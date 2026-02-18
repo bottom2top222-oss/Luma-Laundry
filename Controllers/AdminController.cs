@@ -339,14 +339,14 @@ public IActionResult Index(string? status, string? filter, string? search)
                 UserId = user.Id,
                 Email = user.Email ?? "",
                 UserName = user.UserName ?? "",
-                FirstName = firstName,
-                LastName = lastName,
-                PhoneNumber = phoneNumber,
-                AddressLine1 = addressLine1,
-                AddressLine2 = addressLine2,
-                City = city,
-                State = state,
-                ZipCode = zipCode,
+                FirstName = firstName ?? "",
+                LastName = lastName ?? "",
+                PhoneNumber = phoneNumber ?? "",
+                AddressLine1 = addressLine1 ?? "",
+                AddressLine2 = addressLine2 ?? "",
+                City = city ?? "",
+                State = state ?? "",
+                ZipCode = zipCode ?? "",
                 IsAdmin = isAdmin
             });
         }
