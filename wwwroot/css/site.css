@@ -249,6 +249,13 @@ footer a:hover {
   margin-right: auto;
 }
 
+/* Align header content with main container */
+.header .container-xl {
+  max-width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
 .navmenu a {
   color: #2c3e50;
 }
