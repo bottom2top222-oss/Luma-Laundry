@@ -245,6 +245,10 @@ footer a:hover {
   font-weight: 700;
 }
 
+.header .logo {
+  margin-right: auto;
+}
+
 .navmenu a {
   color: #2c3e50;
 }
@@ -380,6 +384,12 @@ footer a:hover {
 
 .admin-dashboard h1 {
   color: #006994;
+}
+
+.admin-dashboard .admin-actions {
+  margin-left: auto;
+  width: 100%;
+  justify-content: flex-end;
 }
 
 /* Full-width layout for all app pages */

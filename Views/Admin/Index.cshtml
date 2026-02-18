@@ -16,7 +16,7 @@
             }
         </div>
 
-        <div class="d-flex gap-2 flex-wrap justify-content-end">
+        <div class="d-flex gap-2 flex-wrap justify-content-end admin-actions">
             <a class="btn btn-success" href="/Admin/ExportCsv?status=@ViewBag.Status">Export CSV</a>
             <a class="btn btn-info" href="/Admin/Users">Manage Users</a>
             <a class="btn btn-warning" href="/Admin/AuditLogs">Audit Logs</a>
@@ -56,7 +56,6 @@
         ? "btn btn-sm btn-primary"
         : "btn btn-sm btn-outline-primary";
 }
-</div>
 
 <div class="d-flex flex-wrap gap-2 mb-3">
     <a class="@pillClass("All")" href="/Admin?status=All@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">All (@ViewBag.CountAll)</a>
@@ -102,6 +101,9 @@
         No orders yet.
     </div>
 }
+
+</div>
+    </div>
 else
 {
     <div class="table-responsive">
