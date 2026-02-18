@@ -7,7 +7,7 @@ ENV ASPNETCORE_URLS=http://+:8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["LaundryApp.csproj", "./"]
-RUN dotnet restore "LaundryApp.csproj"
+RUN dotnet restore "LaundryApp.csproj" --no-cache
 COPY . .
 RUN dotnet build "LaundryApp.csproj" -c Release -o /app/build
 
