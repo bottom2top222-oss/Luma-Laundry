@@ -7,7 +7,12 @@ export default defineConfig({
     plugins: [tailwindcss(), react()],
     base: '/',
     build: {
-        outDir: '../wwwroot/dist',
-        emptyOutDir: true
+        outDir: '../wwwroot',
+        emptyOutDir: false,
+        rollupOptions: {
+            output: {
+                manualChunks: undefined
+            }
+        }
     }
 });

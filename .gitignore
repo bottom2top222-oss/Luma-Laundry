@@ -119,6 +119,10 @@ cookies.txt
 # VS Code
 .vscode/
 
+# Vite build output
+wwwroot/assets/
+wwwroot/index.html
+
 # Environment files
 .env
 .env.local
