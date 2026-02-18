@@ -195,3 +195,155 @@ footer a:hover {
   color: #0099b6;
   text-decoration: underline;
 }
+
+/* ======================================
+   Luma Coastal Theme Overrides for Regna
+   ====================================== */
+
+/* Primary Accent Color Override */
+:root {
+  --accent-color: #0099b6;
+  --heading-color: #006994;
+  --default-color: #2c3e50;
+  --contrast-color: #ffffff;
+}
+
+/* Hero Section Styling */
+.hero h2 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero p {
+  font-size: 1.5rem;
+  color: #e8f4f8 !important;
+}
+
+.btn-get-started {
+  background: #0099b6 !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn-get-started:hover {
+  background: #006994 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 153, 182, 0.4);
+}
+
+/* Header/Navigation */
+.header .sitename {
+  color: #006994;
+  font-weight: 700;
+}
+
+.navmenu a {
+  color: #2c3e50;
+}
+
+.navmenu a:hover,
+.navmenu .active {
+  color: #0099b6 !important;
+}
+
+/* About Section Icons */
+.about .content ul i {
+  font-size: 1.5rem;
+}
+
+.about .content h5 {
+  color: #006994;
+  font-weight: 600;
+}
+
+/* Stats Section */
+.stats .purecounter {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #006994;
+}
+
+/* Services Section */
+.services .service-item .icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.services .service-item h3 {
+  color: #006994;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* CTA Section */
+.cta h3 {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.cta p {
+  color: #e8f4f8;
+  font-size: 1.1rem;
+}
+
+.cta .cta-btn {
+  background: #ffffff;
+  color: #006994 !important;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.cta .cta-btn:hover {
+  background: #e8f4f8;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Footer */
+#footer {
+  background: linear-gradient(135deg, #006994 0%, #0099b6 100%);
+}
+
+#footer .footer-about .sitename {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+#footer h4 {
+  color: #ffffff;
+}
+
+#footer a {
+  color: #e8f4f8;
+}
+
+#footer a:hover {
+  color: #ffffff;
+}
+
+#footer .copyright {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Scroll to Top Button */
+.scroll-top {
+  background: #0099b6 !important;
+}
+
+.scroll-top:hover {
+  background: #006994 !important;
+}

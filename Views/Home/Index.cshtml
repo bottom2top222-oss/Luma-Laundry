@@ -1,61 +1,173 @@
 ﻿@{
-    ViewData["Title"] = "Luma";
-
-    var email = User?.Identity?.Name ?? "";
+    ViewData["Title"] = "Luma - Coastal Laundry Service";
     var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
-
-    var isAdmin = User?.IsInRole("Admin") ?? false;
 }
 
-<div class="laundry-hero">
-    <div class="hero-content">
-        <h1 class="hero-title">Luma</h1>
-        <p class="hero-subtitle">Pickup & drop-off laundry scheduling in under a minute.</p>
-    </div>
-</div>
-
-<div class="container py-5">
-    <div class="row g-4 align-items-center">
-        <div class="col-md-7">
-            <div class="how-it-works-card">
-                <h2 class="section-title">How it Works</h2>
-                <ol class="steps-list">
-                    <li>Choose pickup, drop-off, or both</li>
-                    <li>Select a time slot</li>
-                    <li>Confirm and get updates</li>
-                </ol>
-            </div>
-
-            <div class="mt-4 d-flex gap-3 flex-wrap">
+<!-- Hero Section -->
+<section id="hero" class="hero section dark-background">
+    <img src="~/img/hero-bg.jpg" alt="" data-aos="fade-in" style="object-fit: cover;">
+    
+    <div class="container text-center" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2>Luma <span style="color: #0099b6;">Laundry</span></h2>
+                <p>Coastal laundry service with pickup & drop-off scheduling in under a minute</p>
                 @if (isLoggedIn)
                 {
-                    <a class="btn btn-primary btn-lg custom-btn" href="/Home/Dashboard">Go to Dashboard</a>
-                    <a class="btn btn-outline-primary btn-lg custom-btn" href="/Orders/Schedule">Schedule Service</a>
+                    <a href="/Orders/Schedule" class="btn-get-started">Schedule Service</a>
                 }
                 else
                 {
-                    <a class="btn btn-primary btn-lg custom-btn" href="/Account/Login">Log In</a>
-                    <a class="btn btn-outline-primary btn-lg custom-btn" href="/Account/Register">Create Account</a>
+                    <a href="/Account/Register" class="btn-get-started">Get Started</a>
                 }
             </div>
         </div>
+    </div>
+</section>
 
-        <div class="col-md-5">
-            <div class="features-card">
-                <div class="feature-item">
-                    <h5 class="feature-title">Fast & Easy</h5>
-                    <p class="feature-text">Schedule in seconds, not minutes.</p>
+<!-- About Section -->
+<section id="about" class="about section">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="100">
+                <h3>How Luma Works</h3>
+                <p>Experience hassle-free laundry service designed for coastal living. We handle everything from pickup to delivery.</p>
+                <ul>
+                    <li>
+                        <i class="bi bi-calendar-check" style="color: #006994;"></i>
+                        <div>
+                            <h5>Simple Scheduling</h5>
+                            <p>Choose your pickup and drop-off times in seconds. Schedule up to a week in advance.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="bi bi-truck" style="color: #0099b6;"></i>
+                        <div>
+                            <h5>Convenient Pickup & Delivery</h5>
+                            <p>We come to you - no more trips to the laundromat. Select the service that fits your needs.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="bi bi-shield-check" style="color: #006994;"></i>
+                        <div>
+                            <h5>Reliable & Trusted</h5>
+                            <p>Track your order status and get notifications. Trusted by hundreds of coastal families.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-lg-6 position-relative align-items-center order-lg-first" data-aos="fade-up" data-aos-delay="200">
+                <img src="~/img/about.jpg" class="img-fluid" alt="Luma Laundry Service" style="border-radius: 8px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section id="stats" class="stats section light-background">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row gy-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-item text-center w-100 h-100">
+                    <span data-purecounter-start="0" data-purecounter-end="500" data-purecounter-duration="1" class="purecounter"></span>
+                    <p style="color: #006994;">Happy Customers</p>
                 </div>
-                <div class="feature-item">
-                    <h5 class="feature-title">Reliable Service</h5>
-                    <p class="feature-text">Professional handling of your laundry.</p>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-item text-center w-100 h-100">
+                    <span data-purecounter-start="0" data-purecounter-end="2500" data-purecounter-duration="1" class="purecounter"></span>
+                    <p style="color: #0099b6;">Orders Completed</p>
                 </div>
-                <div class="feature-item">
-                    <h5 class="feature-title">Flexible Scheduling</h5>
-                    <p class="feature-text">Pick times that work for you.</p>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-item text-center w-100 h-100">
+                    <span data-purecounter-start="0" data-purecounter-end="24" data-purecounter-duration="1" class="purecounter"></span>
+                    <p style="color: #006994;">Hour Turnaround</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-item text-center w-100 h-100">
+                    <span data-purecounter-start="0" data-purecounter-end="100" data-purecounter-duration="1" class="purecounter"></span>
+                    <p style="color: #0099b6;">% Satisfaction</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="services section">
+    <div class="container section-title" data-aos="fade-up">
+        <h2>Our Services</h2>
+        <p>Choose the laundry service that fits your lifestyle</p>
+    </div>
+
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="service-item position-relative">
+                    <div class="icon">
+                        <i class="bi bi-calendar-plus" style="color: #006994;"></i>
+                    </div>
+                    <h3>Pickup Service</h3>
+                    <p>We collect your laundry at your doorstep. Schedule pickup for your convenience and we'll handle the rest.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="service-item position-relative">
+                    <div class="icon">
+                        <i class="bi bi-house-door" style="color: #0099b6;"></i>
+                    </div>
+                    <h3>Drop-off Service</h3>
+                    <p>Fresh, clean laundry delivered right to your door. Choose your preferred delivery time slot.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="service-item position-relative">
+                    <div class="icon">
+                        <i class="bi bi-arrow-left-right" style="color: #006994;"></i>
+                    </div>
+                    <h3>Full Service</h3>
+                    <p>Complete pickup and delivery - the ultimate convenience. We handle everything from start to finish.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section id="cta" class="cta section dark-background" style="background: linear-gradient(135deg, #006994 0%, #0099b6 100%);">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h3>Ready to experience Luma?</h3>
+                <p>Join hundreds of satisfied customers enjoying stress-free laundry service</p>
+                @if (isLoggedIn)
+                {
+                    <a class="cta-btn" href="/Orders/Schedule">Schedule Now</a>
+                }
+                else
+                {
+                    <a class="cta-btn" href="/Account/Register">Create Free Account</a>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <!-- Vendor JS Files -->
+    <script src="~/vendor/purecounter/purecounter_vanilla.js"></script>
+    <script src="~/vendor/aos/aos.js"></script>
+    <script src="~/vendor/glightbox/js/glightbox.min.js"></script>
+    
+    <!-- Template Main JS -->
+    <script src="~/js/main.js"></script>
+}
 
