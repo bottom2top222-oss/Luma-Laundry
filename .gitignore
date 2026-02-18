@@ -108,7 +108,11 @@ $RECYCLE.BIN/
 .DS_Store
 
 # Test files and debug outputs
-*.html
+admin_*.html
+login_*.html
+logout_*.html
+orders_*.html
+user_*.html
 *.txt
 cookies.txt
 
