@@ -11,8 +11,8 @@ export default function Features() {
 
                 <Title
                     title="Services"
-                    heading="Everything your brand needs to grow"
-                    description="From strategy to execution, we help businesses build strong digital products and meaningful customer experiences."
+                    heading="Everything you need for fresh, clean laundry"
+                    description="From pickup to delivery, we handle all your laundry needs with care and convenience."
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

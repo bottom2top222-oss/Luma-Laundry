@@ -14,7 +14,7 @@ export default function Pricing() {
                 <Title
                     title="Pricing"
                     heading="Simple, transparent pricing"
-                    description="Flexible agency packages designed to fit startups, growing teams and established brands."
+                    description="Affordable laundry services for individuals, families, and businesses."
                 />
 
                 <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">

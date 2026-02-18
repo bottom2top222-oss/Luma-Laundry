@@ -15,7 +15,7 @@ export default function CTA() {
                             viewport={{ once: true }}
                             transition={{ type: "spring", stiffness: 250, damping: 70, mass: 1 }}
                         >
-                            Ready to grow your brand?
+                            Ready for fresher laundry?
                         </motion.h2>
                         <motion.p className="max-sm:text-sm text-slate-400 mb-10 max-w-xl mx-auto"
                             initial={{ y: 60, opacity: 0 }}
@@ -23,7 +23,7 @@ export default function CTA() {
                             viewport={{ once: true }}
                             transition={{ type: "spring", stiffness: 250, damping: 70, mass: 1, delay: 0.2 }}
                         >
-                            Partner with our agency to design, build and scale digital products that deliver real business results.
+                            Schedule your first pickup today and experience the convenience of professional laundry service.
                         </motion.p>
                         <motion.div
                             initial={{ y: 60, opacity: 0 }}
@@ -31,9 +31,11 @@ export default function CTA() {
                             viewport={{ once: true }}
                             transition={{ type: "spring", stiffness: 250, damping: 70, mass: 1, delay: 0.3 }}
                         >
-                            <GhostButton className="px-8 py-3 gap-2">
-                                Start your project <ArrowRightIcon size={20} />
-                            </GhostButton>
+                            <a href="/Orders/Schedule">
+                                <GhostButton className="px-8 py-3 gap-2">
+                                    Schedule pickup <ArrowRightIcon size={20} />
+                                </GhostButton>
+                            </a>
                         </motion.div>
                     </div>
                 </div>

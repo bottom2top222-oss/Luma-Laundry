@@ -34,10 +34,12 @@ export default function Navbar() {
                 </div>
 
                 <div className='hidden md:flex items-center gap-3'>
-                    <button className='text-sm font-medium text-gray-300 hover:text-white transition max-sm:hidden'>
+                    <a href='/Account/Login' className='text-sm font-medium text-gray-300 hover:text-white transition max-sm:hidden'>
                         Sign in
-                    </button>
-                    <PrimaryButton className='max-sm:text-xs hidden sm:inline-block'>Get Started</PrimaryButton>
+                    </a>
+                    <a href='/Orders/Schedule'>
+                        <PrimaryButton className='max-sm:text-xs hidden sm:inline-block'>Schedule Pickup</PrimaryButton>
+                    </a>
                 </div>
 
                 <button onClick={() => setIsOpen(!isOpen)} className='md:hidden'>
@@ -51,10 +53,12 @@ export default function Navbar() {
                     </a>
                 ))}
 
-                <button onClick={() => setIsOpen(false)} className='font-medium text-gray-300 hover:text-white transition'>
+                <a href='/Account/Login' onClick={() => setIsOpen(false)} className='font-medium text-gray-300 hover:text-white transition'>
                     Sign in
-                </button>
-                <PrimaryButton onClick={() => setIsOpen(false)}>Get Started</PrimaryButton>
+                </a>
+                <a href='/Orders/Schedule' onClick={() => setIsOpen(false)}>
+                    <PrimaryButton>Schedule Pickup</PrimaryButton>
+                </a>
 
                 <button
                     onClick={() => setIsOpen(false)}
