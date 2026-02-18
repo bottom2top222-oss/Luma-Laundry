@@ -1,0 +1,92 @@
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">Create New User</h1>
+        <div class="text-muted">Add a new user to the system</div>
+    </div>
+
+    <a class="btn btn-outline-secondary" href="/Admin/Users">Back to Users</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" action="/Admin/CreateUser">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required />
+                        <div class="form-text">This will be used as the username</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="addressLine1" class="form-label">Street Address</label>
+                        <input type="text" class="form-control" id="addressLine1" name="addressLine1" placeholder="123 Main St" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="addressLine2" class="form-label">Apartment/Suite (Optional)</label>
+                        <input type="text" class="form-control" id="addressLine2" name="addressLine2" placeholder="Apt 4B" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" required />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <input type="text" class="form-control" id="state" name="state" maxlength="2" required />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="zipCode" class="form-label">ZIP Code</label>
+                            <input type="text" class="form-control" id="zipCode" name="zipCode" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required minlength="6" />
+                        <div class="form-text">Minimum 6 characters</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required />
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="isAdmin" name="isAdmin" />
+                        <label class="form-check-label" for="isAdmin">
+                            Grant Administrator Privileges
+                        </label>
+                        <div class="form-text">Admins can manage orders, users, and system settings</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Create User</button>
+                        <a href="/Admin/Users" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

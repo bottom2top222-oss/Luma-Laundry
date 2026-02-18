@@ -1,0 +1,201 @@
+@model List<LaundryApp.Models.OrderWithUserViewModel>
+
+@{
+    ViewData["Title"] = "Admin";
+    var email = User?.Identity?.Name ?? "";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">Admin Dashboard</h1>
+        <div class="text-muted">Admin: <strong>@email</strong></div>
+        @if (ViewBag.LastUpdated is DateTime lastUpdated)
+        {
+            <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">Last updated: @lastUpdated.ToString("g")</div>
+        }
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-success" href="/Admin/ExportCsv?status=@ViewBag.Status">Export CSV</a>
+        <a class="btn btn-info" href="/Admin/Users">Manage Users</a>
+        <a class="btn btn-warning" href="/Admin/AuditLogs">Audit Logs</a>
+        <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back to Dashboard</a>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" action="/Admin" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search Orders</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="search" 
+                       name="search" 
+                       value="@ViewBag.Search" 
+                       placeholder="Search by name, email, order ID, or address..." />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+            {
+                <div class="col-md-2">
+                    <a href="/Admin" class="btn btn-outline-secondary">Clear Search</a>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+@{
+    string selected = (ViewBag.Status as string) ?? "All";
+    string pillClass(string s) => selected == s
+        ? "btn btn-sm btn-primary"
+        : "btn btn-sm btn-outline-primary";
+}
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="@pillClass("All")" href="/Admin?status=All@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">All (@ViewBag.CountAll)</a>
+    <a class="@pillClass("Scheduled")" href="/Admin?status=Scheduled@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Scheduled (@ViewBag.CountScheduled)</a>
+    <a class="@pillClass("In Progress")" href="/Admin?status=In%20Progress@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">In Progress (@ViewBag.CountInProgress)</a>
+    <a class="@pillClass("Completed")" href="/Admin?status=Completed@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Completed (@ViewBag.CountCompleted)</a>
+    <a class="@pillClass("Cancelled")" href="/Admin?status=Cancelled@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Cancelled (@ViewBag.CountCancelled)</a>
+</div>
+
+
+<form method="get" action="/Admin" class="mb-3 d-flex align-items-center gap-2">
+    <label class="form-label mb-0">Filter:</label>
+
+    <select name="status"
+            class="form-select form-select-sm"
+            style="width:180px;"
+            onchange="this.form.submit()">
+        <option value="All" selected="@(ViewBag.Status == "All")">All</option>
+        <option value="Scheduled" selected="@(ViewBag.Status == "Scheduled")">Scheduled</option>
+        <option value="In Progress" selected="@(ViewBag.Status == "In Progress")">In Progress</option>
+        <option value="Completed" selected="@(ViewBag.Status == "Completed")">Completed</option>
+        <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option>
+    </select>
+
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+    {
+        <input type="hidden" name="search" value="@ViewBag.Search" />
+    }
+
+    <noscript>
+        <button class="btn btn-sm btn-outline-primary">Apply</button>
+    </noscript>
+</form>
+
+
+<p class="text-muted mb-3">
+    Showing: <strong>@(ViewBag.Status ?? "All")</strong>
+</p>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">
+        No orders yet.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th style="width:70px;">Id</th>
+                    <th>User</th>
+                    <th>Service</th>
+                    <th>Scheduled</th>
+                    <th>Status</th>
+                    <th>Admin Notes</th>
+                    <th>Created</th>
+                    <th>Last Updated</th>
+                    <th class="text-end" style="width:240px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    var isFinal = o.Order.Status == "Completed" || o.Order.Status == "Cancelled";
+                    <tr>
+                        <td>@o.Order.Id</td>
+                        <td>@o.UserName</td>
+                        <td>@o.Order.ServiceType</td>
+                        <td>@o.Order.ScheduledAt.ToString("g")</td>
+                        <td>
+                            @{
+                                var badgeClass = o.Order.Status switch
+                                {
+                                    "Scheduled" => "bg-primary",
+                                    "In Progress" => "bg-warning text-dark",
+                                    "Completed" => "bg-success",
+                                    "Cancelled" => "bg-secondary",
+                                    _ => "bg-dark"
+                                };
+                            }
+
+                            <span class="badge @badgeClass">@o.Order.Status</span>
+
+                        </td>
+                        <td>
+                            <form method="post" action="/Admin/UpdateAdminNotes" class="d-inline">
+                                <input type="hidden" name="id" value="@o.Order.Id" />
+                                <input type="hidden" name="currentStatus" value="@ViewBag.Status" />
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                {
+                                    <input type="hidden" name="search" value="@ViewBag.Search" />
+                                }
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="adminNotes" value="@o.Order.AdminNotes" class="form-control form-control-sm" placeholder="Add notes..." style="min-width: 150px;" />
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Save</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td>@o.Order.CreatedAt.ToString("g")</td>
+                        <td>@o.Order.LastUpdatedAt.ToString("g")</td>
+                        <td class="text-end">
+                            <!-- Update status -->
+                            <form method="post" action="/Admin/UpdateStatus" class="d-inline-flex gap-2">
+                                <input type="hidden" name="id" value="@o.Order.Id" />
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                {
+                                    <input type="hidden" name="search" value="@ViewBag.Search" />
+                                }
+                                <select name="status" class="form-select form-select-sm" style="width:140px;">
+                                    <option value="Scheduled" selected="@(o.Order.Status == "Scheduled")">Scheduled</option>
+                                    <option value="In Progress" selected="@(o.Order.Status == "In Progress")">In Progress</option>
+                                    <option value="Completed" selected="@(o.Order.Status == "Completed")">Completed</option>
+                                    <option value="Cancelled" selected="@(o.Order.Status == "Cancelled")">Cancelled</option>
+                                </select>
+                                @* If disabled, browser won't submit it—so keep status in the POST *@
+                                @if (isFinal)
+                                {
+                                    <input type="hidden" name="status" value="@o.Order.Status" />
+                                }
+                                <button class="btn btn-sm btn-primary" @(isFinal ? "disabled" : "")>Save</button>
+                            </form>
+
+                            <!-- Delete -->
+                            <form method="post" action="/Admin/Delete" class="d-inline"
+                                onsubmit="return confirm('Delete order #@o.Order.Id?');">
+                                <input type="hidden" name="id" value="@o.Order.Id" />
+                                <input type="hidden" name="currentStatus" value="@ViewBag.Status" />
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                {
+                                    <input type="hidden" name="search" value="@ViewBag.Search" />
+                                }
+                                 <button class="btn btn-sm btn-outline-danger ms-2">Delete</button>
+                            </form>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+

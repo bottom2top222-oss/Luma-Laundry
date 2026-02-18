@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card" style="width: 400px;">
+        <div class="card-body">
+            <h1 class="card-title text-center mb-4">Log In</h1>
+
+            @if (ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <form method="post" action="/Account/Login">
+                @if (ViewData["ReturnUrl"] != null)
+                {
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                }
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Log In</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="/Account/Register">Don't have an account? Register</a>
+            </div>
+        </div>
+    </div>
+</div>

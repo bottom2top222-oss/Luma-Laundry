@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Schedule Service";
+}
+
+<h1 class="mb-3">Schedule Service</h1>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@err.ErrorMessage</div>
+        }
+    </div>
+}
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Service Type</label>
+        <select class="form-select" name="serviceType" required>
+            <option value="">Select one</option>
+            <option value="Pickup">Pickup</option>
+            <option value="Dropoff">Drop-off</option>
+            <option value="Both">Drop-off + Pickup</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Date & Time</label>
+        <input class="form-control" type="datetime-local" name="scheduledAt" required />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Pickup/Drop-off Address</label>
+        <input class="form-control" type="text" name="addressLine1" placeholder="123 Main St" required />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Apartment/Suite (Optional)</label>
+        <input class="form-control" type="text" name="addressLine2" placeholder="Apt 4B" />
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">City</label>
+            <input class="form-control" type="text" name="city" required />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">State</label>
+            <input class="form-control" type="text" name="state" maxlength="2" required />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">ZIP Code</label>
+            <input class="form-control" type="text" name="zipCode" required />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Special Instructions (optional)</label>
+        <textarea class="form-control" name="notes" rows="3"></textarea>
+    </div>
+
+    <button class="btn btn-primary">Confirm</button>
+    <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back</a>
+</form>

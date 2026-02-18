@@ -1,0 +1,30 @@
+@model LaundryOrder
+
+@{
+    ViewData["Title"] = "Order Created";
+}
+
+<h1 class="mb-3">Order Created - Payment Required</h1>
+
+<div class="alert alert-info">
+    <strong>Next Step:</strong> Complete payment to confirm your appointment.
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>Order #:</strong> @Model.Id</p>
+        <p><strong>Status:</strong> <span class="badge bg-warning text-dark">@Model.Status</span></p>
+        <p><strong>Service:</strong> @Model.ServiceType</p>
+        <p><strong>Date/Time:</strong> @Model.ScheduledAt</p>
+        <p><strong>Address:</strong> @Model.GetDisplayAddress()</p>
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <p><strong>Notes:</strong> @Model.Notes</p>
+        }
+    </div>
+</div>
+
+<div class="mt-3 d-flex gap-2">
+    <a class="btn btn-success" href="/Orders/Payment/@Model.Id">Proceed to Payment</a>
+    <a class="btn btn-outline-secondary" href="/Orders/History">View History</a>
+</div>

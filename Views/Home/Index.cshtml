@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Luma";
+
+    var email = User?.Identity?.Name ?? "";
+    var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+
+    var isAdmin = User?.IsInRole("Admin") ?? false;
+}
+
+<div class="laundry-hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Luma</h1>
+        <p class="hero-subtitle">Pickup & drop-off laundry scheduling in under a minute.</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4 align-items-center">
+        <div class="col-md-7">
+            <div class="how-it-works-card">
+                <h2 class="section-title">How it Works</h2>
+                <ol class="steps-list">
+                    <li>Choose pickup, drop-off, or both</li>
+                    <li>Select a time slot</li>
+                    <li>Confirm and get updates</li>
+                </ol>
+            </div>
+
+            <div class="mt-4 d-flex gap-3 flex-wrap">
+                @if (isLoggedIn)
+                {
+                    <a class="btn btn-primary btn-lg custom-btn" href="/Home/Dashboard">Go to Dashboard</a>
+                    <a class="btn btn-outline-primary btn-lg custom-btn" href="/Orders/Schedule">Schedule Service</a>
+                }
+                else
+                {
+                    <a class="btn btn-primary btn-lg custom-btn" href="/Account/Login">Log In</a>
+                    <a class="btn btn-outline-primary btn-lg custom-btn" href="/Account/Register">Create Account</a>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="features-card">
+                <div class="feature-item">
+                    <h5 class="feature-title">Fast & Easy</h5>
+                    <p class="feature-text">Schedule in seconds, not minutes.</p>
+                </div>
+                <div class="feature-item">
+                    <h5 class="feature-title">Reliable Service</h5>
+                    <p class="feature-text">Professional handling of your laundry.</p>
+                </div>
+                <div class="feature-item">
+                    <h5 class="feature-title">Flexible Scheduling</h5>
+                    <p class="feature-text">Pick times that work for you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

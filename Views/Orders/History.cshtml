@@ -1,0 +1,69 @@
+@model List<LaundryOrder>
+
+@{
+    ViewData["Title"] = "Order History";
+}
+
+<h1 class="mb-3">Order History</h1>
+
+@if (Model.Count == 0)
+{
+    <p>No orders yet. <a href="/Orders/Schedule">Schedule one</a>.</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Status</th>
+                <th>Service</th>
+                <th>Scheduled</th>
+                <th>Created</th>
+                <th>Address</th>
+                <th>Notes</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var o in Model)
+        {
+            var badgeClass = o.Status switch
+            {
+                "Scheduled" => "bg-warning text-dark",
+                "Paid" => "bg-primary",
+                "In Progress" => "bg-warning text-dark",
+                "Completed" => "bg-success",
+                "Cancelled" => "bg-secondary",
+                _ => "bg-dark"
+            };
+
+            <tr>
+                <td>@o.Id</td>
+                <td>
+                    <span class="badge @badgeClass">@o.Status</span>
+                </td>
+                <td>@o.ServiceType</td>
+                <td>@o.ScheduledAt</td>
+                <td>@o.CreatedAt</td>
+                <td>@o.GetDisplayAddress()</td>
+                <td>@(string.IsNullOrEmpty(o.Notes) ? "-" : o.Notes)</td>
+                <td class="text-end">
+                    @if (o.Status == "Scheduled")
+                    {
+                        <a href="/Orders/Payment/@o.Id" class="btn btn-sm btn-success me-2">Pay Now</a>
+                        <form method="post" action="/Orders/Cancel/@o.Id" style="display:inline;">
+                            <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                        </form>
+                    }
+                    else if (o.Status == "Paid")
+                    {
+                        <span class="text-success">✓ Paid</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+

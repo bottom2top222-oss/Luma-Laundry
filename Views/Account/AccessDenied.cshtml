@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="py-4">
+    <h1 class="display-5">Access Denied</h1>
+    <p class="lead">You do not have permission to access this resource.</p>
+
+    @if (!string.IsNullOrEmpty(returnUrl))
+    {
+        <p class="text-muted">Return URL: @returnUrl</p>
+    }
+
+    <div class="mt-3">
+        <a class="btn btn-primary" href="/">Home</a>
+        <a class="btn btn-outline-secondary" href="/Home/Index">Back</a>
+    </div>
+</div>

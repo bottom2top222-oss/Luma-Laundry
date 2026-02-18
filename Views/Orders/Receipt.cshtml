@@ -1,0 +1,57 @@
+@model LaundryOrder
+
+@{
+    ViewData["Title"] = "Receipt";
+}
+
+<div class="text-center mb-4">
+    <h1 class="text-success">✅ Payment Successful!</h1>
+    <p class="lead">Your laundry service has been scheduled</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Receipt #RCP-@Model.Id.ToString("D6")</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Order Details</h6>
+                        <p><strong>Order ID:</strong> @Model.Id</p>
+                        <p><strong>Status:</strong> <span class="badge bg-success">@Model.Status</span></p>
+                        <p><strong>Service:</strong> @Model.ServiceType</p>
+                        <p><strong>Scheduled:</strong> @Model.ScheduledAt</p>
+                        <p><strong>Address:</strong> @Model.GetDisplayAddress()</p>
+                        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                        {
+                            <p><strong>Notes:</strong> @Model.Notes</p>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Payment Information</h6>
+                        <p><strong>Payment Date:</strong> @DateTime.Now</p>
+                        <p><strong>Payment Method:</strong> Credit Card **** **** **** 3456</p>
+                        <p><strong>Transaction ID:</strong> TXN-@Model.Id.ToString("D8")</p>
+                        <hr>
+                        <h5 class="text-success">Total Paid: $25.00</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Thank you for choosing our laundry service!</small>
+                    <div>
+                        <button onclick="window.print()" class="btn btn-sm btn-outline-primary">Print Receipt</button>
+                        <a href="/Orders/History" class="btn btn-sm btn-primary">View Order History</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="/Orders/Schedule" class="btn btn-outline-secondary">Schedule Another Service</a>
+</div>
