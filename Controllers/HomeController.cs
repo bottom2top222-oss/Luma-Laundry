@@ -19,7 +19,7 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult Index()
     {
-        return View();
+        return Redirect("/app/");
     }
 
     [HttpGet]
