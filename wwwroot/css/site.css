@@ -347,3 +347,37 @@ footer a:hover {
 .scroll-top:hover {
   background: #006994 !important;
 }
+
+/* Inner Pages (Admin, Dashboard, etc.) */
+.inner-page .main {
+  padding-top: 110px;
+  background-color: #f0f8fa;
+  min-height: calc(100vh - 120px);
+}
+
+.inner-page .header {
+  --background-color: #ffffff;
+  --default-color: #2c3e50;
+  --heading-color: #006994;
+  --nav-color: #2c3e50;
+  --nav-hover-color: #0099b6;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.inner-page .header .logo h1 {
+  color: #006994;
+}
+
+.inner-page .navmenu a,
+.inner-page .navmenu a:focus {
+  color: #2c3e50;
+}
+
+.inner-page .navmenu a:hover,
+.inner-page .navmenu .active {
+  color: #0099b6 !important;
+}
+
+.admin-dashboard h1 {
+  color: #006994;
+}

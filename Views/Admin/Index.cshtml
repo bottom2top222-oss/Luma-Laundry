@@ -5,23 +5,24 @@
     var email = User?.Identity?.Name ?? "";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="mb-0">Admin Dashboard</h1>
-        <div class="text-muted">Admin: <strong>@email</strong></div>
-        @if (ViewBag.LastUpdated is DateTime lastUpdated)
-        {
-            <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">Last updated: @lastUpdated.ToString("g")</div>
-        }
-    </div>
+<div class="container admin-dashboard">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+        <div>
+            <h1 class="mb-0">Admin Dashboard</h1>
+            <div class="text-muted">Admin: <strong>@email</strong></div>
+            @if (ViewBag.LastUpdated is DateTime lastUpdated)
+            {
+                <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">Last updated: @lastUpdated.ToString("g")</div>
+            }
+        </div>
 
-    <div class="d-flex gap-2">
-        <a class="btn btn-success" href="/Admin/ExportCsv?status=@ViewBag.Status">Export CSV</a>
-        <a class="btn btn-info" href="/Admin/Users">Manage Users</a>
-        <a class="btn btn-warning" href="/Admin/AuditLogs">Audit Logs</a>
-        <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back to Dashboard</a>
+        <div class="d-flex gap-2 flex-wrap justify-content-end">
+            <a class="btn btn-success" href="/Admin/ExportCsv?status=@ViewBag.Status">Export CSV</a>
+            <a class="btn btn-info" href="/Admin/Users">Manage Users</a>
+            <a class="btn btn-warning" href="/Admin/AuditLogs">Audit Logs</a>
+            <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back to Dashboard</a>
+        </div>
     </div>
-</div>
 
 <!-- Search Form -->
 <div class="card mb-3">
@@ -55,6 +56,7 @@
         ? "btn btn-sm btn-primary"
         : "btn btn-sm btn-outline-primary";
 }
+</div>
 
 <div class="d-flex flex-wrap gap-2 mb-3">
     <a class="@pillClass("All")" href="/Admin?status=All@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">All (@ViewBag.CountAll)</a>
