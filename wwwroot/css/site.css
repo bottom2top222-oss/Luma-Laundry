@@ -381,3 +381,19 @@ footer a:hover {
 .admin-dashboard h1 {
   color: #006994;
 }
+
+/* Full-width layout for all app pages */
+.main {
+  width: 100%;
+}
+
+.main .container,
+.main .container-sm,
+.main .container-md,
+.main .container-lg,
+.main .container-xl,
+.main .container-xxl {
+  max-width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
+}
