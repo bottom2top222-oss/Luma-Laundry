@@ -19,7 +19,7 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult Index()
     {
-        return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html"), "text/html");
+        return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "dist", "index.html"), "text/html");
     }
 
     [HttpGet]

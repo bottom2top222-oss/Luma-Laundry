@@ -7,7 +7,7 @@ export default defineConfig({
     plugins: [tailwindcss(), react()],
     base: '/',
     build: {
-        outDir: '../wwwroot',
-        emptyOutDir: false
+        outDir: '../wwwroot/dist',
+        emptyOutDir: true
     }
 });

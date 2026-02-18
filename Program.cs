@@ -73,7 +73,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // SPA fallback for React app - serve index.html for non-MVC routes
-app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("dist/index.html");
 
 app.Run();
 
