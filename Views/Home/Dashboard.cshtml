@@ -5,26 +5,56 @@
     var isAdmin = User?.IsInRole("Admin") ?? false;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="display-5">Dashboard</h1>
-        <p class="text-muted mb-0">Logged in as <strong>@email</strong></p>
+<div class="container dashboard-shell py-4">
+    <div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1 class="display-6 mb-1">Welcome to Luma</h1>
+            <p class="mb-0 opacity-75">Logged in as <strong>@email</strong></p>
+        </div>
+
+        <form method="post" action="/Account/Logout">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-light text-dark">Logout</button>
+        </form>
     </div>
 
-    <form method="post" action="/Account/Logout">
-        @Html.AntiForgeryToken()
-        <button class="btn btn-outline-danger">Logout</button>
-    </form>
-</div>
+    <div class="row g-3">
+        <div class="col-lg-4 col-md-6">
+            <a class="dashboard-card-link" href="/Orders/Schedule">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-2">Schedule Service</h5>
+                        <p class="card-text text-muted mb-0">Book pickup, drop-off, or full service in under a minute.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
 
-<div class="d-flex gap-3 flex-wrap">
-    <a class="btn btn-primary btn-lg" href="/Orders/Schedule">Schedule Service</a>
-    <a class="btn btn-outline-secondary btn-lg" href="/Orders/History">Order History</a>
+        <div class="col-lg-4 col-md-6">
+            <a class="dashboard-card-link" href="/Orders/History">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-2">Order History</h5>
+                        <p class="card-text text-muted mb-0">Review recent orders and current status updates.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
 
-    @if (isAdmin)
-    {
-        <a class="btn btn-warning btn-lg" href="/Admin">Admin Dashboard</a>
-    }
+        @if (isAdmin)
+        {
+            <div class="col-lg-4 col-md-6">
+                <a class="dashboard-card-link" href="/Admin">
+                    <div class="card dashboard-card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-2">Admin Dashboard</h5>
+                            <p class="card-text text-muted mb-0">Manage orders, users, and operational activity.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
 </div>
 
 

@@ -5,27 +5,27 @@
     var email = User?.Identity?.Name ?? "";
 }
 
-<div class="container admin-dashboard">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+<div class="container dashboard-shell admin-dashboard py-4">
+    <div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h1 class="mb-0">Admin Dashboard</h1>
-            <div class="text-muted">Admin: <strong>@email</strong></div>
+            <div class="mb-0 opacity-75">Admin: <strong>@email</strong></div>
             @if (ViewBag.LastUpdated is DateTime lastUpdated)
             {
-                <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">Last updated: @lastUpdated.ToString("g")</div>
+                <div class="opacity-75" style="font-size: 0.85rem; margin-top: 2px;">Last updated: @lastUpdated.ToString("g")</div>
             }
         </div>
 
         <div class="d-flex gap-2 flex-wrap justify-content-end admin-actions">
-            <a class="btn btn-success" href="/Admin/ExportCsv?status=@ViewBag.Status">Export CSV</a>
-            <a class="btn btn-info" href="/Admin/Users">Manage Users</a>
-            <a class="btn btn-warning" href="/Admin/AuditLogs">Audit Logs</a>
-            <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back to Dashboard</a>
+            <a class="btn btn-light" href="/Admin/ExportCsv?status=@ViewBag.Status">Export CSV</a>
+            <a class="btn btn-light" href="/Admin/Users">Manage Users</a>
+            <a class="btn btn-light" href="/Admin/AuditLogs">Audit Logs</a>
+            <a class="btn btn-outline-light" href="/Home/Dashboard">Back to Dashboard</a>
         </div>
     </div>
 
 <!-- Search Form -->
-<div class="card mb-3">
+<div class="card dashboard-card mb-3">
     <div class="card-body">
         <form method="get" action="/Admin" class="row g-3 align-items-end">
             <div class="col-md-4">
@@ -65,8 +65,7 @@
     <a class="@pillClass("Cancelled")" href="/Admin?status=Cancelled@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Cancelled (@ViewBag.CountCancelled)</a>
 </div>
 
-
-<form method="get" action="/Admin" class="mb-3 d-flex align-items-center gap-2">
+<form method="get" action="/Admin" class="card dashboard-card mb-3 p-3 d-flex align-items-center gap-2 flex-wrap">
     <label class="form-label mb-0">Filter:</label>
 
     <select name="status"
@@ -106,7 +105,7 @@
     </div>
 else
 {
-    <div class="table-responsive">
+    <div class="table-responsive card dashboard-card p-2">
         <table class="table table-striped align-middle">
             <thead>
                 <tr>
