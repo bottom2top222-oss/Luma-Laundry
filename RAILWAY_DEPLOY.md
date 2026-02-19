@@ -6,6 +6,24 @@ This guide walks through deploying your Luma Laundry application to Railway.app 
 
 ### 2026-02-19
 
+- Commit: `be3b30e`
+- Restyled the user dashboard to match the new dark blue/cyan visual direction.
+- Updated dashboard actions to button-like tiles for improved clarity and consistency.
+- Validation completed before push:
+   - `dotnet build LaundryApp.sln -v minimal` → build successful
+- Railway impact: redeploy `frontend` to apply the dashboard UI update.
+
+### 2026-02-19
+
+- Commit: `de42945`
+- Fixed schedule flow lookup fallback to prevent dead-end navigation after scheduling.
+- Improved resilience when transitioning from scheduling to payment/order continuation.
+- Validation completed before push:
+   - `dotnet build LaundryApp.sln -v minimal` → build successful
+- Railway impact: redeploy `frontend` to apply schedule flow reliability fixes.
+
+### 2026-02-19
+
 - Commit: `56a514b`
 - Set `Support@luma-laundry.app` as the default admin email in app configuration.
 - Updated identity seeding logic to synchronize an existing Admin account to the configured admin email when safe.
@@ -335,7 +353,7 @@ Your SQLite database needs persistent storage:
 The application will automatically:
 - Run migrations on startup (see `Program.cs`)
 - Create the admin user with credentials:
-  - Email: `admin@laundry.com`
+   - Email: `Support@luma-laundry.app`
   - Password: `Admin123!`
 
 **Important**: Change the admin password after first login!
@@ -430,7 +448,7 @@ Before going live:
 - [ ] Enable HTTPS-only (already configured in `Program.cs`)
 - [ ] Set strong cookie encryption keys (auto-generated)
 - [ ] Review Terms of Service and Privacy Policy content
-- [ ] Add your real support email (currently `support@luma.com`)
+- [ ] Verify support/admin email is set to `Support@luma-laundry.app`
 
 ## Post-Deploy Verification (Auth Hardening)
 
