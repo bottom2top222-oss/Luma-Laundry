@@ -411,6 +411,20 @@ Before going live:
 - [ ] Review Terms of Service and Privacy Policy content
 - [ ] Add your real support email (currently `support@luma.com`)
 
+## Post-Deploy Verification (Auth Hardening)
+
+After redeploying `frontend`, verify the new security behavior end-to-end:
+
+1. Open the live site and log in as admin using the default password.
+2. Confirm you are redirected to `/Account/ChangePassword` before accessing dashboard pages.
+3. Attempt to set the new password back to `Admin123!` and confirm it is rejected.
+4. Set a valid strong password and confirm successful redirect to dashboard.
+5. Log out and log in with the new password to confirm persistence.
+6. Submit login with a wrong password repeatedly and confirm account lockout message appears after threshold is reached.
+7. Confirm authenticated logout still works from the top-right menu.
+
+Expected result: default admin credentials are no longer usable after rotation, and repeated failed sign-ins trigger temporary lockout.
+
 ## Next Steps
 
 1. Test all features on the live site
