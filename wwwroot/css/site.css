@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
 html {
   font-size: 14px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -34,6 +36,7 @@ body.landing-page {
     radial-gradient(420px 280px at 95% 95%, rgba(173, 21, 165, 0.28), transparent 65%),
     #02081f;
   color: #dbe8ff;
+  font-family: 'Outfit', sans-serif;
 }
 
 .form-floating > .form-control-plaintext::placeholder,
