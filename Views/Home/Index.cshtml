@@ -3,18 +3,22 @@
     var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
 }
 
-<section class="home-hero py-5">
-    <div class="container text-center py-4">
-        <h1 class="display-5 fw-bold mb-3">Luma <span class="home-accent">Laundry</span></h1>
-        <p class="lead mb-4">Coastal laundry service with pickup & drop-off scheduling in under a minute.</p>
-        @if (isLoggedIn)
-        {
-            <a href="/Orders/Schedule" class="btn btn-primary btn-lg">Schedule Service</a>
-        }
-        else
-        {
-            <a href="/Account/Register" class="btn btn-primary btn-lg">Get Started</a>
-        }
+<section class="home-hero min-vh-100 d-flex align-items-center">
+    <div class="container home-hero-inner text-center py-5">
+        <h1 class="home-hero-title mb-3">LUMA</h1>
+        <p class="home-hero-copy mb-4 mx-auto">
+            We know you're busy—our laundry service is designed for professionals like you.
+            We pick up, clean, and deliver, so you can focus on what matters most.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
+            <a href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")" class="btn btn-lg home-glow-btn">Schedule pickup</a>
+            <a href="/Home/Pricing" class="btn btn-lg home-ghost-btn">View pricing</a>
+        </div>
+        <div id="features" class="d-flex flex-wrap justify-content-center gap-3 home-chip-row">
+            <span class="home-chip">⚡ Same-day service</span>
+            <span class="home-chip">✓ Eco-friendly cleaning</span>
+            <span class="home-chip">✓ Free pickup &amp; delivery</span>
+        </div>
     </div>
 </section>
 
@@ -25,97 +29,25 @@
                 <div class="home-panel h-100 p-4 p-lg-5">
                     <h2 class="mb-3">How Luma Works</h2>
                     <p class="mb-4">Experience hassle-free laundry service designed for coastal living. We handle everything from pickup to delivery.</p>
-                    <div class="d-flex mb-3">
-                        <span class="feature-dot"></span>
-                        <div>
-                            <h5 class="mb-1">Simple Scheduling</h5>
-                            <p class="mb-0">Choose your pickup and drop-off times in seconds. Schedule up to a week in advance.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex mb-3">
-                        <span class="feature-dot"></span>
-                        <div>
-                            <h5 class="mb-1">Convenient Pickup & Delivery</h5>
-                            <p class="mb-0">We come to you - no more trips to the laundromat. Select the service that fits your needs.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex">
-                        <span class="feature-dot"></span>
-                        <div>
-                            <h5 class="mb-1">Reliable & Trusted</h5>
-                            <p class="mb-0">Track your order status and get notifications. Trusted by hundreds of coastal families.</p>
-                        </div>
-                    </div>
+                    <div class="d-flex mb-3"><span class="feature-dot"></span><div><h5 class="mb-1">Simple Scheduling</h5><p class="mb-0">Choose pickup and drop-off times in seconds.</p></div></div>
+                    <div class="d-flex mb-3"><span class="feature-dot"></span><div><h5 class="mb-1">Convenient Pickup & Delivery</h5><p class="mb-0">No laundromat trips—service at your door.</p></div></div>
+                    <div class="d-flex"><span class="feature-dot"></span><div><h5 class="mb-1">Reliable & Trusted</h5><p class="mb-0">Track orders with consistent service quality.</p></div></div>
                 </div>
             </div>
             <div class="col-lg-6">
                 <div class="home-panel h-100 p-4 p-lg-5 d-flex flex-column justify-content-center">
                     <h2 class="mb-4">Why Customers Choose Luma</h2>
                     <div class="row text-center g-3">
-                        <div class="col-6">
-                            <div class="stat-number">500+</div>
-                            <div class="stat-label">Happy Customers</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-number">2,500+</div>
-                            <div class="stat-label">Orders Completed</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-number">24h</div>
-                            <div class="stat-label">Turnaround</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-number">100%</div>
-                            <div class="stat-label">Satisfaction</div>
-                        </div>
+                        <div class="col-6"><div class="stat-number">500+</div><div class="stat-label">Happy Customers</div></div>
+                        <div class="col-6"><div class="stat-number">2,500+</div><div class="stat-label">Orders Completed</div></div>
+                        <div class="col-6"><div class="stat-number">24h</div><div class="stat-label">Turnaround</div></div>
+                        <div class="col-6"><div class="stat-number">100%</div><div class="stat-label">Satisfaction</div></div>
                     </div>
                 </div>
             </div>
+        <div id="faq" class="text-center mt-5">
+            <p class="mb-0 stat-label">FAQ: Pickup windows, pricing, and turnaround are available from the menu above.</p>
         </div>
-    </div>
-</section>
-
-<section class="py-5">
-    <div class="container">
-        <div class="text-center mb-4">
-            <h2>Our Services</h2>
-            <p class="mb-0">Choose the laundry service that fits your lifestyle</p>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="home-service-card h-100 p-4">
-                    <h4>Pickup Service</h4>
-                    <p class="mb-0">We collect your laundry at your doorstep. Schedule pickup for your convenience and we handle the rest.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="home-service-card h-100 p-4">
-                    <h4>Drop-off Service</h4>
-                    <p class="mb-0">Fresh, clean laundry delivered right to your door. Choose your preferred delivery time slot.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="home-service-card h-100 p-4">
-                    <h4>Full Service</h4>
-                    <p class="mb-0">Complete pickup and delivery convenience. We handle everything from start to finish.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="home-cta py-5">
-    <div class="container text-center text-white py-3">
-        <h3 class="mb-2">Ready to experience Luma?</h3>
-        <p class="mb-4">Join hundreds of satisfied customers enjoying stress-free laundry service.</p>
-        @if (isLoggedIn)
-        {
-            <a class="btn btn-light btn-lg" href="/Orders/Schedule">Schedule Now</a>
-        }
-        else
-        {
-            <a class="btn btn-light btn-lg" href="/Account/Register">Create Free Account</a>
-        }
     </div>
 </section>
 
