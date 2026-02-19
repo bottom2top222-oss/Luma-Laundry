@@ -6,6 +6,19 @@ This guide walks through deploying your Luma Laundry application to Railway.app 
 
 ### 2026-02-19
 
+- Commit: `0363f61`
+- Hardened authentication and admin access security.
+- Added stronger Identity password policy requirements (uppercase/lowercase/number/symbol, minimum length 8).
+- Enabled account lockout after repeated failed sign-in attempts.
+- Added anti-forgery validation/tokens to login, register, and logout flows.
+- Added `Change Password` screen and forced admin password rotation when default admin credentials are still in use.
+- Validation completed before push:
+   - `dotnet build LaundryApp.sln -v minimal` → build successful
+   - `dotnet test LaundryApp.sln -v minimal` → all tests passing (3/3)
+- Railway impact: no new variables required; redeploy `frontend` to apply the updated login/password behavior.
+
+### 2026-02-19
+
 - Commit: `53563f9`
 - Added starter automated tests (xUnit) and wired them into the solution.
 - Remediated vulnerable NuGet dependencies by upgrading to secure .NET 8 patch versions.
