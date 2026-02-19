@@ -13,40 +13,40 @@ namespace LaundryApp.Migrations.IdentityMigrations
             // Add new columns to Orders table
             migrationBuilder.AddColumn<string>(
                 name: "PaymentStatus",
-                table: "AspNetUsers",
+                table: "Orders",
                 type: "TEXT",
                 nullable: false,
                 defaultValue: "method_on_file");
 
             migrationBuilder.AddColumn<int>(
                 name: "PaymentMethodId",
-                table: "AspNetUsers",
+                table: "Orders",
                 type: "INTEGER",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "InvoiceId",
-                table: "AspNetUsers",
+                table: "Orders",
                 type: "INTEGER",
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
                 name: "TermsAccepted",
-                table: "AspNetUsers",
+                table: "Orders",
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<string>(
                 name: "TermsAcceptedAt",
-                table: "AspNetUsers",
+                table: "Orders",
                 type: "TEXT",
                 nullable: false,
                 defaultValue: "");
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "ClosedAt",
-                table: "AspNetUsers",
+                table: "Orders",
                 type: "TEXT",
                 nullable: true);
 
@@ -168,27 +168,27 @@ namespace LaundryApp.Migrations.IdentityMigrations
 
             migrationBuilder.DropColumn(
                 name: "PaymentStatus",
-                table: "AspNetUsers");
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "PaymentMethodId",
-                table: "AspNetUsers");
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "InvoiceId",
-                table: "AspNetUsers");
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "TermsAccepted",
-                table: "AspNetUsers");
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "TermsAcceptedAt",
-                table: "AspNetUsers");
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "ClosedAt",
-                table: "AspNetUsers");
+                table: "Orders");
         }
     }
 }
