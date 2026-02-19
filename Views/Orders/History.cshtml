@@ -75,6 +75,7 @@ else
                     {
                         <a href="/Orders/SavePaymentMethod/@o.Id" class="btn btn-sm btn-primary me-2">Save Card</a>
                         <form method="post" action="/Orders/Cancel/@o.Id" style="display:inline;">
+                            @Html.AntiForgeryToken()
                             <button class="btn btn-sm btn-outline-danger">Cancel</button>
                         </form>
                     }
@@ -86,6 +87,7 @@ else
                     {
                         <a href="/Orders/UpdatePaymentMethod/@o.Id" class="btn btn-sm btn-warning me-2">Update Card</a>
                         <form method="post" action="/Orders/RetryPayment/@o.Id" style="display:inline;">
+                            @Html.AntiForgeryToken()
                             <button class="btn btn-sm btn-primary">Retry Payment</button>
                         </form>
                     }
