@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using LaundryApp.Data;
 using LaundryApp.Models;
+using LaundryApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Linq;
@@ -14,12 +15,14 @@ public class AdminController : Controller
     private readonly OrderStore _orderStore;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly LaundryAppDbContext _dbContext;
+    private readonly PaymentService _paymentService;
 
-    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext)
+    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext, PaymentService paymentService)
     {
         _orderStore = orderStore;
         _userManager = userManager;
         _dbContext = dbContext;
+        _paymentService = paymentService;
     }
 
     [HttpGet("/Admin")]
@@ -74,7 +77,7 @@ public IActionResult Index(string? status, string? filter, string? search)
 
 
     [HttpPost]
-    public IActionResult UpdateStatus(int id, string status, string currentStatus = "All", string? search = null)
+    public async Task<IActionResult> UpdateStatus(int id, string status, string currentStatus = "All", string? search = null)
     {
         var order = _orderStore.Get(id);
         if (order == null) return NotFound();
@@ -84,15 +87,76 @@ public IActionResult Index(string? status, string? filter, string? search)
         order.LastUpdatedAt = DateTime.Now;
         _orderStore.Save();
 
+        // Handle payment workflow based on status changes
+        if (status == "ReadyForDelivery" && order.PaymentStatus == "method_on_file")
+        {
+            try
+            {
+                // Generate invoice when order is ready for delivery
+                var dbOrder = await _dbContext.Orders.FindAsync(id);
+                if (dbOrder != null && dbOrder.InvoiceId == null)
+                {
+                    // Create invoice with default amounts (customize as needed)
+                    await _paymentService.GenerateInvoiceAsync(
+                        id,
+                        subtotal: 25.00m,
+                        taxAmount: 2.00m,
+                        deliveryFee: 3.00m,
+                        lineItems: $"[{{\"description\": \"{order.ServiceType} Service\", \"amount\": 25.00}}]"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't block status update
+                var auditLog = new AuditLog
+                {
+                    UserEmail = User.Identity?.Name ?? "Unknown",
+                    Action = "Invoice Generation Failed",
+                    Entity = $"Order #{id}",
+                    Details = $"Error: {ex.Message}"
+                };
+                _dbContext.AuditLogs.Add(auditLog);
+            }
+        }
+        else if (status == "Delivered" && order.PaymentStatus == "method_on_file")
+        {
+            try
+            {
+                // Attempt payment when order is delivered
+                var dbOrder = await _dbContext.Orders.FindAsync(id);
+                if (dbOrder != null && dbOrder.InvoiceId != null)
+                {
+                    var invoice = await _dbContext.Invoices.FindAsync(dbOrder.InvoiceId);
+                    if (invoice != null && dbOrder.PaymentMethodId != null)
+                    {
+                        await _paymentService.AttemptPaymentAsync(id, invoice.Total, dbOrder.PaymentMethodId.Value);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't block status update
+                var auditLog = new AuditLog
+                {
+                    UserEmail = User.Identity?.Name ?? "Unknown",
+                    Action = "Payment Attempt Failed",
+                    Entity = $"Order #{id}",
+                    Details = $"Error: {ex.Message}"
+                };
+                _dbContext.AuditLogs.Add(auditLog);
+            }
+        }
+
         // Log audit
-        var auditLog = new AuditLog
+        var auditLog2 = new AuditLog
         {
             UserEmail = User.Identity?.Name ?? "Unknown",
             Action = "Status Changed",
             Entity = $"Order #{id}",
             Details = $"{oldStatus} → {status}"
         };
-        _dbContext.AuditLogs.Add(auditLog);
+        _dbContext.AuditLogs.Add(auditLog2);
         _dbContext.SaveChanges();
 
         return RedirectToAction("Index", new { status = currentStatus, search = search });

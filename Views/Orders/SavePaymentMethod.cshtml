@@ -1,0 +1,92 @@
+@model LaundryOrder
+
+@{
+    ViewData["Title"] = "Save Payment Method";
+}
+
+<h1 class="mb-3">Save Payment Method</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Order Summary</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Order #:</strong> @Model.Id</p>
+                <p><strong>Service:</strong> @Model.ServiceType</p>
+                <p><strong>Date/Time:</strong> @Model.ScheduledAt</p>
+                <p><strong>Address:</strong> @Model.GetDisplayAddress()</p>
+                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                {
+                    <p><strong>Notes:</strong> @Model.Notes</p>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Payment Method</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>No charge today.</strong> We'll charge your card after delivery is completed.
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@err.ErrorMessage</div>
+                        }
+                    </div>
+                }
+                
+                <form method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Card Number</label>
+                        <input type="text" name="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required />
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label">Expiry</label>
+                                <input type="text" name="expiry" class="form-control" placeholder="MM/YY" maxlength="5" required />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="text" name="cvv" class="form-control" placeholder="123" maxlength="4" required />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Cardholder Name</label>
+                        <input type="text" name="cardholderName" class="form-control" placeholder="John Doe" required />
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="acceptTerms" id="acceptTerms" class="form-check-input" required />
+                        <label class="form-check-label" for="acceptTerms">
+                            I agree that my card will be charged after delivery is completed. Payment processing fees may apply.
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Save Card & Continue</button>
+                </form>
+                
+                <div class="mt-3 text-center">
+                    <a href="/Orders/Schedule" class="btn btn-outline-secondary">Cancel & Schedule Another</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

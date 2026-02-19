@@ -17,11 +17,11 @@ else
             <tr>
                 <th>#</th>
                 <th>Status</th>
+                <th>Payment</th>
                 <th>Service</th>
                 <th>Scheduled</th>
                 <th>Created</th>
                 <th>Address</th>
-                <th>Notes</th>
                 <th></th>
             </tr>
         </thead>
@@ -31,11 +31,24 @@ else
             var badgeClass = o.Status switch
             {
                 "Scheduled" => "bg-warning text-dark",
-                "Paid" => "bg-primary",
-                "In Progress" => "bg-warning text-dark",
-                "Completed" => "bg-success",
-                "Cancelled" => "bg-secondary",
+                "Paid" => "bg-success",
+                "In Progress" => "bg-info text-dark",
+                "Completed" => "bg-secondary",
+                "Delivered" => "bg-info text-dark",
+                "PaymentPending" => "bg-warning text-dark",
+                "Closed" => "bg-success",
+                "Cancelled" => "bg-danger",
                 _ => "bg-dark"
+            };
+
+            var paymentBadgeClass = o.PaymentStatus switch
+            {
+                "method_on_file" => "bg-info",
+                "pending" => "bg-warning text-dark",
+                "paid" => "bg-success",
+                "failed" => "bg-danger",
+                "past_due" => "bg-danger",
+                _ => "bg-secondary"
             };
 
             <tr>
@@ -43,22 +56,42 @@ else
                 <td>
                     <span class="badge @badgeClass">@o.Status</span>
                 </td>
-                <td>@o.ServiceType</td>
-                <td>@o.ScheduledAt</td>
-                <td>@o.CreatedAt</td>
-                <td>@o.GetDisplayAddress()</td>
-                <td>@(string.IsNullOrEmpty(o.Notes) ? "-" : o.Notes)</td>
-                <td class="text-end">
-                    @if (o.Status == "Scheduled")
+                <td>
+                    @if (!string.IsNullOrEmpty(o.PaymentStatus))
                     {
-                        <a href="/Orders/Payment/@o.Id" class="btn btn-sm btn-success me-2">Pay Now</a>
+                        <span class="badge @paymentBadgeClass">@o.PaymentStatus</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">No payment</span>
+                    }
+                </td>
+                <td>@o.ServiceType</td>
+                <td>@o.ScheduledAt.ToString("g")</td>
+                <td>@o.CreatedAt.ToString("g")</td>
+                <td>@o.GetDisplayAddress()</td>
+                <td class="text-end">
+                    @if (o.Status == "Scheduled" && o.PaymentStatus != "method_on_file")
+                    {
+                        <a href="/Orders/SavePaymentMethod/@o.Id" class="btn btn-sm btn-primary me-2">Save Card</a>
                         <form method="post" action="/Orders/Cancel/@o.Id" style="display:inline;">
                             <button class="btn btn-sm btn-outline-danger">Cancel</button>
                         </form>
                     }
-                    else if (o.Status == "Paid")
+                    else if (o.Status == "Scheduled" && o.PaymentStatus == "method_on_file")
                     {
-                        <span class="text-success">✓ Paid</span>
+                        <span class="badge bg-success">Card Saved</span>
+                    }
+                    else if (o.PaymentStatus == "failed")
+                    {
+                        <a href="/Orders/UpdatePaymentMethod/@o.Id" class="btn btn-sm btn-warning me-2">Update Card</a>
+                        <form method="post" action="/Orders/RetryPayment/@o.Id" style="display:inline;">
+                            <button class="btn btn-sm btn-primary">Retry Payment</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="/Orders/Invoice/@o.Id" class="btn btn-sm btn-outline-primary">View Details</a>
                     }
                 </td>
             </tr>

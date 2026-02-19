@@ -3,6 +3,7 @@ using LaundryApp.Data;
 using Microsoft.AspNetCore.Identity;
 using System.IO;
 using LaundryApp.Models;
+using LaundryApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ builder.Services.AddDbContext<LaundryApp.Data.LaundryAppDbContext>(options =>
 
 // OrderStore
 builder.Services.AddScoped<LaundryApp.Data.OrderStore>();
+
+// Payment Service
+builder.Services.AddScoped<PaymentService>();
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
