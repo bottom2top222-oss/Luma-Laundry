@@ -8,21 +8,31 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.24" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.24">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.24">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.24" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="services\LaundryApp.Api\**\*.cs" />
     <Compile Remove="services\LaundryApp.Worker\**\*.cs" />
+    <Compile Remove="Tests\**\*.cs" />
     <Content Remove="services\LaundryApp.Api\**\*" />
     <Content Remove="services\LaundryApp.Worker\**\*" />
+    <Content Remove="Tests\**\*" />
     <EmbeddedResource Remove="services\LaundryApp.Api\**\*" />
     <EmbeddedResource Remove="services\LaundryApp.Worker\**\*" />
+    <EmbeddedResource Remove="Tests\**\*" />
     <None Remove="services\LaundryApp.Api\**\*" />
     <None Remove="services\LaundryApp.Worker\**\*" />
+    <None Remove="Tests\**\*" />
   </ItemGroup>
 
 </Project>
