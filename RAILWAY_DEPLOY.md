@@ -42,6 +42,168 @@ This guide walks through deploying your Luma Laundry application to Railway.app 
 
 6. Click **Deploy**
 
+## Step 2B (Recommended): Split into 3 Railway Services
+
+For the architecture shown in your Railway screenshot, create **three services** from the same repo:
+
+1. **frontend** (public)
+   - Dockerfile path: `docker/Dockerfile.frontend`
+   - Expose HTTP (Railway will route to port `8080`)
+
+2. **backend-server** (private/internal)
+   - Dockerfile path: `docker/Dockerfile.api`
+   - Expose HTTP internally (port `8080`)
+
+3. **backend-worker** (private/internal)
+   - Dockerfile path: `docker/Dockerfile.worker`
+   - No public domain required
+
+You can keep your existing root `Dockerfile` for legacy single-service deploys, but the `docker/*` files are the new multi-service setup.
+
+### Service Variable Matrix
+
+Set variables per service in Railway:
+
+#### `frontend`
+```
+ASPNETCORE_ENVIRONMENT=Production
+LayeredServices__ApiOnlyMode=true
+LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
+Database__Path=/var/data/laundry.db
+```
+
+#### `backend-server`
+```
+ASPNETCORE_ENVIRONMENT=Production
+Database__Path=/var/data/laundry.db
+```
+
+#### `backend-worker`
+```
+ASPNETCORE_ENVIRONMENT=Production
+LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
+```
+
+> Tip: internal Railway hostnames typically resolve as `<service-name>.railway.internal`.
+
+### Ready-to-Paste Variables
+
+Use these blocks directly when configuring each Railway service.
+
+#### frontend (.env style)
+```
+ASPNETCORE_ENVIRONMENT=Production
+LayeredServices__ApiOnlyMode=true
+LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
+Database__Path=/var/data/laundry.db
+```
+
+#### backend-server (.env style)
+```
+ASPNETCORE_ENVIRONMENT=Production
+Database__Path=/var/data/laundry.db
+```
+
+#### backend-worker (.env style)
+```
+ASPNETCORE_ENVIRONMENT=Production
+LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
+```
+
+#### frontend (JSON-style)
+```json
+{
+   "ASPNETCORE_ENVIRONMENT": "Production",
+   "LayeredServices__ApiOnlyMode": "true",
+   "LayeredServices__ApiBaseUrl": "http://backend-server.railway.internal:8080",
+   "Database__Path": "/var/data/laundry.db"
+}
+```
+
+#### backend-server (JSON-style)
+```json
+{
+   "ASPNETCORE_ENVIRONMENT": "Production",
+   "Database__Path": "/var/data/laundry.db"
+}
+```
+
+#### backend-worker (JSON-style)
+```json
+{
+   "ASPNETCORE_ENVIRONMENT": "Production",
+   "LayeredServices__ApiBaseUrl": "http://backend-server.railway.internal:8080"
+}
+```
+
+## Railway Click-Path Checklist (3-Service Setup)
+
+Use this exact sequence in Railway UI.
+
+### A) Create Services
+
+1. Open your Railway project.
+2. Click **+ New** → **GitHub Repo** (same repo each time).
+3. Create service **frontend**.
+4. Repeat and create service **backend-server**.
+5. Repeat and create service **backend-worker**.
+
+### B) Set Dockerfile Per Service
+
+For each service: **Service → Settings → Source → Root Directory / Dockerfile Path**
+
+- **frontend** → `docker/Dockerfile.frontend`
+- **backend-server** → `docker/Dockerfile.api`
+- **backend-worker** → `docker/Dockerfile.worker`
+
+### C) Networking / Exposure
+
+- **frontend**: Public domain enabled (this is your website).
+- **backend-server**: Keep private (no public domain).
+- **backend-worker**: Keep private (no public domain).
+
+### D) Variables (exact values)
+
+#### frontend
+```
+ASPNETCORE_ENVIRONMENT=Production
+LayeredServices__ApiOnlyMode=true
+LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
+Database__Path=/var/data/laundry.db
+```
+
+#### backend-server
+```
+ASPNETCORE_ENVIRONMENT=Production
+Database__Path=/var/data/laundry.db
+```
+
+#### backend-worker
+```
+ASPNETCORE_ENVIRONMENT=Production
+LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
+```
+
+### E) Volume Mounts
+
+- Attach volume to **frontend** at `/var/data`.
+- Attach volume to **backend-server** at `/var/data`.
+- Worker does not require DB volume for current architecture.
+
+### F) Deploy + Verify
+
+1. Trigger deploy for all three services.
+2. Check logs until each shows healthy startup.
+3. Open frontend domain and verify homepage loads.
+4. Verify internal API connectivity by checking frontend logs for missing API connection errors.
+
+### G) Common Misconfigurations
+
+- Wrong Dockerfile path per service.
+- Public domain accidentally enabled for backend-server/worker.
+- Missing `LayeredServices__ApiBaseUrl` on frontend/worker.
+- Missing volume mount at `/var/data` for services writing SQLite.
+
 ## Step 3: Configure Environment Variables
 
 1. In your Railway project dashboard, click on your service
@@ -51,7 +213,10 @@ This guide walks through deploying your Luma Laundry application to Railway.app 
 3. Add these environment variables:
    ```
    ASPNETCORE_ENVIRONMENT=Production
+   Database__Path=/var/data/laundry.db
    ```
+
+If you use multi-service deployment, apply the variables from **Step 2B** to each service instead of one shared set.
 
 4. Click **"Deploy"** to restart with new variables
 
@@ -165,6 +330,7 @@ Railway automatically detects the push and redeploys!
 - Check logs in Railway dashboard
 - Verify environment variables are set
 - Ensure volume is mounted to `/var/data`
+- Confirm `Database__Path=/var/data/laundry.db` is set
 
 ### Domain not working:
 - DNS can take time to propagate (up to 48 hours)
@@ -173,7 +339,7 @@ Railway automatically detects the push and redeploys!
 
 ### Database resets on deploy:
 - Ensure the volume is properly configured
-- Check that `ConnectionStrings:IdentityConnection` points to `/var/data/laundry.db`
+- Check that `Database__Path` points to `/var/data/laundry.db`
 
 ### 500 errors:
 - Check logs for exceptions

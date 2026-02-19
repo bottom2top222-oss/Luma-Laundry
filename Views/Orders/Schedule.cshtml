@@ -2,7 +2,12 @@
     ViewData["Title"] = "Schedule Service";
 }
 
-<h1 class="mb-3">Schedule Service</h1>
+<section class="schedule-hero mb-4">
+    <div class="schedule-hero__inner">
+        <h1 class="mb-2">Schedule Service</h1>
+        <p class="mb-0">Pick your date and time in seconds and we’ll handle the rest.</p>
+    </div>
+</section>
 
 @if (!ViewData.ModelState.IsValid)
 {
@@ -14,54 +19,238 @@
     </div>
 }
 
-<form method="post">
+<form method="post" id="scheduleForm">
     @Html.AntiForgeryToken()
-    
-    <div class="mb-3">
-        <label class="form-label">Service Type</label>
-        <select class="form-select" name="serviceType" required>
-            <option value="">Select one</option>
-            <option value="Pickup">Pickup</option>
-            <option value="Dropoff">Drop-off</option>
-            <option value="Both">Drop-off + Pickup</option>
-        </select>
-    </div>
+    <input type="hidden" name="scheduledAt" id="scheduledAt" />
 
-    <div class="mb-3">
-        <label class="form-label">Date & Time</label>
-        <input class="form-control" type="datetime-local" name="scheduledAt" required />
-    </div>
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card schedule-card h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Select Date & Time</h5>
+                    <p class="text-muted small mb-3" id="calendarMonthLabel"></p>
 
-    <div class="mb-3">
-        <label class="form-label">Pickup/Drop-off Address</label>
-        <input class="form-control" type="text" name="addressLine1" placeholder="123 Main St" required />
-    </div>
+                    <div class="calendar-weekdays mb-2">
+                        <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+                    </div>
 
-    <div class="mb-3">
-        <label class="form-label">Apartment/Suite (Optional)</label>
-        <input class="form-control" type="text" name="addressLine2" placeholder="Apt 4B" />
-    </div>
+                    <div id="calendarGrid" class="calendar-grid mb-4"></div>
 
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label class="form-label">City</label>
-            <input class="form-control" type="text" name="city" required />
+                    <label class="form-label">Time</label>
+                    <select class="form-select" id="timeSlot" required>
+                        <option value="">Select a time</option>
+                        <option value="08:00">8:00 AM</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                        <option value="18:00">6:00 PM</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <label class="form-label">State</label>
-            <input class="form-control" type="text" name="state" maxlength="2" required />
-        </div>
-        <div class="col-md-3 mb-3">
-            <label class="form-label">ZIP Code</label>
-            <input class="form-control" type="text" name="zipCode" required />
+
+        <div class="col-lg-7">
+            <div class="card schedule-card">
+                <div class="card-body">
+                    <h5 class="mb-3">Service Details</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label">Service Type</label>
+                        <select class="form-select" name="serviceType" required>
+                            <option value="">Select one</option>
+                            <option value="Pickup">Pickup</option>
+                            <option value="Dropoff">Drop-off</option>
+                            <option value="Both">Drop-off + Pickup</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Pickup/Drop-off Address</label>
+                        <input class="form-control" type="text" name="addressLine1" placeholder="123 Main St" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Apartment/Suite (Optional)</label>
+                        <input class="form-control" type="text" name="addressLine2" placeholder="Apt 4B" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">City</label>
+                            <input class="form-control" type="text" name="city" required />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">State</label>
+                            <input class="form-control" type="text" name="state" maxlength="2" required />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">ZIP Code</label>
+                            <input class="form-control" type="text" name="zipCode" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Special Instructions (optional)</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary">Confirm</button>
+                        <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Special Instructions (optional)</label>
-        <textarea class="form-control" name="notes" rows="3"></textarea>
-    </div>
-
-    <button class="btn btn-primary">Confirm</button>
-    <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back</a>
 </form>
+
+@section Scripts {
+    <script>
+        (() => {
+            const monthLabel = document.getElementById('calendarMonthLabel');
+            const calendarGrid = document.getElementById('calendarGrid');
+            const timeSlot = document.getElementById('timeSlot');
+            const scheduledAtInput = document.getElementById('scheduledAt');
+            const form = document.getElementById('scheduleForm');
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const firstOfMonth = new Date(year, month, 1);
+            const lastOfMonth = new Date(year, month + 1, 0);
+            const totalDays = lastOfMonth.getDate();
+
+            let selectedDate = null;
+
+            monthLabel.textContent = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const startDay = (firstOfMonth.getDay() + 6) % 7;
+            for (let i = 0; i < startDay; i++) {
+                const spacer = document.createElement('span');
+                spacer.className = 'calendar-day--spacer';
+                calendarGrid.appendChild(spacer);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(year, month, day);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'calendar-day';
+                button.textContent = String(day);
+
+                const isPast = date < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                if (isPast) {
+                    button.disabled = true;
+                    button.classList.add('calendar-day--disabled');
+                }
+
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.calendar-day--selected').forEach(el => el.classList.remove('calendar-day--selected'));
+                    button.classList.add('calendar-day--selected');
+                    selectedDate = date;
+                });
+
+                if (day === now.getDate()) {
+                    button.classList.add('calendar-day--today');
+                }
+
+                calendarGrid.appendChild(button);
+            }
+
+            form.addEventListener('submit', (event) => {
+                if (!selectedDate || !timeSlot.value) {
+                    event.preventDefault();
+                    alert('Please select a date and time.');
+                    return;
+                }
+
+                const [hour, minute] = timeSlot.value.split(':');
+                const localDateTime = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), Number(hour), Number(minute));
+                const pad = (n) => String(n).padStart(2, '0');
+                const formatted = `${localDateTime.getFullYear()}-${pad(localDateTime.getMonth() + 1)}-${pad(localDateTime.getDate())}T${pad(localDateTime.getHours())}:${pad(localDateTime.getMinutes())}`;
+                scheduledAtInput.value = formatted;
+            });
+        })();
+    </script>
+}
+
+<style>
+    .schedule-hero {
+        background: linear-gradient(135deg, #006994 0%, #0099b6 100%);
+        border-radius: 14px;
+        color: #fff;
+        padding: 1.5rem;
+    }
+
+    .schedule-hero__inner h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .schedule-card {
+        border: 1px solid #c8e6f5;
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(0, 105, 148, 0.08);
+    }
+
+    .calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        color: #6c757d;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.6rem;
+    }
+
+    .calendar-day,
+    .calendar-day--spacer {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 999px;
+        border: 0;
+    }
+
+    .calendar-day {
+        background: #e9ecef;
+        color: #4b5563;
+        font-weight: 600;
+        transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .calendar-day:hover:not(:disabled) {
+        background: #dce8ef;
+        transform: translateY(-1px);
+    }
+
+    .calendar-day--today {
+        outline: 2px solid #0099b6;
+        outline-offset: 1px;
+    }
+
+    .calendar-day--selected {
+        background: #f2994a;
+        color: #fff;
+    }
+
+    .calendar-day--disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .calendar-day--spacer {
+        visibility: hidden;
+    }
+</style>

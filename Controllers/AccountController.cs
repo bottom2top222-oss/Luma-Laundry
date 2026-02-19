@@ -53,8 +53,17 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string email, string password, string confirmPassword, string firstName, string lastName, string phoneNumber, string addressLine1, string addressLine2, string city, string state, string zipCode, bool acceptTerms)
+    public async Task<IActionResult> Register(string email, string password, string confirmPassword, string firstName, string lastName, string phoneNumber, string addressLine1, string? addressLine2, string city, string state, string zipCode, string? acceptTerms)
     {
+        var acceptedTerms = false;
+        if (Request.HasFormContentType)
+        {
+            var submittedValues = Request.Form["acceptTerms"];
+            acceptedTerms = submittedValues.Any(v =>
+                string.Equals(v, "true", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(v, "on", StringComparison.OrdinalIgnoreCase));
+        }
+
         if (string.IsNullOrWhiteSpace(email))
         {
             ModelState.AddModelError("", "Email is required.");
@@ -75,7 +84,7 @@ public class AccountController : Controller
             ModelState.AddModelError("", "Password must be at least 6 characters long.");
         }
 
-        if (!acceptTerms)
+        if (!acceptedTerms)
         {
             ModelState.AddModelError("", "You must accept the Terms of Service to create an account.");
         }
@@ -99,11 +108,13 @@ public class AccountController : Controller
             FirstName = firstName,
             LastName = lastName,
             PhoneNumber = phoneNumber,
-            AddressLine1 = addressLine1,
-            AddressLine2 = addressLine2,
-            City = city,
-            State = state,
-            ZipCode = zipCode
+            AddressLine1 = addressLine1?.Trim() ?? "",
+            AddressLine2 = addressLine2?.Trim() ?? "",
+            City = city?.Trim() ?? "",
+            State = state?.Trim() ?? "",
+            ZipCode = zipCode?.Trim() ?? "",
+            TermsAccepted = acceptedTerms,
+            TermsAcceptedAt = acceptedTerms ? DateTime.UtcNow.ToString("o") : ""
         };
         var result = await _userManager.CreateAsync(user, password!);
 

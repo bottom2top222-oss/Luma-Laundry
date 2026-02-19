@@ -50,6 +50,12 @@ az webapp config appsettings set `
   --name $webAppName `
   --settings ASPNETCORE_ENVIRONMENT=Production
 
+# Configure SQLite path for Linux App Service persistent storage
+az webapp config appsettings set `
+  --resource-group $resourceGroup `
+  --name $webAppName `
+  --settings Database__Path=/home/site/wwwroot/App_Data/laundry.db
+
 # Enable detailed error messages (optional, for debugging)
 az webapp config appsettings set `
   --resource-group $resourceGroup `
@@ -143,6 +149,12 @@ az webapp config appsettings set `
   --resource-group $resourceGroup `
   --name $webAppName `
   --settings WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
+
+# Ensure app uses persistent SQLite location
+az webapp config appsettings set `
+  --resource-group $resourceGroup `
+  --name $webAppName `
+  --settings Database__Path=/home/site/wwwroot/App_Data/laundry.db
 ```
 
 ### Option B: Upgrade to Azure SQL Database (recommended for production)

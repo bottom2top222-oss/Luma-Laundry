@@ -1,3 +1,4 @@
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -10,18 +11,10 @@ namespace LaundryApp.Migrations.IdentityMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Add new columns to Orders table
-            migrationBuilder.AddColumn<string>(
-                name: "PaymentStatus",
+            migrationBuilder.AddColumn<DateTime>(
+                name: "ClosedAt",
                 table: "Orders",
                 type: "TEXT",
-                nullable: false,
-                defaultValue: "method_on_file");
-
-            migrationBuilder.AddColumn<int>(
-                name: "PaymentMethodId",
-                table: "Orders",
-                type: "INTEGER",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
@@ -29,6 +22,19 @@ namespace LaundryApp.Migrations.IdentityMigrations
                 table: "Orders",
                 type: "INTEGER",
                 nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "PaymentMethodId",
+                table: "Orders",
+                type: "INTEGER",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "PaymentStatus",
+                table: "Orders",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.AddColumn<bool>(
                 name: "TermsAccepted",
@@ -44,36 +50,6 @@ namespace LaundryApp.Migrations.IdentityMigrations
                 nullable: false,
                 defaultValue: "");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "ClosedAt",
-                table: "Orders",
-                type: "TEXT",
-                nullable: true);
-
-            // Create PaymentMethod table
-            migrationBuilder.CreateTable(
-                name: "PaymentMethods",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    UserEmail = table.Column<string>(type: "TEXT", nullable: false),
-                    CardToken = table.Column<string>(type: "TEXT", nullable: false),
-                    CardLast4 = table.Column<string>(type: "TEXT", nullable: false),
-                    CardBrand = table.Column<string>(type: "TEXT", nullable: false),
-                    ExpiryMonth = table.Column<string>(type: "TEXT", nullable: false),
-                    ExpiryYear = table.Column<string>(type: "TEXT", nullable: false),
-                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsVerified = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    LastUsedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentMethods", x => x.Id);
-                });
-
-            // Create Invoice table
             migrationBuilder.CreateTable(
                 name: "Invoices",
                 columns: table => new
@@ -100,11 +76,31 @@ namespace LaundryApp.Migrations.IdentityMigrations
                         name: "FK_Invoices_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
-            // Create PaymentAttempt table
+            migrationBuilder.CreateTable(
+                name: "PaymentMethods",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserEmail = table.Column<string>(type: "TEXT", nullable: false),
+                    CardToken = table.Column<string>(type: "TEXT", nullable: false),
+                    CardLast4 = table.Column<string>(type: "TEXT", nullable: false),
+                    CardBrand = table.Column<string>(type: "TEXT", nullable: false),
+                    ExpiryMonth = table.Column<string>(type: "TEXT", nullable: false),
+                    ExpiryYear = table.Column<string>(type: "TEXT", nullable: false),
+                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsVerified = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    LastUsedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentMethods", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "PaymentAttempts",
                 columns: table => new
@@ -138,6 +134,11 @@ namespace LaundryApp.Migrations.IdentityMigrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_PaymentMethodId",
+                table: "Orders",
+                column: "PaymentMethodId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Invoices_OrderId",
                 table: "Invoices",
                 column: "OrderId",
@@ -152,22 +153,41 @@ namespace LaundryApp.Migrations.IdentityMigrations
                 name: "IX_PaymentAttempts_OrderId",
                 table: "PaymentAttempts",
                 column: "OrderId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Orders_PaymentMethods_PaymentMethodId",
+                table: "Orders",
+                column: "PaymentMethodId",
+                principalTable: "PaymentMethods",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Orders_PaymentMethods_PaymentMethodId",
+                table: "Orders");
+
             migrationBuilder.DropTable(
                 name: "PaymentAttempts");
 
             migrationBuilder.DropTable(
-                name: "Invoices");
-
-            migrationBuilder.DropTable(
                 name: "PaymentMethods");
 
+            migrationBuilder.DropTable(
+                name: "Invoices");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Orders_PaymentMethodId",
+                table: "Orders");
+
             migrationBuilder.DropColumn(
-                name: "PaymentStatus",
+                name: "ClosedAt",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "InvoiceId",
                 table: "Orders");
 
             migrationBuilder.DropColumn(
@@ -175,7 +195,7 @@ namespace LaundryApp.Migrations.IdentityMigrations
                 table: "Orders");
 
             migrationBuilder.DropColumn(
-                name: "InvoiceId",
+                name: "PaymentStatus",
                 table: "Orders");
 
             migrationBuilder.DropColumn(
@@ -184,10 +204,6 @@ namespace LaundryApp.Migrations.IdentityMigrations
 
             migrationBuilder.DropColumn(
                 name: "TermsAcceptedAt",
-                table: "Orders");
-
-            migrationBuilder.DropColumn(
-                name: "ClosedAt",
                 table: "Orders");
         }
     }

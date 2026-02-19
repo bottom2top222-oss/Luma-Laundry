@@ -3,16 +3,19 @@ using System;
 using LaundryApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LaundryApp.Migrations
+namespace LaundryApp.Migrations.IdentityMigrations
 {
     [DbContext(typeof(LaundryAppDbContext))]
-    partial class LaundryAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260219011524_AddPaymentWorkflow")]
+    partial class AddPaymentWorkflow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -83,13 +86,6 @@ namespace LaundryApp.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("TermsAccepted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("TermsAcceptedAt")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

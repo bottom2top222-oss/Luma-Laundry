@@ -14,4 +14,15 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="services\LaundryApp.Api\**\*.cs" />
+    <Compile Remove="services\LaundryApp.Worker\**\*.cs" />
+    <Content Remove="services\LaundryApp.Api\**\*" />
+    <Content Remove="services\LaundryApp.Worker\**\*" />
+    <EmbeddedResource Remove="services\LaundryApp.Api\**\*" />
+    <EmbeddedResource Remove="services\LaundryApp.Worker\**\*" />
+    <None Remove="services\LaundryApp.Api\**\*" />
+    <None Remove="services\LaundryApp.Worker\**\*" />
+  </ItemGroup>
+
 </Project>

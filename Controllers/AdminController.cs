@@ -16,24 +16,36 @@ public class AdminController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly LaundryAppDbContext _dbContext;
     private readonly PaymentService _paymentService;
+    private readonly LayeredApiJobClient _layeredApiJobClient;
+    private readonly LayeredApiOrderClient _layeredApiOrderClient;
+    private readonly bool _apiOnlyMode;
 
-    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext, PaymentService paymentService)
+    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext, PaymentService paymentService, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
     {
         _orderStore = orderStore;
         _userManager = userManager;
         _dbContext = dbContext;
         _paymentService = paymentService;
+        _layeredApiJobClient = layeredApiJobClient;
+        _layeredApiOrderClient = layeredApiOrderClient;
+        _apiOnlyMode = bool.TryParse(configuration["LayeredServices:ApiOnlyMode"], out var apiOnly) && apiOnly;
     }
 
     [HttpGet("/Admin")]
-public IActionResult Index(string? status, string? filter, string? search)
+public async Task<IActionResult> Index(string? status, string? filter, string? search)
 {
 
     // Accept either query param name
     var selected = !string.IsNullOrWhiteSpace(status) ? status : filter;
     selected ??= "All";
 
-    var allOrders = _orderStore.All().ToList();
+    var apiOrders = await _layeredApiOrderClient.GetAdminOrdersAsync(selected, search);
+    var allOrders = apiOrders ?? (_apiOnlyMode ? new List<LaundryOrder>() : _orderStore.All().ToList());
+
+    if (apiOrders == null && _apiOnlyMode)
+    {
+        ViewBag.Error = "Order service is temporarily unavailable.";
+    }
 
     // Apply search filter if provided
     if (!string.IsNullOrWhiteSpace(search))
@@ -48,7 +60,7 @@ public IActionResult Index(string? status, string? filter, string? search)
     }
 
     // Counts for pills (only count from filtered results if searching)
-    var countSource = string.IsNullOrWhiteSpace(search) ? _orderStore.All().ToList() : allOrders;
+    var countSource = allOrders;
     ViewBag.CountAll = countSource.Count;
     ViewBag.CountScheduled = countSource.Count(o => o.Status == "Scheduled");
     ViewBag.CountInProgress = countSource.Count(o => o.Status == "In Progress");
@@ -79,31 +91,58 @@ public IActionResult Index(string? status, string? filter, string? search)
     [HttpPost]
     public async Task<IActionResult> UpdateStatus(int id, string status, string currentStatus = "All", string? search = null)
     {
-        var order = _orderStore.Get(id);
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
         if (order == null) return NotFound();
 
         var oldStatus = order.Status;
-        order.Status = status;
-        order.LastUpdatedAt = DateTime.Now;
-        _orderStore.Save();
+        var statusUpdatedViaApi = await _layeredApiOrderClient.UpdateOrderStatusAsync(id, status);
+        if (!statusUpdatedViaApi)
+        {
+            if (_apiOnlyMode)
+            {
+                TempData["Error"] = "Unable to update order status right now.";
+                return RedirectToAction("Index", new { status = currentStatus, search = search });
+            }
+
+            order.Status = status;
+            order.LastUpdatedAt = DateTime.Now;
+            _orderStore.Save();
+        }
+        else
+        {
+            order.Status = status;
+        }
 
         // Handle payment workflow based on status changes
         if (status == "ReadyForDelivery" && order.PaymentStatus == "method_on_file")
         {
             try
             {
-                // Generate invoice when order is ready for delivery
-                var dbOrder = await _dbContext.Orders.FindAsync(id);
-                if (dbOrder != null && dbOrder.InvoiceId == null)
+                var invoiceResult = await _layeredApiOrderClient.GenerateInvoiceAsync(
+                    id,
+                    subtotal: 25.00m,
+                    taxAmount: 2.00m,
+                    deliveryFee: 3.00m,
+                    lineItems: $"[{{\"description\": \"{order.ServiceType} Service\", \"amount\": 25.00}}]");
+
+                if (!invoiceResult.success)
                 {
-                    // Create invoice with default amounts (customize as needed)
-                    await _paymentService.GenerateInvoiceAsync(
-                        id,
-                        subtotal: 25.00m,
-                        taxAmount: 2.00m,
-                        deliveryFee: 3.00m,
-                        lineItems: $"[{{\"description\": \"{order.ServiceType} Service\", \"amount\": 25.00}}]"
-                    );
+                    if (_apiOnlyMode)
+                    {
+                        throw new Exception("API invoice generation failed in API-only mode.");
+                    }
+
+                    var dbOrder = await _dbContext.Orders.FindAsync(id);
+                    if (dbOrder != null && dbOrder.InvoiceId == null)
+                    {
+                        await _paymentService.GenerateInvoiceAsync(
+                            id,
+                            subtotal: 25.00m,
+                            taxAmount: 2.00m,
+                            deliveryFee: 3.00m,
+                            lineItems: $"[{{\"description\": \"{order.ServiceType} Service\", \"amount\": 25.00}}]"
+                        );
+                    }
                 }
             }
             catch (Exception ex)
@@ -123,14 +162,50 @@ public IActionResult Index(string? status, string? filter, string? search)
         {
             try
             {
-                // Attempt payment when order is delivered
-                var dbOrder = await _dbContext.Orders.FindAsync(id);
-                if (dbOrder != null && dbOrder.InvoiceId != null)
+                var attemptResult = await _layeredApiOrderClient.AttemptPaymentAsync(id);
+
+                if (attemptResult.success)
                 {
-                    var invoice = await _dbContext.Invoices.FindAsync(dbOrder.InvoiceId);
-                    if (invoice != null && dbOrder.PaymentMethodId != null)
+                    if (attemptResult.status == "success")
                     {
-                        await _paymentService.AttemptPaymentAsync(id, invoice.Total, dbOrder.PaymentMethodId.Value);
+                        var apiOrder = await _layeredApiOrderClient.GetOrderAsync(id);
+                        if (apiOrder != null)
+                        {
+                            var apiInvoice = await _layeredApiOrderClient.GetInvoiceAsync(id);
+                            var receiptAttempt = new PaymentAttempt
+                            {
+                                OrderId = id,
+                                Status = attemptResult.status,
+                                Amount = attemptResult.amount,
+                                TransactionId = attemptResult.transactionId,
+                                AttemptNumber = 1,
+                                CreatedAt = DateTime.Now
+                            };
+
+                            await _layeredApiJobClient.QueueReceiptEmailAsync(apiOrder, apiInvoice, receiptAttempt);
+                        }
+                    }
+                }
+                else
+                {
+                    if (_apiOnlyMode)
+                    {
+                        throw new Exception("API payment attempt failed in API-only mode.");
+                    }
+
+                    var dbOrder = await _dbContext.Orders.FindAsync(id);
+                    if (dbOrder != null && dbOrder.InvoiceId != null)
+                    {
+                        var invoice = await _dbContext.Invoices.FindAsync(dbOrder.InvoiceId);
+                        if (invoice != null && dbOrder.PaymentMethodId != null)
+                        {
+                            var attempt = await _paymentService.AttemptPaymentAsync(id, invoice.Total, dbOrder.PaymentMethodId.Value);
+
+                            if (attempt.Status == "success")
+                            {
+                                await _layeredApiJobClient.QueueReceiptEmailAsync(dbOrder, invoice, attempt);
+                            }
+                        }
                     }
                 }
             }
@@ -163,15 +238,25 @@ public IActionResult Index(string? status, string? filter, string? search)
     }
 
     [HttpPost]
-    public IActionResult UpdateAdminNotes(int id, string adminNotes, string currentStatus = "All", string? search = null)
+    public async Task<IActionResult> UpdateAdminNotes(int id, string adminNotes, string currentStatus = "All", string? search = null)
     {
-        var order = _orderStore.Get(id);
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
         if (order == null) return NotFound();
 
         var oldNotes = order.AdminNotes;
-        order.AdminNotes = adminNotes;
-        order.LastUpdatedAt = DateTime.Now;
-        _orderStore.Save();
+        var updatedViaApi = await _layeredApiOrderClient.UpdateAdminNotesAsync(id, adminNotes);
+        if (!updatedViaApi)
+        {
+            if (_apiOnlyMode)
+            {
+                TempData["Error"] = "Unable to update admin notes right now.";
+                return RedirectToAction("Index", new { status = currentStatus, search = search });
+            }
+
+            order.AdminNotes = adminNotes;
+            order.LastUpdatedAt = DateTime.Now;
+            _orderStore.Save();
+        }
 
         // Log audit
         var auditLog = new AuditLog
@@ -188,9 +273,9 @@ public IActionResult Index(string? status, string? filter, string? search)
     }
 
     [HttpPost]
-    public IActionResult Delete(int id, string currentStatus = "All", string? search = null)
+    public async Task<IActionResult> Delete(int id, string currentStatus = "All", string? search = null)
     {
-        var order = _orderStore.Get(id);
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
         if (order != null)
         {
             // Log audit before deleting
@@ -205,15 +290,26 @@ public IActionResult Index(string? status, string? filter, string? search)
             _dbContext.SaveChanges();
         }
 
-        _orderStore.Delete(id);
+        var deletedViaApi = await _layeredApiOrderClient.DeleteOrderAsync(id);
+        if (!deletedViaApi)
+        {
+            if (_apiOnlyMode)
+            {
+                TempData["Error"] = "Unable to delete order right now.";
+                return RedirectToAction("Index", new { status = currentStatus, search = search });
+            }
+
+            _orderStore.Delete(id);
+        }
 
         return RedirectToAction("Index", new { status = currentStatus, search = search });
     }
 
     [HttpGet]
-    public IActionResult ExportCsv(string? status)
+    public async Task<IActionResult> ExportCsv(string? status)
     {
-        var orders = _orderStore.All().ToList();
+        var apiOrders = await _layeredApiOrderClient.GetAdminOrdersAsync(status, null);
+        var orders = apiOrders ?? (_apiOnlyMode ? new List<LaundryOrder>() : _orderStore.All().ToList());
 
         if (!string.IsNullOrWhiteSpace(status) && status != "All")
         {
