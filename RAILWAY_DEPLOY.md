@@ -425,6 +425,8 @@ Railway automatically detects the push and redeploys!
 
 ## Troubleshooting
 
+- Need to intentionally pause public access? Use [Maintenance Mode Quick Toggle](#maintenance-mode-quick-toggle).
+
 ### App won't start:
 - Check logs in Railway dashboard
 - Verify environment variables are set
