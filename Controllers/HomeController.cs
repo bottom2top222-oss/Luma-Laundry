@@ -38,6 +38,13 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult Pricing()
+    {
+        ViewData["Title"] = "Pricing";
+        return View();
+    }
+
     private bool IsLoggedIn()
         => User?.Identity?.IsAuthenticated ?? false;
 }

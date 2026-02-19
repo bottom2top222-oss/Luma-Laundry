@@ -176,3 +176,64 @@ footer a:hover {
   color: rgba(220, 230, 255, 0.75);
   font-size: 0.95rem;
 }
+
+.pricing-page {
+  background: #f2f5f8;
+}
+
+.pricing-hero {
+  background: #ffffff;
+  border: 1px solid #d9e2ec;
+}
+
+.pricing-hero h1,
+.pricing-info h2 {
+  color: #006994;
+}
+
+.promo-card {
+  background: #d50000;
+  border-radius: 14px;
+  color: #ffffff;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+}
+
+.promo-top {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffeb3b;
+}
+
+.promo-mid {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.promo-bottom {
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.pricing-info {
+  background: #ffffff;
+  border: 1px solid #d9e2ec;
+}
+
+.pricing-rate-card,
+.pricing-list-card {
+  border: 2px solid #007baf;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pricing-rate-card .card-header,
+.pricing-list-card .card-header {
+  background: #007baf;
+  color: #ffffff;
+  border-bottom: 0;
+}
+
+.pricing-list-card .list-group-item {
+  font-size: 1.02rem;
+}

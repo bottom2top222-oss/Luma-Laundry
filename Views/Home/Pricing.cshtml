@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Pricing";
+    var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+}
+
+<section class="pricing-page py-4 py-md-5">
+    <div class="container">
+        <div class="pricing-hero rounded-4 p-4 p-lg-5 mb-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-6 fw-bold mb-3">Pricing, Made Simple</h1>
+                    <p class="lead mb-3">No hidden fees. No confusing tiers. What you see is what you pay for quality pickup and delivery laundry service.</p>
+                    <p class="mb-4 text-secondary">Schedule weekly pickups that work for your routine, or book only when you need service.</p>
+                    <a class="btn btn-primary btn-lg" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Schedule a Pickup Today</a>
+                </div>
+                <div class="col-lg-6">
+                    <div class="promo-card text-center p-4">
+                        <div class="promo-top">10% OFF</div>
+                        <div class="promo-mid">First Order</div>
+                        <div class="promo-bottom">Use code: <strong>Try10</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <div class="pricing-info h-100 rounded-4 p-4">
+                    <h2 class="h1 mb-3">Wash & Fold Pricing</h2>
+                    <p class="mb-3">Wash and fold laundry is charged by the pound and weighed after cleaning and drying.</p>
+                    <p class="mb-3 text-primary fw-semibold">Free pickup and delivery straight to your doorstep.</p>
+                    <p class="mb-0 fw-bold">Minimum order: 17 lbs</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card pricing-rate-card h-100">
+                    <div class="card-header text-center fw-bold text-uppercase">Weekly Price</div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="display-6 text-center mb-2">$1.99</div>
+                        <p class="text-center text-muted mb-4">Per Pound</p>
+                        <a class="btn btn-primary mt-auto" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Schedule a Pickup</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card pricing-rate-card h-100">
+                    <div class="card-header text-center fw-bold text-uppercase">By Request Price</div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="display-6 text-center mb-2">$2.25</div>
+                        <p class="text-center text-muted mb-4">Per Pound</p>
+                        <a class="btn btn-primary mt-auto" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Schedule a Pickup</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-4">
+                <div class="pricing-info h-100 rounded-4 p-4">
+                    <h2 class="h1 mb-3">Large Item Pricing</h2>
+                    <p class="mb-3">Large household and bedding items are billed per piece.</p>
+                    <p class="mb-0 fw-bold">Minimum charge: $50.00 for large household and bedding item orders.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card pricing-list-card h-100">
+                    <div class="card-header text-center fw-bold text-uppercase">Large Bedding Items</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between"><span>Comforter (King)</span><strong>$34.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Comforter (Queen)</span><strong>$34.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Comforter (Full)</span><strong>$32.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Comforter (Twin)</span><strong>$32.99</strong></li>
+                    </ul>
+                    <div class="card-body">
+                        <a class="btn btn-primary w-100" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Schedule a Pickup</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card pricing-list-card h-100">
+                    <div class="card-header text-center fw-bold text-uppercase">Household Items</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between"><span>Bedspread</span><strong>$15.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Cushion Slip Cover</span><strong>$8.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Chair Slip Cover</span><strong>$17.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Sofa Slip Cover</span><strong>$22.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Blanket</span><strong>$17.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Pillow Sham</span><strong>$3.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Duvet Cover</span><strong>$19.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Weighted Blanket</span><strong>$2.85/lb</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Standard Pillow</span><strong>$9.99</strong></li>
+                        <li class="list-group-item d-flex justify-content-between"><span>Mattress Cover</span><strong>$11.99</strong></li>
+                    </ul>
+                    <div class="card-body">
+                        <a class="btn btn-primary w-100" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Schedule a Pickup</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
