@@ -46,8 +46,8 @@ body {
 }
 
 /* Admin dashboard tweaks */
-.admin-dashboard h1 {
-  color: #006994;
+.admin-dashboard .dashboard-banner h1 {
+  color: #ffffff;
 }
 
 .admin-dashboard .admin-actions {
