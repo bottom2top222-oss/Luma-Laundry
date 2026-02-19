@@ -518,11 +518,6 @@ public class OrdersController : Controller
                 return orderFromApi;
             }
 
-            if (_apiOnlyMode)
-            {
-                return null;
-            }
-
             return _orderStore.Get(id);
         }
 }
