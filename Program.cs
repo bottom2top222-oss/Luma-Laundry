@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using LaundryApp.Data;
+using LaundryApp.Middleware;
 using Microsoft.AspNetCore.Identity;
 using System.IO;
 using LaundryApp.Models;
@@ -63,6 +64,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+// Maintenance mode middleware
+app.UseMiddleware<MaintenanceMiddleware>();
 
 app.UseHttpsRedirection();
 
