@@ -45,9 +45,7 @@
                     </div>
                 }
                 
-                <form method="post">
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    
+                <form method="post" action="/Orders/UpdatePaymentMethod/@Model.Id">
                     <div class="mb-3">
                         <label class="form-label">Card Number</label>
                         <input type="text" name="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required />
