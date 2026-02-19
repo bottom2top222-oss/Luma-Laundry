@@ -17,9 +17,25 @@ public class LaundryOrder
     public string Notes { get; set; } = "";
     public string AdminNotes { get; set; } = "";
 
+    // Order Status: Scheduled, PickedUp, InProcessing, QualityCheck, ReadyForDelivery, Delivered, PaymentPending, Paid, Closed
     public string Status { get; set; } = "Scheduled";
+    
+    // Payment Status: not_required, method_on_file, pending, paid, failed, past_due
+    public string PaymentStatus { get; set; } = "method_on_file";
+    
+    // Payment Fields
+    public int? PaymentMethodId { get; set; }
+    public PaymentMethod? PaymentMethod { get; set; }
+    
+    public int? InvoiceId { get; set; }
+    public Invoice? Invoice { get; set; }
+    
+    public bool TermsAccepted { get; set; } = false;
+    public string TermsAcceptedAt { get; set; } = "";
+
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime LastUpdatedAt { get; set; } = DateTime.Now;
+    public DateTime? ClosedAt { get; set; }
 
     public string GetDisplayAddress()
     {
@@ -64,6 +80,21 @@ public class LaundryOrder
 
         return $"{line1}, {line2}";
     }
+    
+    public string GetStatusBadge() => Status switch
+    {
+        "Scheduled" => "badge-secondary",
+        "PickedUp" => "badge-info",
+        "InProcessing" => "badge-primary",
+        "QualityCheck" => "badge-warning",
+        "ReadyForDelivery" => "badge-info",
+        "Delivered" => "badge-success",
+        "PaymentPending" => "badge-warning",
+        "Paid" => "badge-success",
+        "Closed" => "badge-dark",
+        "Cancelled" => "badge-danger",
+        _ => "badge-secondary"
+    };
 }
 
 
