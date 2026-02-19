@@ -66,6 +66,13 @@ This guide walks through deploying your Luma Laundry application to Railway.app 
    - `dotnet test LaundryApp.sln -v minimal` → all tests passing (3/3)
 - Railway impact: no variable changes required; redeploy `frontend`, `backend-server`, and `backend-worker` to pick up package updates.
 
+### 2026-02-18
+
+- Commit: `8d46a43`
+- Added maintenance mode middleware and registered it early in the request pipeline.
+- Added a branded `503 Service Unavailable` maintenance response page.
+- Railway impact: set `MAINTENANCE_MODE=true` on `frontend` to enable maintenance mode, then redeploy `frontend`; set `MAINTENANCE_MODE=false` (or remove it) to disable.
+
 ## Prerequisites
 
 - GitHub account
