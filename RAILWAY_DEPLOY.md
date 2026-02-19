@@ -6,6 +6,27 @@ This guide walks through deploying your Luma Laundry application to Railway.app 
 
 ### 2026-02-19
 
+- Commit: `56a514b`
+- Set `Support@luma-laundry.app` as the default admin email in app configuration.
+- Updated identity seeding logic to synchronize an existing Admin account to the configured admin email when safe.
+- Validation completed before push:
+   - `dotnet build LaundryApp.sln -v minimal` → build successful
+   - `dotnet test LaundryApp.sln -v minimal` → all tests passing (3/3)
+- Railway impact: redeploy `frontend` and `backend-server` so startup seeding applies the admin email update.
+
+### 2026-02-19
+
+- Commit: `74fc4a3`
+- Added forgot-password and reset-password flow for admin and user accounts.
+- Added reset-link email delivery through SMTP (`Email:*` configuration).
+- Added new account pages: forgot password form, reset form, and confirmation screens.
+- Validation completed before push:
+   - `dotnet build LaundryApp.sln -v minimal` → build successful
+   - `dotnet test LaundryApp.sln -v minimal` → all tests passing (3/3)
+- Railway impact: set SMTP variables (`Email__SmtpHost`, `Email__SmtpPort`, `Email__FromAddress`, `Email__FromName`, `Email__Username`, `Email__Password`, `Email__EnableSsl`) and redeploy `frontend`.
+
+### 2026-02-19
+
 - Commit: `0363f61`
 - Hardened authentication and admin access security.
 - Added stronger Identity password policy requirements (uppercase/lowercase/number/symbol, minimum length 8).
