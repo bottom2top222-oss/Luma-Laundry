@@ -27,6 +27,31 @@ public static class IdentitySeed
         var admin = await userManager.FindByEmailAsync(adminEmail);
         if (admin == null)
         {
+            var existingAdmins = await userManager.GetUsersInRoleAsync("Admin");
+            var firstExistingAdmin = existingAdmins.FirstOrDefault();
+
+            if (firstExistingAdmin != null)
+            {
+                var targetEmailInUse = await userManager.FindByEmailAsync(adminEmail);
+                if (targetEmailInUse == null)
+                {
+                    firstExistingAdmin.Email = adminEmail;
+                    firstExistingAdmin.UserName = adminEmail;
+                    firstExistingAdmin.NormalizedEmail = adminEmail.ToUpperInvariant();
+                    firstExistingAdmin.NormalizedUserName = adminEmail.ToUpperInvariant();
+                    firstExistingAdmin.EmailConfirmed = true;
+
+                    var updateResult = await userManager.UpdateAsync(firstExistingAdmin);
+                    if (updateResult.Succeeded)
+                    {
+                        admin = firstExistingAdmin;
+                    }
+                }
+            }
+        }
+
+        if (admin == null)
+        {
             admin = new ApplicationUser
             {
                 UserName = adminEmail,
@@ -45,6 +70,11 @@ public static class IdentitySeed
             {
                 await userManager.AddToRoleAsync(admin, "Admin");
             }
+        }
+
+        if (admin != null && !await userManager.IsInRoleAsync(admin, "Admin"))
+        {
+            await userManager.AddToRoleAsync(admin, "Admin");
         }
     }
 }
