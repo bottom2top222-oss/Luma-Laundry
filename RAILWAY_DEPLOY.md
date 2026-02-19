@@ -2,6 +2,18 @@
 
 This guide walks through deploying your Luma Laundry application to Railway.app with your custom domain: **luma-laundry.app**
 
+## Release Notes (Latest)
+
+### 2026-02-19
+
+- Commit: `53563f9`
+- Added starter automated tests (xUnit) and wired them into the solution.
+- Remediated vulnerable NuGet dependencies by upgrading to secure .NET 8 patch versions.
+- Validation completed before push:
+   - `dotnet list LaundryApp.sln package --vulnerable --include-transitive` → no vulnerable packages
+   - `dotnet test LaundryApp.sln -v minimal` → all tests passing (3/3)
+- Railway impact: no variable changes required; redeploy `frontend`, `backend-server`, and `backend-worker` to pick up package updates.
+
 ## Prerequisites
 
 - GitHub account
