@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using LaundryApp.Models;
 
 namespace LaundryApp.Controllers;
@@ -8,11 +9,16 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IConfiguration _configuration;
 
-    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+    public AccountController(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -23,6 +29,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
     {
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -31,15 +38,33 @@ public class AccountController : Controller
             return View();
         }
 
-        var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+        var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
+            var user = await _userManager.FindByEmailAsync(email);
+            var defaultAdminPassword = _configuration["DefaultAdmin:Password"] ?? "Admin123!";
+
+            if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                var isUsingDefaultPassword = await _userManager.CheckPasswordAsync(user, defaultAdminPassword);
+                if (isUsingDefaultPassword)
+                {
+                    return RedirectToAction(nameof(ChangePassword), new { returnUrl });
+                }
+            }
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
             return RedirectToAction("Dashboard", "Home");
+        }
+
+        if (result.IsLockedOut)
+        {
+            ModelState.AddModelError("", "Your account has been temporarily locked due to multiple failed login attempts. Please try again later.");
+            return View();
         }
 
         ModelState.AddModelError("", "Invalid login attempt.");
@@ -53,6 +78,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(string email, string password, string confirmPassword, string firstName, string lastName, string phoneNumber, string addressLine1, string? addressLine2, string city, string state, string zipCode, string? acceptTerms)
     {
         var acceptedTerms = false;
@@ -139,7 +165,69 @@ public class AccountController : Controller
         return View();
     }
 
+    [Authorize]
+    [HttpGet]
+    public IActionResult ChangePassword(string? returnUrl = null)
+    {
+        ViewData["ReturnUrl"] = returnUrl;
+        return View();
+    }
+
+    [Authorize]
     [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword, string confirmPassword, string? returnUrl = null)
+    {
+        ViewData["ReturnUrl"] = returnUrl;
+
+        if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            ModelState.AddModelError("", "All password fields are required.");
+            return View();
+        }
+
+        if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
+        {
+            ModelState.AddModelError("", "New password and confirmation do not match.");
+            return View();
+        }
+
+        var defaultAdminPassword = _configuration["DefaultAdmin:Password"] ?? "Admin123!";
+        if (string.Equals(newPassword, defaultAdminPassword, StringComparison.Ordinal))
+        {
+            ModelState.AddModelError("", "New password cannot be the default admin password.");
+            return View();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return RedirectToAction(nameof(Login));
+        }
+
+        var changeResult = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!changeResult.Succeeded)
+        {
+            foreach (var error in changeResult.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View();
+        }
+
+        await _signInManager.RefreshSignInAsync(user);
+
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToAction("Dashboard", "Home");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();

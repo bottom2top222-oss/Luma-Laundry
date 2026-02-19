@@ -12,6 +12,7 @@
     </div>
 
     <form method="post" action="/Account/Logout">
+        @Html.AntiForgeryToken()
         <button class="btn btn-outline-danger">Logout</button>
     </form>
 </div>

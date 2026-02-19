@@ -47,9 +47,11 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ChangePassword">Change Password</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="post" action="/Account/Logout" class="d-inline">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="dropdown-item">Logout</button>
                                         </form>
                                     </li>

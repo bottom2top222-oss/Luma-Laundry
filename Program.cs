@@ -53,14 +53,28 @@ builder.Services.AddHttpClient<LayeredApiOrderClient>(client =>
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
 })
     .AddEntityFrameworkStores<LaundryAppDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
 
 // Session
 builder.Services.AddDistributedMemoryCache();
@@ -99,6 +113,40 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var path = context.Request.Path.Value ?? string.Empty;
+        var isAllowedPath = path.StartsWith("/Account/ChangePassword", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/Account/Logout", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/Account/AccessDenied", StringComparison.OrdinalIgnoreCase);
+
+        if (!isAllowedPath)
+        {
+            var userManager = context.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+            var configuration = context.RequestServices.GetRequiredService<IConfiguration>();
+            var defaultAdminPassword = configuration["DefaultAdmin:Password"] ?? "Admin123!";
+
+            var currentUser = await userManager.GetUserAsync(context.User);
+            if (currentUser != null && await userManager.IsInRoleAsync(currentUser, "Admin"))
+            {
+                var isUsingDefaultPassword = await userManager.CheckPasswordAsync(currentUser, defaultAdminPassword);
+                if (isUsingDefaultPassword)
+                {
+                    var returnUrl = context.Request.Path + context.Request.QueryString;
+                    var redirectUrl = $"/Account/ChangePassword?returnUrl={Uri.EscapeDataString(returnUrl)}";
+                    context.Response.Redirect(redirectUrl);
+                    return;
+                }
+            }
+        }
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllerRoute(

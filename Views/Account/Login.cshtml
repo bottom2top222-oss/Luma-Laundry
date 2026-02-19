@@ -18,6 +18,8 @@
             }
 
             <form method="post" action="/Account/Login">
+                @Html.AntiForgeryToken()
+
                 @if (ViewData["ReturnUrl"] != null)
                 {
                     <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />

@@ -18,6 +18,8 @@
             }
 
             <form method="post" action="/Account/Register">
+                @Html.AntiForgeryToken()
+
                 <div class="mb-3">
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" class="form-control" id="email" name="email" required />
@@ -66,8 +68,8 @@
 
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required minlength="6" />
-                    <div class="form-text">Minimum 6 characters</div>
+                    <input type="password" class="form-control" id="password" name="password" required minlength="8" />
+                    <div class="form-text">Minimum 8 characters with uppercase, lowercase, number, and symbol.</div>
                 </div>
 
                 <div class="mb-3">
