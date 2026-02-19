@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.WebUtilities;
 using LaundryApp.Models;
+using LaundryApp.Services;
+using System.Text;
 
 namespace LaundryApp.Controllers;
 
@@ -10,15 +13,21 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
+    private readonly EmailNotificationService _emailNotificationService;
+    private readonly ILogger<AccountController> _logger;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        EmailNotificationService emailNotificationService,
+        ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
+        _emailNotificationService = emailNotificationService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -161,6 +170,137 @@ public class AccountController : Controller
 
     [HttpGet]
     public IActionResult Terms()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            ModelState.AddModelError("", "Email is required.");
+            return View();
+        }
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return RedirectToAction(nameof(ForgotPasswordConfirmation));
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        var resetUrl = Url.Action(
+            nameof(ResetPassword),
+            "Account",
+            new { email = user.Email, token = encodedToken },
+            Request.Scheme);
+
+        if (!string.IsNullOrWhiteSpace(resetUrl) && !string.IsNullOrWhiteSpace(user.Email))
+        {
+            var emailSent = await _emailNotificationService.SendPasswordResetEmailAsync(user.Email, resetUrl);
+            if (!emailSent)
+            {
+                _logger.LogWarning("Password reset email could not be sent for {Email}.", user.Email);
+            }
+        }
+
+        return RedirectToAction(nameof(ForgotPasswordConfirmation));
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPasswordConfirmation()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult ResetPassword(string? email = null, string? token = null)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+        {
+            return RedirectToAction(nameof(Login));
+        }
+
+        ViewData["Email"] = email;
+        ViewData["Token"] = token;
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(string email, string token, string newPassword, string confirmPassword)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            ModelState.AddModelError("", "All fields are required.");
+            ViewData["Email"] = email;
+            ViewData["Token"] = token;
+            return View();
+        }
+
+        if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
+        {
+            ModelState.AddModelError("", "New password and confirmation do not match.");
+            ViewData["Email"] = email;
+            ViewData["Token"] = token;
+            return View();
+        }
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return RedirectToAction(nameof(ResetPasswordConfirmation));
+        }
+
+        var defaultAdminPassword = _configuration["DefaultAdmin:Password"] ?? "Admin123!";
+        if (await _userManager.IsInRoleAsync(user, "Admin") && string.Equals(newPassword, defaultAdminPassword, StringComparison.Ordinal))
+        {
+            ModelState.AddModelError("", "Admin reset password cannot be the default admin password.");
+            ViewData["Email"] = email;
+            ViewData["Token"] = token;
+            return View();
+        }
+
+        string decodedToken;
+        try
+        {
+            decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+        }
+        catch
+        {
+            ModelState.AddModelError("", "The reset token is invalid or expired.");
+            ViewData["Email"] = email;
+            ViewData["Token"] = token;
+            return View();
+        }
+
+        var resetResult = await _userManager.ResetPasswordAsync(user, decodedToken, newPassword);
+        if (!resetResult.Succeeded)
+        {
+            foreach (var error in resetResult.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            ViewData["Email"] = email;
+            ViewData["Token"] = token;
+            return View();
+        }
+
+        return RedirectToAction(nameof(ResetPasswordConfirmation));
+    }
+
+    [HttpGet]
+    public IActionResult ResetPasswordConfirmation()
     {
         return View();
     }

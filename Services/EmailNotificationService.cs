@@ -55,6 +55,20 @@ public class EmailNotificationService
         return await SendEmailAsync(order.UserEmail, subject, body);
     }
 
+    public async Task<bool> SendPasswordResetEmailAsync(string toEmail, string resetUrl)
+    {
+        var subject = "LUMA Password Reset Request";
+        var body = $@"
+            <h2>Reset Your Password</h2>
+            <p>We received a request to reset your LUMA account password.</p>
+            <p><a href=""{WebUtility.HtmlEncode(resetUrl)}"">Click here to reset your password</a></p>
+            <p>If the button does not work, copy and paste this URL into your browser:</p>
+            <p>{WebUtility.HtmlEncode(resetUrl)}</p>
+            <p>If you did not request this, you can safely ignore this email.</p>";
+
+        return await SendEmailAsync(toEmail, subject, body);
+    }
+
     private async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody)
     {
         var host = _configuration["Email:SmtpHost"];
