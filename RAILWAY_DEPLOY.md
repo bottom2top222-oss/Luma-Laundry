@@ -291,6 +291,34 @@ If you use multi-service deployment, apply the variables from **Step 2B** to eac
 
 4. Click **"Deploy"** to restart with new variables
 
+## Maintenance Mode Quick Toggle
+
+Use this when you need to temporarily take the site offline while keeping deployment simple.
+
+### Enable Maintenance Mode
+
+1. Open Railway and select the **frontend** service.
+2. Go to **Variables**.
+3. Set:
+   ```
+   MAINTENANCE_MODE=true
+   ```
+4. Trigger a redeploy for **frontend**.
+5. Verify the site returns a branded `503 Service Unavailable` maintenance page.
+
+### Disable Maintenance Mode
+
+1. Open Railway and select the **frontend** service.
+2. Go to **Variables**.
+3. Either remove `MAINTENANCE_MODE` or set:
+   ```
+   MAINTENANCE_MODE=false
+   ```
+4. Trigger a redeploy for **frontend**.
+5. Verify normal site pages load again.
+
+> Note: this toggle is only required on `frontend` for normal web maintenance windows.
+
 ## Step 4: Add Persistent Storage
 
 Your SQLite database needs persistent storage:
@@ -361,7 +389,7 @@ The application will automatically:
 - Run migrations on startup (see `Program.cs`)
 - Create the admin user with credentials:
    - Email: `Support@luma-laundry.app`
-  - Password: `Admin123!`
+   - Password: `Admin123!`
 
 **Important**: Change the admin password after first login!
 
