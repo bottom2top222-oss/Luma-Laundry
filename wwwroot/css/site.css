@@ -77,6 +77,10 @@ footer a:hover {
   max-width: 1200px;
 }
 
+.admin-dashboard.dashboard-shell {
+  max-width: 100%;
+}
+
 .dashboard-banner {
   background: linear-gradient(135deg, #006994 0%, #0099b6 100%);
   color: #fff;
