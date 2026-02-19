@@ -81,12 +81,6 @@ public class OrdersController : Controller
         }
         else
         {
-            if (_apiOnlyMode)
-            {
-                ModelState.AddModelError("", "Order service is temporarily unavailable. Please try again.");
-                return View();
-            }
-
             _orderStore.Add(order);
         }
 

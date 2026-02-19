@@ -156,10 +156,6 @@
                     selectedDate = date;
                 });
 
-                if (day === now.getDate()) {
-                    button.classList.add('calendar-day--today');
-                }
-
                 calendarGrid.appendChild(button);
             }
 
@@ -233,11 +229,6 @@
     .calendar-day:hover:not(:disabled) {
         background: #dce8ef;
         transform: translateY(-1px);
-    }
-
-    .calendar-day--today {
-        outline: 2px solid #0099b6;
-        outline-offset: 1px;
     }
 
     .calendar-day--selected {
