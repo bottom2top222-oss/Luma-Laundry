@@ -237,3 +237,54 @@ footer a:hover {
 .pricing-list-card .list-group-item {
   font-size: 1.02rem;
 }
+
+.home-hero {
+  background: linear-gradient(135deg, #eef7fb 0%, #d9edf7 100%);
+}
+
+.home-accent {
+  color: #0099b6;
+}
+
+.home-panel {
+  background: #ffffff;
+  border: 1px solid #d8e5ee;
+  border-radius: 12px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+}
+
+.home-panel h2,
+.home-service-card h4 {
+  color: #006994;
+}
+
+.feature-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 12px;
+  margin-top: 8px;
+  flex: 0 0 auto;
+  background: #0099b6;
+}
+
+.stat-number {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #006994;
+}
+
+.stat-label {
+  color: #5d7285;
+}
+
+.home-service-card {
+  background: #ffffff;
+  border: 1px solid #d8e5ee;
+  border-radius: 12px;
+  box-shadow: 0 0.35rem 0.85rem rgba(0, 0, 0, 0.04);
+}
+
+.home-cta {
+  background: linear-gradient(135deg, #006994 0%, #0099b6 100%);
+}

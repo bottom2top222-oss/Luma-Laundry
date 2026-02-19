@@ -3,171 +3,119 @@
     var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
 }
 
-<!-- Hero Section -->
-<section id="hero" class="hero section dark-background">
-    <img src="~/img/hero-bg.jpg" alt="" data-aos="fade-in" style="object-fit: cover;">
-    
-    <div class="container text-center" data-aos="fade-up" data-aos-delay="100">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h2>Luma <span style="color: #0099b6;">Laundry</span></h2>
-                <p>Coastal laundry service with pickup & drop-off scheduling in under a minute</p>
-                @if (isLoggedIn)
-                {
-                    <a href="/Orders/Schedule" class="btn-get-started">Schedule Service</a>
-                }
-                else
-                {
-                    <a href="/Account/Register" class="btn-get-started">Get Started</a>
-                }
-            </div>
-        </div>
+<section class="home-hero py-5">
+    <div class="container text-center py-4">
+        <h1 class="display-5 fw-bold mb-3">Luma <span class="home-accent">Laundry</span></h1>
+        <p class="lead mb-4">Coastal laundry service with pickup & drop-off scheduling in under a minute.</p>
+        @if (isLoggedIn)
+        {
+            <a href="/Orders/Schedule" class="btn btn-primary btn-lg">Schedule Service</a>
+        }
+        else
+        {
+            <a href="/Account/Register" class="btn btn-primary btn-lg">Get Started</a>
+        }
     </div>
 </section>
 
-<!-- About Section -->
-<section id="about" class="about section">
+<section class="py-5">
     <div class="container">
-        <div class="row gy-4">
-            <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="100">
-                <h3>How Luma Works</h3>
-                <p>Experience hassle-free laundry service designed for coastal living. We handle everything from pickup to delivery.</p>
-                <ul>
-                    <li>
-                        <i class="bi bi-calendar-check" style="color: #006994;"></i>
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-6">
+                <div class="home-panel h-100 p-4 p-lg-5">
+                    <h2 class="mb-3">How Luma Works</h2>
+                    <p class="mb-4">Experience hassle-free laundry service designed for coastal living. We handle everything from pickup to delivery.</p>
+                    <div class="d-flex mb-3">
+                        <span class="feature-dot"></span>
                         <div>
-                            <h5>Simple Scheduling</h5>
-                            <p>Choose your pickup and drop-off times in seconds. Schedule up to a week in advance.</p>
+                            <h5 class="mb-1">Simple Scheduling</h5>
+                            <p class="mb-0">Choose your pickup and drop-off times in seconds. Schedule up to a week in advance.</p>
                         </div>
-                    </li>
-                    <li>
-                        <i class="bi bi-truck" style="color: #0099b6;"></i>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <span class="feature-dot"></span>
                         <div>
-                            <h5>Convenient Pickup & Delivery</h5>
-                            <p>We come to you - no more trips to the laundromat. Select the service that fits your needs.</p>
+                            <h5 class="mb-1">Convenient Pickup & Delivery</h5>
+                            <p class="mb-0">We come to you - no more trips to the laundromat. Select the service that fits your needs.</p>
                         </div>
-                    </li>
-                    <li>
-                        <i class="bi bi-shield-check" style="color: #006994;"></i>
+                    </div>
+                    <div class="d-flex">
+                        <span class="feature-dot"></span>
                         <div>
-                            <h5>Reliable & Trusted</h5>
-                            <p>Track your order status and get notifications. Trusted by hundreds of coastal families.</p>
+                            <h5 class="mb-1">Reliable & Trusted</h5>
+                            <p class="mb-0">Track your order status and get notifications. Trusted by hundreds of coastal families.</p>
                         </div>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="col-lg-6 position-relative align-items-center order-lg-first" data-aos="fade-up" data-aos-delay="200">
-                <img src="~/img/about.jpg" class="img-fluid" alt="Luma Laundry Service" style="border-radius: 8px;">
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Stats Section -->
-<section id="stats" class="stats section light-background">
-    <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row gy-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="stats-item text-center w-100 h-100">
-                    <span data-purecounter-start="0" data-purecounter-end="500" data-purecounter-duration="1" class="purecounter"></span>
-                    <p style="color: #006994;">Happy Customers</p>
+                    </div>
                 </div>
             </div>
-
-            <div class="col-lg-3 col-md-6">
-                <div class="stats-item text-center w-100 h-100">
-                    <span data-purecounter-start="0" data-purecounter-end="2500" data-purecounter-duration="1" class="purecounter"></span>
-                    <p style="color: #0099b6;">Orders Completed</p>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <div class="stats-item text-center w-100 h-100">
-                    <span data-purecounter-start="0" data-purecounter-end="24" data-purecounter-duration="1" class="purecounter"></span>
-                    <p style="color: #006994;">Hour Turnaround</p>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <div class="stats-item text-center w-100 h-100">
-                    <span data-purecounter-start="0" data-purecounter-end="100" data-purecounter-duration="1" class="purecounter"></span>
-                    <p style="color: #0099b6;">% Satisfaction</p>
+            <div class="col-lg-6">
+                <div class="home-panel h-100 p-4 p-lg-5 d-flex flex-column justify-content-center">
+                    <h2 class="mb-4">Why Customers Choose Luma</h2>
+                    <div class="row text-center g-3">
+                        <div class="col-6">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Happy Customers</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-number">2,500+</div>
+                            <div class="stat-label">Orders Completed</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-number">24h</div>
+                            <div class="stat-label">Turnaround</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Satisfaction</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Services Section -->
-<section id="services" class="services section">
-    <div class="container section-title" data-aos="fade-up">
-        <h2>Our Services</h2>
-        <p>Choose the laundry service that fits your lifestyle</p>
-    </div>
-
+<section class="py-5">
     <div class="container">
-        <div class="row gy-4">
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-calendar-plus" style="color: #006994;"></i>
-                    </div>
-                    <h3>Pickup Service</h3>
-                    <p>We collect your laundry at your doorstep. Schedule pickup for your convenience and we'll handle the rest.</p>
+        <div class="text-center mb-4">
+            <h2>Our Services</h2>
+            <p class="mb-0">Choose the laundry service that fits your lifestyle</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="home-service-card h-100 p-4">
+                    <h4>Pickup Service</h4>
+                    <p class="mb-0">We collect your laundry at your doorstep. Schedule pickup for your convenience and we handle the rest.</p>
                 </div>
             </div>
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-house-door" style="color: #0099b6;"></i>
-                    </div>
-                    <h3>Drop-off Service</h3>
-                    <p>Fresh, clean laundry delivered right to your door. Choose your preferred delivery time slot.</p>
+            <div class="col-md-4">
+                <div class="home-service-card h-100 p-4">
+                    <h4>Drop-off Service</h4>
+                    <p class="mb-0">Fresh, clean laundry delivered right to your door. Choose your preferred delivery time slot.</p>
                 </div>
             </div>
-
-            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                <div class="service-item position-relative">
-                    <div class="icon">
-                        <i class="bi bi-arrow-left-right" style="color: #006994;"></i>
-                    </div>
-                    <h3>Full Service</h3>
-                    <p>Complete pickup and delivery - the ultimate convenience. We handle everything from start to finish.</p>
+            <div class="col-md-4">
+                <div class="home-service-card h-100 p-4">
+                    <h4>Full Service</h4>
+                    <p class="mb-0">Complete pickup and delivery convenience. We handle everything from start to finish.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- CTA Section -->
-<section id="cta" class="cta section dark-background" style="background: linear-gradient(135deg, #006994 0%, #0099b6 100%);">
-    <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row justify-content-center text-center">
-            <div class="col-lg-8">
-                <h3>Ready to experience Luma?</h3>
-                <p>Join hundreds of satisfied customers enjoying stress-free laundry service</p>
-                @if (isLoggedIn)
-                {
-                    <a class="cta-btn" href="/Orders/Schedule">Schedule Now</a>
-                }
-                else
-                {
-                    <a class="cta-btn" href="/Account/Register">Create Free Account</a>
-                }
-            </div>
-        </div>
+<section class="home-cta py-5">
+    <div class="container text-center text-white py-3">
+        <h3 class="mb-2">Ready to experience Luma?</h3>
+        <p class="mb-4">Join hundreds of satisfied customers enjoying stress-free laundry service.</p>
+        @if (isLoggedIn)
+        {
+            <a class="btn btn-light btn-lg" href="/Orders/Schedule">Schedule Now</a>
+        }
+        else
+        {
+            <a class="btn btn-light btn-lg" href="/Account/Register">Create Free Account</a>
+        }
     </div>
 </section>
-
-@section Scripts {
-    <!-- Vendor JS Files -->
-    <script src="~/vendor/purecounter/purecounter_vanilla.js"></script>
-    <script src="~/vendor/aos/aos.js"></script>
-    <script src="~/vendor/glightbox/js/glightbox.min.js"></script>
-    
-    <!-- Template Main JS -->
-    <script src="~/js/main.js"></script>
-}
 
