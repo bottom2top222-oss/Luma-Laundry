@@ -10,16 +10,14 @@ export default function Hero() {
                 <div className="max-w-6xl mx-auto px-4 min-h-screen max-md:w-screen max-md:overflow-hidden pt-32 md:pt-26 flex items-center justify-center">
                     <div className="grid grid-cols-1 gap-10 items-center">
                         <div className="text-center max-w-4xl mx-auto">
-                            <motion.h1 className="text-6xl md:text-8xl font-bold leading-tight mb-6"
+                            <motion.img className="mx-auto w-full max-w-[980px] mb-6"
+                                src="/luma-hero.png"
+                                alt="LUMA"
                                 initial={{ y: 60, opacity: 0 }}
                                 whileInView={{ y: 0, opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ type: "spring", stiffness: 250, damping: 70, mass: 1, delay: 0.1 }}
-                            >
-                                <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-300 to-cyan-400">
-                                    LUMA
-                                </span>
-                            </motion.h1>
+                            />
 
                             <motion.p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8"
                                 initial={{ y: 60, opacity: 0 }}
