@@ -37,7 +37,7 @@ public class OrdersController : Controller
     public async Task<IActionResult> Schedule(string serviceType, DateTime scheduledAt, string addressLine1, string? addressLine2, string city, string state, string zipCode, string? notes)
     {
         if (string.IsNullOrWhiteSpace(serviceType))
-            ModelState.AddModelError("", "Choose Pickup, Drop-off, or Both.");
+            ModelState.AddModelError("", "Choose Pickup or Drop-off.");
 
         if (scheduledAt == default)
             ModelState.AddModelError("", "Choose a date and time.");
@@ -162,12 +162,7 @@ public class OrdersController : Controller
 
             if (!savedViaApi)
             {
-                if (_apiOnlyMode)
-                {
-                    ModelState.AddModelError("", "Unable to save payment method right now. Please try again.");
-                    return View(order);
-                }
-
+                // Fallback to database save when API is unavailable
                 await _paymentService.SavePaymentMethodAsync(
                     email,
                     cardNumber,
