@@ -177,12 +177,19 @@ public class OrdersController : Controller
                 var localOrder = _orderStore.Get(id);
                 if (localOrder != null)
                 {
+                    // Ensure UserEmail matches the current logged-in user
+                    localOrder.UserEmail = email;
                     localOrder.TermsAccepted = true;
                     localOrder.TermsAcceptedAt = DateTime.Now.ToString("o");
                     localOrder.PaymentStatus = "method_on_file";
                     localOrder.LastUpdatedAt = DateTime.Now;
                     _orderStore.Save();
                 }
+            }
+            else
+            {
+                // Also ensure the order from API has the correct UserEmail
+                order.UserEmail = email;
             }
 
             return RedirectToAction("Confirm", new { id = order.Id });
@@ -476,18 +483,6 @@ public class OrdersController : Controller
         {
             TempData["Error"] = "Order service is temporarily unavailable.";
             orders = new List<LaundryOrder>();
-        }
-
-        // Debug info
-        ViewBag.CurrentUserEmail = email;
-        ViewBag.OrderCount = orders.Count;
-        
-        // Also get all orders to check if there are any unmatched
-        var allOrders = _orderStore.All().ToList();
-        ViewBag.TotalOrdersInDatabase = allOrders.Count;
-        if (allOrders.Count > 0 && orders.Count == 0)
-        {
-            ViewBag.DebugInfo = $"User email '{email}' - Found {allOrders.Count} total orders in database but none match this user";
         }
 
         return View(orders);
