@@ -189,31 +189,38 @@ footer a:hover {
 }
 
 .pricing-page {
-  background: #f2f5f8;
+  background:
+    radial-gradient(900px 500px at 50% 25%, rgba(70, 20, 130, 0.28), transparent 70%),
+    radial-gradient(420px 280px at 95% 95%, rgba(173, 21, 165, 0.2), transparent 65%),
+    #02081f;
+  color: #e6efff;
 }
 
 .pricing-hero {
-  background: #ffffff;
-  border: 1px solid #d9e2ec;
+  background: rgba(8, 16, 45, 0.85);
+  border: 1px solid rgba(90, 130, 255, 0.35);
+  box-shadow: 0 0.8rem 1.4rem rgba(2, 8, 32, 0.45);
 }
 
 .pricing-hero h1,
 .pricing-info h2 {
-  color: #006994;
+  color: #bfe5ff;
 }
 
 .promo-card {
-  background: #d50000;
+  background: linear-gradient(135deg, #261068 0%, #4327b2 55%, #2f7cf6 100%);
   border-radius: 14px;
   color: #ffffff;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(132, 165, 255, 0.45);
+  box-shadow: 0 0 18px rgba(67, 123, 255, 0.45);
 }
 
 .promo-top {
   font-size: 3rem;
   font-weight: 800;
   line-height: 1;
-  color: #ffeb3b;
+  color: #7ff3ff;
+  text-shadow: 0 0 16px rgba(127, 243, 255, 0.4);
 }
 
 .promo-mid {
@@ -227,26 +234,44 @@ footer a:hover {
 }
 
 .pricing-info {
-  background: #ffffff;
-  border: 1px solid #d9e2ec;
+  background: rgba(10, 20, 58, 0.75);
+  border: 1px solid rgba(90, 130, 255, 0.35);
+  box-shadow: 0 0.65rem 1.2rem rgba(2, 8, 32, 0.4);
 }
 
 .pricing-rate-card,
 .pricing-list-card {
-  border: 2px solid #007baf;
+  background: rgba(10, 20, 58, 0.75);
+  border: 2px solid rgba(86, 140, 255, 0.75);
   border-radius: 12px;
   overflow: hidden;
 }
 
 .pricing-rate-card .card-header,
 .pricing-list-card .card-header {
-  background: #007baf;
+  background: linear-gradient(135deg, #0d1f5b 0%, #113b86 55%, #0b56a8 100%);
   color: #ffffff;
   border-bottom: 0;
 }
 
 .pricing-list-card .list-group-item {
   font-size: 1.02rem;
+  background: transparent;
+  color: #e6efff;
+  border-color: rgba(124, 156, 235, 0.24);
+}
+
+.pricing-rate-card .card-body,
+.pricing-list-card .card-body {
+  color: #e6efff;
+}
+
+.pricing-muted {
+  color: rgba(215, 229, 255, 0.82) !important;
+}
+
+.pricing-highlight {
+  color: #5ee3ff;
 }
 
 .home-hero {
