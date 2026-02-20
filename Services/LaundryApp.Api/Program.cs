@@ -436,6 +436,26 @@ app.MapPost("/api/admin/orders/{id:int}/admin-notes", async (int id, UpdateAdmin
     return Results.Ok(new { id = order.Id, adminNotes = order.AdminNotes });
 });
 
+app.MapPost("/api/admin/orders/{id:int}/payment-status", async (int id, UpdatePaymentStatusRequest request, ApiDbContext db) =>
+{
+    if (string.IsNullOrWhiteSpace(request.PaymentStatus))
+    {
+        return Results.BadRequest(new { error = "PaymentStatus is required." });
+    }
+
+    var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == id);
+    if (order is null)
+    {
+        return Results.NotFound();
+    }
+
+    order.PaymentStatus = request.PaymentStatus;
+    order.LastUpdatedAt = DateTime.Now;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new { id = order.Id, paymentStatus = order.PaymentStatus });
+});
+
 app.MapDelete("/api/admin/orders/{id:int}", async (int id, ApiDbContext db) =>
 {
     var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == id);
@@ -567,6 +587,8 @@ public record GenerateInvoiceRequest(
 public record UpdateOrderStatusRequest(string Status);
 
 public record UpdateAdminNotesRequest(string? AdminNotes);
+
+public record UpdatePaymentStatusRequest(string PaymentStatus);
 
 public static class ApiHelpers
 {

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace LaundryApp.Controllers;
 
@@ -101,6 +100,12 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
         if (order == null) return NotFound();
 
+        if (status == "Quoted")
+        {
+            TempData["Info"] = "Use Process Order to enter exact weight/item counts before sending quote.";
+            return RedirectToAction("ProcessOrder", new { id, currentStatus, search });
+        }
+
         var oldStatus = order.Status;
         var statusUpdatedViaApi = await _layeredApiOrderClient.UpdateOrderStatusAsync(id, status);
         if (!statusUpdatedViaApi)
@@ -120,57 +125,15 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
             order.Status = status;
         }
 
-        // Handle quote creation when processing is completed
-        if (status == "Quoted")
+        if (status == "Approved")
         {
-            try
+            var paymentStatusUpdatedViaApi = await _layeredApiOrderClient.UpdatePaymentStatusAsync(id, "Approved");
+            if (!paymentStatusUpdatedViaApi && !_apiOnlyMode)
             {
-                var quote = BuildQuote(order);
-                var invoiceResult = await _layeredApiOrderClient.GenerateInvoiceAsync(
-                    id,
-                    subtotal: quote.subtotal,
-                    taxAmount: 0,
-                    deliveryFee: 0,
-                    lineItems: quote.lineItems);
-
-                if (!invoiceResult.success)
-                {
-                    if (_apiOnlyMode)
-                    {
-                        throw new Exception("API invoice generation failed in API-only mode.");
-                    }
-
-                    var dbOrder = await _dbContext.Orders.FindAsync(id);
-                    if (dbOrder != null && dbOrder.InvoiceId == null)
-                    {
-                        await _paymentService.GenerateInvoiceAsync(
-                            id,
-                            subtotal: quote.subtotal,
-                            taxAmount: 0,
-                            deliveryFee: 0,
-                            lineItems: quote.lineItems
-                        );
-                    }
-                }
-
-                order.PaymentStatus = "ApprovalRequired";
+                order.PaymentStatus = "Approved";
+                order.LastUpdatedAt = DateTime.Now;
+                _orderStore.Save();
             }
-            catch (Exception ex)
-            {
-                // Log error but don't block status update
-                var auditLog = new AuditLog
-                {
-                    UserEmail = User.Identity?.Name ?? "Unknown",
-                    Action = "Invoice Generation Failed",
-                    Entity = $"Order #{id}",
-                    Details = $"Error: {ex.Message}"
-                };
-                _dbContext.AuditLogs.Add(auditLog);
-            }
-        }
-        else if (status == "Approved")
-        {
-            order.PaymentStatus = "Approved";
         }
         else if (status == "Ready" && (order.PaymentStatus == "PaymentMethodOnFile" || order.PaymentStatus == "Approved"))
         {
@@ -259,104 +222,167 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         return RedirectToAction("Index", new { status = currentStatus, search = search });
     }
 
-    private (decimal subtotal, string lineItems) BuildQuote(LaundryOrder order)
+    [HttpGet]
+    public async Task<IActionResult> ProcessOrder(int id, string currentStatus = "All", string? search = null)
     {
-        var notes = (order.Notes ?? string.Empty).ToLowerInvariant();
-        var serviceType = (order.ServiceType ?? string.Empty).ToLowerInvariant();
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
+        if (order == null) return NotFound();
+
+        ViewBag.CurrentStatus = currentStatus;
+        ViewBag.Search = search;
+
+        return View(new ProcessOrderViewModel
+        {
+            Id = order.Id,
+            UserEmail = order.UserEmail,
+            ServiceType = order.ServiceType,
+            ScheduledAt = order.ScheduledAt,
+            Address = order.GetDisplayAddress(),
+            Notes = order.Notes,
+            EstimatedTotal = 0m
+        });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ProcessOrder(ProcessOrderViewModel model, string currentStatus = "All", string? search = null)
+    {
+        if (model.WashFoldWeightLbs.GetValueOrDefault() <= 0 &&
+            model.WeightedBlanketWeightLbs.GetValueOrDefault() <= 0 &&
+            model.ComforterKingQty <= 0 && model.ComforterQueenQty <= 0 && model.ComforterFullQty <= 0 && model.ComforterTwinQty <= 0 &&
+            model.DuvetCoverQty <= 0 && model.BlanketQty <= 0 && model.BedspreadQty <= 0 && model.CushionSlipCoverQty <= 0 &&
+            model.ChairSlipCoverQty <= 0 && model.SofaSlipCoverQty <= 0 && model.PillowShamQty <= 0 && model.StandardPillowQty <= 0 && model.MattressCoverQty <= 0)
+        {
+            ModelState.AddModelError("", "Enter at least one weight or item count before processing.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.CurrentStatus = currentStatus;
+            ViewBag.Search = search;
+            return View(model);
+        }
+
+        var order = await _layeredApiOrderClient.GetOrderAsync(model.Id) ?? (_apiOnlyMode ? null : _orderStore.Get(model.Id));
+        if (order == null) return NotFound();
+
+        var quote = BuildQuote(model);
+        var estimated = model.EstimatedTotal.GetValueOrDefault(quote.appliedMinimum);
+        var requiresApproval = quote.total > quote.appliedMinimum || (estimated > 0 && quote.total > (estimated * 1.20m));
+
+        var invoiceResult = await _layeredApiOrderClient.GenerateInvoiceAsync(model.Id, quote.total, 0m, 0m, quote.lineItemsJson);
+        if (!invoiceResult.success)
+        {
+            if (_apiOnlyMode)
+            {
+                TempData["Error"] = "Unable to generate quote right now.";
+                return RedirectToAction("Index", new { status = currentStatus, search });
+            }
+
+            await _paymentService.GenerateInvoiceAsync(model.Id, quote.total, 0m, 0m, quote.lineItemsJson);
+        }
+
+        var targetStatus = requiresApproval ? "Quoted" : "Approved";
+        var targetPaymentStatus = requiresApproval ? "ApprovalRequired" : "Approved";
+
+        var updatedStatusViaApi = await _layeredApiOrderClient.UpdateOrderStatusAsync(model.Id, targetStatus);
+        var updatedPaymentViaApi = await _layeredApiOrderClient.UpdatePaymentStatusAsync(model.Id, targetPaymentStatus);
+
+        if ((!updatedStatusViaApi || !updatedPaymentViaApi) && !_apiOnlyMode)
+        {
+            order.Status = targetStatus;
+            order.PaymentStatus = targetPaymentStatus;
+            order.LastUpdatedAt = DateTime.Now;
+            _orderStore.Save();
+        }
+
+        var auditLog = new AuditLog
+        {
+            UserEmail = User.Identity?.Name ?? "Unknown",
+            Action = "Order Processed",
+            Entity = $"Order #{model.Id}",
+            Details = $"Total ${quote.total:0.00}; ApprovalRequired={requiresApproval}; MinimumApplied=${quote.appliedMinimum:0.00}"
+        };
+        _dbContext.AuditLogs.Add(auditLog);
+        _dbContext.SaveChanges();
+
+        TempData["Success"] = requiresApproval
+            ? "Quote generated and sent for customer approval."
+            : "Quote generated and auto-approved.";
+
+        return RedirectToAction("Index", new { status = currentStatus, search });
+    }
+
+    private (decimal total, decimal appliedMinimum, string lineItemsJson) BuildQuote(ProcessOrderViewModel model)
+    {
         var lineItems = new List<object>();
         decimal subtotal = 0m;
 
-        var includesWashFold = serviceType.Contains("wash") || serviceType.Contains("fold");
-        var includesLarge = serviceType.Contains("large") || serviceType.Contains("bedding");
-        var includesHousehold = serviceType.Contains("household");
-
-        var isByRequest = notes.Contains("by request") || notes.Contains("request");
-        var washRate = isByRequest ? 2.25m : 2.00m;
-
-        if (includesWashFold)
+        var washWeight = model.WashFoldWeightLbs.GetValueOrDefault();
+        var washRate = model.UseByRequestRate ? 2.25m : 2.00m;
+        if (washWeight > 0)
         {
-            var weight = ExtractWeight(notes);
-            var billableWeight = Math.Max(weight, 20m);
-            var washTotal = billableWeight * washRate;
-            subtotal += washTotal;
-            lineItems.Add(new { description = $"Wash & Fold ({billableWeight:0.##} lbs @ ${washRate:0.00}/lb)", amount = washTotal });
-        }
-
-        var largeCatalog = new Dictionary<string, decimal>
-        {
-            ["comforter (king)"] = 34.99m,
-            ["comforter (queen)"] = 34.99m,
-            ["comforter (full)"] = 32.99m,
-            ["comforter (twin)"] = 32.99m,
-            ["duvet cover"] = 19.99m,
-            ["blanket"] = 17.99m,
-        };
-
-        if (includesLarge || includesHousehold)
-        {
-            foreach (var item in largeCatalog)
+            var billableWashWeight = Math.Max(washWeight, 20m);
+            var washAmount = billableWashWeight * washRate;
+            subtotal += washAmount;
+            lineItems.Add(new { description = $"Wash & Fold ({billableWashWeight:0.##} lbs @ ${washRate:0.00}/lb)", amount = washAmount });
+            if (washWeight < 20m)
             {
-                var qty = ExtractQuantity(notes, item.Key);
-                if (qty <= 0) continue;
-                var amount = qty * item.Value;
-                subtotal += amount;
-                lineItems.Add(new { description = $"{item.Key} x{qty}", amount });
-            }
-
-            var weightedBlanketWeight = ExtractWeightedBlanketWeight(notes);
-            if (weightedBlanketWeight > 0)
-            {
-                var weightedAmount = weightedBlanketWeight * 2.85m;
-                subtotal += weightedAmount;
-                lineItems.Add(new { description = $"Weighted blanket ({weightedBlanketWeight:0.##} lbs @ $2.85/lb)", amount = weightedAmount });
+                lineItems.Add(new { description = "20 lb minimum applied", amount = 0m });
             }
         }
 
-        var minimum = includesLarge || notes.Contains("weighted blanket") ? 50m : 0m;
-        if (includesWashFold)
+        void AddItem(string description, int qty, decimal unitPrice)
         {
-            minimum = Math.Max(minimum, 20m * washRate);
+            if (qty <= 0) return;
+            var amount = qty * unitPrice;
+            subtotal += amount;
+            lineItems.Add(new { description = $"{description} x{qty}", amount });
         }
 
-        if (subtotal < minimum)
+        AddItem("Comforter (King)", model.ComforterKingQty, 34.99m);
+        AddItem("Comforter (Queen)", model.ComforterQueenQty, 34.99m);
+        AddItem("Comforter (Full)", model.ComforterFullQty, 32.99m);
+        AddItem("Comforter (Twin)", model.ComforterTwinQty, 32.99m);
+        AddItem("Duvet Cover", model.DuvetCoverQty, 19.99m);
+        AddItem("Blanket", model.BlanketQty, 17.99m);
+
+        AddItem("Bedspread", model.BedspreadQty, 15.99m);
+        AddItem("Cushion Slip Cover", model.CushionSlipCoverQty, 8.99m);
+        AddItem("Chair Slip Cover", model.ChairSlipCoverQty, 17.99m);
+        AddItem("Sofa Slip Cover", model.SofaSlipCoverQty, 22.99m);
+        AddItem("Pillow Sham", model.PillowShamQty, 3.99m);
+        AddItem("Standard Pillow", model.StandardPillowQty, 9.99m);
+        AddItem("Mattress Cover", model.MattressCoverQty, 11.99m);
+
+        var weightedBlanketWeight = model.WeightedBlanketWeightLbs.GetValueOrDefault();
+        if (weightedBlanketWeight > 0)
         {
-            lineItems.Add(new { description = "Minimum pricing applied", amount = minimum - subtotal });
-            subtotal = minimum;
+            var weightedAmount = weightedBlanketWeight * 2.85m;
+            subtotal += weightedAmount;
+            lineItems.Add(new { description = $"Weighted Blanket ({weightedBlanketWeight:0.##} lbs @ $2.85/lb)", amount = weightedAmount });
+        }
+
+        var hasLargeBeddingOrWeighted = model.ComforterKingQty > 0 || model.ComforterQueenQty > 0 ||
+            model.ComforterFullQty > 0 || model.ComforterTwinQty > 0 || model.DuvetCoverQty > 0 ||
+            model.BlanketQty > 0 || weightedBlanketWeight > 0;
+
+        var washMinimum = washWeight > 0 ? 20m * washRate : 0m;
+        var largeMinimum = hasLargeBeddingOrWeighted ? 50m : 0m;
+        var appliedMinimum = Math.Max(washMinimum, largeMinimum);
+
+        if (appliedMinimum > 0 && subtotal < appliedMinimum)
+        {
+            lineItems.Add(new { description = "Minimum pricing adjustment", amount = appliedMinimum - subtotal });
+            subtotal = appliedMinimum;
         }
 
         if (subtotal <= 0)
         {
-            subtotal = 40m;
-            lineItems.Add(new { description = "Manual pricing placeholder", amount = subtotal });
+            subtotal = appliedMinimum > 0 ? appliedMinimum : 40m;
+            lineItems.Add(new { description = "Manual pricing adjustment", amount = subtotal });
         }
 
-        return (subtotal, JsonSerializer.Serialize(lineItems));
-    }
-
-    private static decimal ExtractWeight(string notes)
-    {
-        var match = Regex.Match(notes, @"(\d+(?:\.\d+)?)\s*(lb|lbs|pounds)");
-        return match.Success && decimal.TryParse(match.Groups[1].Value, out var weight) ? weight : 0m;
-    }
-
-    private static int ExtractQuantity(string notes, string itemName)
-    {
-        var pattern = Regex.Escape(itemName) + @"\s*(x\s*(\d+))?";
-        var match = Regex.Match(notes, pattern);
-        if (!match.Success) return 0;
-
-        if (match.Groups.Count > 2 && int.TryParse(match.Groups[2].Value, out var qty))
-        {
-            return Math.Max(qty, 1);
-        }
-
-        return 1;
-    }
-
-    private static decimal ExtractWeightedBlanketWeight(string notes)
-    {
-        var match = Regex.Match(notes, @"weighted blanket[^\d]*(\d+(?:\.\d+)?)");
-        return match.Success && decimal.TryParse(match.Groups[1].Value, out var weight) ? weight : 0m;
+        return (subtotal, appliedMinimum, JsonSerializer.Serialize(lineItems));
     }
 
     [HttpPost]

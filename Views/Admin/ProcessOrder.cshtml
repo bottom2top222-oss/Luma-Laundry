@@ -1,0 +1,95 @@
+@model ProcessOrderViewModel
+
+@{
+    ViewData["Title"] = "Process Order";
+}
+
+<div class="container py-4">
+    <h1 class="mb-3">Process Order #@Model.Id</h1>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div><strong>User:</strong> @Model.UserEmail</div>
+            <div><strong>Service:</strong> @Model.ServiceType</div>
+            <div><strong>Scheduled:</strong> @Model.ScheduledAt.ToString("g")</div>
+            <div><strong>Address:</strong> @Model.Address</div>
+            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+            {
+                <div><strong>Notes:</strong> @Model.Notes</div>
+            }
+        </div>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@err.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post" action="/Admin/ProcessOrder" class="card">
+        @Html.AntiForgeryToken()
+        <div class="card-body">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" name="currentStatus" value="@ViewBag.CurrentStatus" />
+            @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+            {
+                <input type="hidden" name="search" value="@ViewBag.Search" />
+            }
+
+            <h5>Wash & Fold</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label">Weight (lbs)</label>
+                    <input type="number" step="0.1" min="0" class="form-control" name="WashFoldWeightLbs" value="@Model.WashFoldWeightLbs" />
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="UseByRequestRate" value="true" id="useByRequestRate" @(Model.UseByRequestRate ? "checked" : "") />
+                        <label class="form-check-label" for="useByRequestRate">Use By Request rate ($2.25/lb)</label>
+                    </div>
+                </div>
+            </div>
+
+            <h5>Large Bedding & Household</h5>
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label">Comforter (King)</label><input type="number" min="0" class="form-control" name="ComforterKingQty" value="@Model.ComforterKingQty" /></div>
+                <div class="col-md-3"><label class="form-label">Comforter (Queen)</label><input type="number" min="0" class="form-control" name="ComforterQueenQty" value="@Model.ComforterQueenQty" /></div>
+                <div class="col-md-3"><label class="form-label">Comforter (Full)</label><input type="number" min="0" class="form-control" name="ComforterFullQty" value="@Model.ComforterFullQty" /></div>
+                <div class="col-md-3"><label class="form-label">Comforter (Twin)</label><input type="number" min="0" class="form-control" name="ComforterTwinQty" value="@Model.ComforterTwinQty" /></div>
+                <div class="col-md-3"><label class="form-label">Duvet Cover</label><input type="number" min="0" class="form-control" name="DuvetCoverQty" value="@Model.DuvetCoverQty" /></div>
+                <div class="col-md-3"><label class="form-label">Blanket</label><input type="number" min="0" class="form-control" name="BlanketQty" value="@Model.BlanketQty" /></div>
+                <div class="col-md-3"><label class="form-label">Weighted Blanket (lbs)</label><input type="number" step="0.1" min="0" class="form-control" name="WeightedBlanketWeightLbs" value="@Model.WeightedBlanketWeightLbs" /></div>
+
+                <div class="col-md-3"><label class="form-label">Bedspread</label><input type="number" min="0" class="form-control" name="BedspreadQty" value="@Model.BedspreadQty" /></div>
+                <div class="col-md-3"><label class="form-label">Cushion Slip Cover</label><input type="number" min="0" class="form-control" name="CushionSlipCoverQty" value="@Model.CushionSlipCoverQty" /></div>
+                <div class="col-md-3"><label class="form-label">Chair Slip Cover</label><input type="number" min="0" class="form-control" name="ChairSlipCoverQty" value="@Model.ChairSlipCoverQty" /></div>
+                <div class="col-md-3"><label class="form-label">Sofa Slip Cover</label><input type="number" min="0" class="form-control" name="SofaSlipCoverQty" value="@Model.SofaSlipCoverQty" /></div>
+                <div class="col-md-3"><label class="form-label">Pillow Sham</label><input type="number" min="0" class="form-control" name="PillowShamQty" value="@Model.PillowShamQty" /></div>
+                <div class="col-md-3"><label class="form-label">Standard Pillow</label><input type="number" min="0" class="form-control" name="StandardPillowQty" value="@Model.StandardPillowQty" /></div>
+                <div class="col-md-3"><label class="form-label">Mattress Cover</label><input type="number" min="0" class="form-control" name="MattressCoverQty" value="@Model.MattressCoverQty" /></div>
+            </div>
+
+            <h5 class="mt-4">Approval Baseline</h5>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Estimated Total (optional)</label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="EstimatedTotal" value="@Model.EstimatedTotal" />
+                    <small class="text-muted">If final is >20% above estimate, customer approval is required.</small>
+                </div>
+            </div>
+
+            <div class="alert alert-info mb-3">
+                Final total is calculated from exact weights/items. Payment is charged when order moves to <strong>Ready</strong>.
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Calculate & Send Quote</button>
+                <a class="btn btn-outline-secondary" href="/Admin?status=@ViewBag.CurrentStatus@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>

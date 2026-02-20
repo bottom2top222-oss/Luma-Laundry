@@ -248,6 +248,12 @@ public class LayeredApiOrderClient
         return await PostAsync($"/api/admin/orders/{orderId}/admin-notes", payload);
     }
 
+    public async Task<bool> UpdatePaymentStatusAsync(int orderId, string paymentStatus)
+    {
+        var payload = new { paymentStatus };
+        return await PostAsync($"/api/admin/orders/{orderId}/payment-status", payload);
+    }
+
     public async Task<bool> DeleteOrderAsync(int orderId)
     {
         try

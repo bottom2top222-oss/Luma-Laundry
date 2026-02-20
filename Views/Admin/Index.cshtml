@@ -24,6 +24,19 @@
         </div>
     </div>
 
+    @if (TempData["Success"] is string success && !string.IsNullOrWhiteSpace(success))
+    {
+        <div class="alert alert-success">@success</div>
+    }
+    @if (TempData["Info"] is string info && !string.IsNullOrWhiteSpace(info))
+    {
+        <div class="alert alert-info">@info</div>
+    }
+    @if (TempData["Error"] is string error && !string.IsNullOrWhiteSpace(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
 <!-- Search Form -->
 <div class="card dashboard-card mb-3">
     <div class="card-body">
@@ -173,6 +186,8 @@
                         <td>@o.Order.CreatedAt.ToString("g")</td>
                         <td>@o.Order.LastUpdatedAt.ToString("g")</td>
                         <td class="text-end">
+                            <a class="btn btn-sm btn-outline-info me-2" href="/Admin/ProcessOrder?id=@o.Order.Id&currentStatus=@ViewBag.Status@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Process</a>
+
                             <!-- Update status -->
                             <form method="post" action="/Admin/UpdateStatus" class="d-inline-flex gap-2">
                                 <input type="hidden" name="id" value="@o.Order.Id" />
