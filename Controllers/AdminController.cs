@@ -40,7 +40,12 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     selected ??= "All";
 
     var apiOrders = await _layeredApiOrderClient.GetAdminOrdersAsync(selected, search);
-    var allOrders = apiOrders ?? (_apiOnlyMode ? new List<LaundryOrder>() : _orderStore.All().ToList());
+    
+    // Use local store if: API returned null OR (API returned empty AND not in API-only mode AND we're filtering all statuses)
+    var shouldUseLocalStore = apiOrders == null || 
+        (apiOrders.Count == 0 && !_apiOnlyMode && selected == "All");
+    
+    var allOrders = shouldUseLocalStore ? _orderStore.All().ToList() : (apiOrders ?? new List<LaundryOrder>());
 
     if (apiOrders == null && _apiOnlyMode)
     {
