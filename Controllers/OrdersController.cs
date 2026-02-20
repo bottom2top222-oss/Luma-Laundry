@@ -173,10 +173,16 @@ public class OrdersController : Controller
                     isDefault: true
                 );
 
-                order.TermsAccepted = true;
-                order.TermsAcceptedAt = DateTime.Now.ToString("o");
-                order.PaymentStatus = "method_on_file";
-                _orderStore.Save();
+                // Reload order from local store to ensure it's tracked by DbContext
+                var localOrder = _orderStore.Get(id);
+                if (localOrder != null)
+                {
+                    localOrder.TermsAccepted = true;
+                    localOrder.TermsAcceptedAt = DateTime.Now.ToString("o");
+                    localOrder.PaymentStatus = "method_on_file";
+                    localOrder.LastUpdatedAt = DateTime.Now;
+                    _orderStore.Save();
+                }
             }
 
             return RedirectToAction("Confirm", new { id = order.Id });
