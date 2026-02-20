@@ -6,6 +6,18 @@
 
 <h1 class="mb-3">Order History</h1>
 
+@* Diagnostic info *@
+@if (!string.IsNullOrEmpty(ViewBag.DiagEmail as string))
+{
+    <div class="alert alert-info" role="alert">
+        <strong>Diagnostic Info:</strong><br/>
+        Your email: <code>@ViewBag.DiagEmail</code><br/>
+        Orders for you: <strong>@ViewBag.DiagOrderCount</strong><br/>
+        Total orders in database: <strong>@ViewBag.DiagAllOrders</strong><br/>
+        All emails in DB: <code>@ViewBag.DiagAllEmails</code>
+    </div>
+}
+
 @if (Model.Count == 0)
 {
     <p>No orders yet. <a href="/Orders/Schedule">Schedule one</a>.</p>
