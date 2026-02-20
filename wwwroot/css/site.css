@@ -403,6 +403,28 @@ footer a:hover {
   color: #ffffff;
 }
 
+.landing-dropdown-menu {
+  background: rgba(7, 14, 38, 0.98);
+  border: 1px solid rgba(96, 136, 232, 0.35);
+  box-shadow: 0 0.8rem 1.6rem rgba(3, 10, 30, 0.45);
+}
+
+.landing-dropdown-menu .dropdown-item,
+.landing-dropdown-menu .dropdown-item:focus,
+.landing-dropdown-menu .dropdown-item:active {
+  color: #dfeaff;
+  background: transparent;
+}
+
+.landing-dropdown-menu .dropdown-item:hover {
+  background: rgba(55, 102, 204, 0.25);
+  color: #ffffff;
+}
+
+.landing-dropdown-menu .dropdown-divider {
+  border-color: rgba(114, 150, 239, 0.28);
+}
+
 .landing-ghost-btn {
   border-radius: 999px;
   border: 1px solid rgba(180, 197, 255, 0.3);

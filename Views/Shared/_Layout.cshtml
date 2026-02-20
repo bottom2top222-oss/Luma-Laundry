@@ -23,24 +23,28 @@
                         <li class="nav-item"><a class="nav-link" href="/#features">Features</a></li>
                         <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a></li>
                         <li class="nav-item"><a class="nav-link" href="/#faq">FAQ</a></li>
-                        @if (User?.Identity?.IsAuthenticated ?? false)
-                        {
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Schedule">Schedule</a></li>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a></li>
-                            }
-                        }
                     </ul>
                     <div class="d-flex align-items-center gap-3">
                         @if (User?.Identity?.IsAuthenticated ?? false)
                         {
-                            <a class="landing-signin" asp-area="" asp-controller="Home" asp-action="Dashboard">@User.Identity?.Name</a>
-                            <form method="post" action="/Account/Logout" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn landing-ghost-btn">Logout</button>
-                            </form>
+                            <div class="dropdown">
+                                <a class="landing-signin dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">@User.Identity?.Name</a>
+                                <ul class="dropdown-menu dropdown-menu-end landing-dropdown-menu">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Orders" asp-action="Schedule">Schedule</a></li>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" action="/Account/Logout" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
                             <a class="btn landing-cta-btn" asp-area="" asp-controller="Orders" asp-action="Schedule">Schedule Pickup</a>
                         }
                         else
