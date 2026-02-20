@@ -37,9 +37,11 @@ app.MapPost("/api/orders", async (CreateOrderRequest request, ApiDbContext db) =
         return Results.BadRequest(new { error = "ScheduledAt is required." });
     }
 
+    var normalizedUserEmail = request.UserEmail.Trim();
+
     var order = new ApiLaundryOrder
     {
-        UserEmail = request.UserEmail,
+        UserEmail = normalizedUserEmail,
         ServiceType = request.ServiceType,
         ScheduledAt = request.ScheduledAt,
         AddressLine1 = request.AddressLine1?.Trim() ?? "",
@@ -356,8 +358,10 @@ app.MapGet("/api/orders", async (string userEmail, ApiDbContext db) =>
         return Results.BadRequest(new { error = "userEmail is required." });
     }
 
+    var normalizedEmail = userEmail.Trim().ToLower();
+
     var orders = await db.Orders
-        .Where(o => o.UserEmail == userEmail)
+        .Where(o => (o.UserEmail ?? string.Empty).Trim().ToLower() == normalizedEmail)
         .OrderByDescending(o => o.CreatedAt)
         .ToListAsync();
 

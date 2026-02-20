@@ -68,7 +68,7 @@ public class OrdersController : Controller
             ZipCode = zipCode?.Trim() ?? "",
             Notes = notes?.Trim() ?? "",
             Status = "Scheduled",
-            UserEmail = User?.Identity?.Name ?? ""
+            UserEmail = (User?.Identity?.Name ?? "").Trim()
         };
 
         order.Address = order.GetDisplayAddress();

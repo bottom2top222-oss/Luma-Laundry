@@ -22,6 +22,7 @@ public class OrderStore
 
     public LaundryOrder Add(LaundryOrder order)
     {
+        order.UserEmail = (order.UserEmail ?? string.Empty).Trim();
         order.CreatedAt = DateTime.Now;
         order.LastUpdatedAt = DateTime.Now;
         _dbContext.Orders.Add(order);
@@ -36,8 +37,10 @@ public class OrderStore
 
     public IReadOnlyList<LaundryOrder> ByUser(string userEmail)
     {
+        var normalizedEmail = (userEmail ?? string.Empty).Trim().ToLower();
+
         return _dbContext.Orders
-            .Where(o => o.UserEmail == userEmail)
+            .Where(o => ((o.UserEmail ?? string.Empty).Trim().ToLower()) == normalizedEmail)
             .OrderByDescending(o => o.CreatedAt)
             .ToList();
     }
