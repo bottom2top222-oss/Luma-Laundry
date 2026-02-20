@@ -16,8 +16,8 @@ public class ApiLaundryOrder
     public string Notes { get; set; } = "";
     public string AdminNotes { get; set; } = "";
 
-    public string Status { get; set; } = "Scheduled";
-    public string PaymentStatus { get; set; } = "method_on_file";
+    public string Status { get; set; } = "PendingPickup";
+    public string PaymentStatus { get; set; } = "NoPaymentMethod";
 
     public int? PaymentMethodId { get; set; }
     public int? InvoiceId { get; set; }

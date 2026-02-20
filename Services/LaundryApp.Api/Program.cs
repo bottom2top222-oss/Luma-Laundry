@@ -52,8 +52,8 @@ app.MapPost("/api/orders", async (CreateOrderRequest request, ApiDbContext db) =
         ZipCode = request.ZipCode?.Trim() ?? "",
         Notes = request.Notes?.Trim() ?? "",
         Address = ApiHelpers.BuildAddress(request.AddressLine1, request.AddressLine2, request.City, request.State, request.ZipCode),
-        Status = "Scheduled",
-        PaymentStatus = "method_on_file",
+        Status = "PendingPickup",
+        PaymentStatus = "NoPaymentMethod",
         CreatedAt = DateTime.Now,
         LastUpdatedAt = DateTime.Now
     };
@@ -111,7 +111,8 @@ app.MapPost("/api/orders/{id:int}/invoice/generate", async (int id, GenerateInvo
     await db.SaveChangesAsync();
 
     order.InvoiceId = invoice.Id;
-    order.PaymentStatus = "pending";
+    order.Status = "Quoted";
+    order.PaymentStatus = "ApprovalRequired";
     order.LastUpdatedAt = DateTime.Now;
     await db.SaveChangesAsync();
 
@@ -168,14 +169,15 @@ app.MapPost("/api/orders/{id:int}/payment/attempt", async (int id, ApiDbContext 
         attempt.Status = "success";
         attempt.TransactionId = $"txn_{DateTime.Now.Ticks}";
         order.Status = "Paid";
-        order.PaymentStatus = "paid";
+        order.PaymentStatus = "Paid";
         invoice.Status = "final";
     }
     else
     {
         attempt.Status = "failed";
         attempt.FailureReason = "Card declined - insufficient funds";
-        order.PaymentStatus = "failed";
+        order.Status = "PaymentFailed";
+        order.PaymentStatus = "PaymentFailed";
         attempt.NextRetryAt = DateTime.Now.AddHours(6);
     }
 
@@ -217,7 +219,8 @@ app.MapPost("/api/orders/{id:int}/payment-method", async (int id, SavePaymentMet
     await db.SaveChangesAsync();
 
     order.PaymentMethodId = method.Id;
-    order.PaymentStatus = "method_on_file";
+    order.PaymentStatus = "PaymentMethodOnFile";
+    order.Status = "PendingPickup";
     if (request.AcceptTerms)
     {
         order.TermsAccepted = true;
@@ -261,7 +264,7 @@ app.MapPost("/api/orders/{id:int}/payment-method/update", async (int id, SavePay
     await db.SaveChangesAsync();
 
     order.PaymentMethodId = method.Id;
-    order.PaymentStatus = "method_on_file";
+    order.PaymentStatus = "PaymentMethodOnFile";
     order.LastUpdatedAt = DateTime.Now;
     await db.SaveChangesAsync();
 
@@ -330,14 +333,15 @@ app.MapPost("/api/orders/{id:int}/payment/retry", async (int id, ApiDbContext db
         attempt.Status = "success";
         attempt.TransactionId = $"txn_{DateTime.Now.Ticks}";
         order.Status = "Paid";
-        order.PaymentStatus = "paid";
+        order.PaymentStatus = "Paid";
         invoice.Status = "final";
     }
     else
     {
         attempt.Status = "failed";
         attempt.FailureReason = "Card declined - please update payment method";
-        order.PaymentStatus = "failed";
+        order.Status = "PaymentFailed";
+        order.PaymentStatus = "PaymentFailed";
 
         if (attemptNumber < 3)
         {

@@ -17,11 +17,11 @@ public class LaundryOrder
     public string Notes { get; set; } = "";
     public string AdminNotes { get; set; } = "";
 
-    // Order Status: Scheduled, PickedUp, InProcessing, QualityCheck, ReadyForDelivery, Delivered, PaymentPending, Paid, Closed
-    public string Status { get; set; } = "Scheduled";
+    // Order Status: PendingPickup, PickedUp, WeighedOrCounted, Quoted, Approved, InProgress, Ready, Paid, Delivered, Completed, Cancelled
+    public string Status { get; set; } = "PendingPickup";
     
-    // Payment Status: not_required, method_on_file, pending, paid, failed, past_due
-    public string PaymentStatus { get; set; } = "method_on_file";
+    // Payment Status: NoPaymentMethod, PaymentMethodOnFile, ApprovalRequired, Approved, ChargeAttempted, Paid, PaymentFailed, Refunded
+    public string PaymentStatus { get; set; } = "NoPaymentMethod";
     
     // Payment Fields
     public int? PaymentMethodId { get; set; }
@@ -83,15 +83,17 @@ public class LaundryOrder
     
     public string GetStatusBadge() => Status switch
     {
-        "Scheduled" => "badge-secondary",
+        "PendingPickup" => "badge-secondary",
         "PickedUp" => "badge-info",
-        "InProcessing" => "badge-primary",
-        "QualityCheck" => "badge-warning",
-        "ReadyForDelivery" => "badge-info",
+        "WeighedOrCounted" => "badge-primary",
+        "Quoted" => "badge-warning",
+        "Approved" => "badge-info",
+        "InProgress" => "badge-primary",
+        "Ready" => "badge-info",
+        "PaymentFailed" => "badge-danger",
         "Delivered" => "badge-success",
-        "PaymentPending" => "badge-warning",
         "Paid" => "badge-success",
-        "Closed" => "badge-dark",
+        "Completed" => "badge-dark",
         "Cancelled" => "badge-danger",
         _ => "badge-secondary"
     };

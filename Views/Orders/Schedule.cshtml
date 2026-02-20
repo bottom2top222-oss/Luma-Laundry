@@ -1,11 +1,11 @@
 @{
-    ViewData["Title"] = "Schedule Service";
+    ViewData["Title"] = "Schedule Pickup & Payment Method";
 }
 
 <section class="schedule-hero mb-4">
     <div class="schedule-hero__inner">
-        <h1 class="mb-2">Schedule Service</h1>
-        <p class="mb-0">Pick your date and time in seconds and we’ll handle the rest.</p>
+        <h1 class="mb-2">Schedule Pickup & Payment Method</h1>
+        <p class="mb-0">Book pickup details now, add your card on file, and pay only after processing is complete.</p>
     </div>
 </section>
 
@@ -61,11 +61,12 @@
                     <h5 class="mb-3">Service Details</h5>
 
                     <div class="mb-3">
-                        <label class="form-label">Service Type</label>
+                        <label class="form-label">Order Type</label>
                         <select class="form-select" name="serviceType" required>
                             <option value="">Select one</option>
-                            <option value="Pickup">Pickup</option>
-                            <option value="Dropoff">Drop-off</option>
+                            <option value="Wash & Fold">Wash & Fold (bags)</option>
+                            <option value="Large Bedding">Large Bedding</option>
+                            <option value="Household Items">Household Items</option>
                         </select>
                     </div>
 
@@ -96,7 +97,11 @@
 
                     <div class="mb-3">
                         <label class="form-label">Special Instructions (optional)</label>
-                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                        <textarea class="form-control" name="notes" rows="3" placeholder="e.g. 3 bags, King comforter + weighted blanket"></textarea>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>You won’t be charged yet.</strong> We only charge once your laundry is processed and your final total is ready.
                     </div>
 
                     <div class="d-flex gap-2">

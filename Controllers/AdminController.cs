@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace LaundryApp.Controllers;
 
@@ -67,8 +69,8 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     // Counts for pills (only count from filtered results if searching)
     var countSource = allOrders;
     ViewBag.CountAll = countSource.Count;
-    ViewBag.CountScheduled = countSource.Count(o => o.Status == "Scheduled");
-    ViewBag.CountInProgress = countSource.Count(o => o.Status == "In Progress");
+    ViewBag.CountScheduled = countSource.Count(o => o.Status == "PendingPickup");
+    ViewBag.CountInProgress = countSource.Count(o => o.Status == "InProgress");
     ViewBag.CountCompleted = countSource.Count(o => o.Status == "Completed");
     ViewBag.CountCancelled = countSource.Count(o => o.Status == "Cancelled");
 
@@ -118,17 +120,18 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
             order.Status = status;
         }
 
-        // Handle payment workflow based on status changes
-        if (status == "ReadyForDelivery" && order.PaymentStatus == "method_on_file")
+        // Handle quote creation when processing is completed
+        if (status == "Quoted")
         {
             try
             {
+                var quote = BuildQuote(order);
                 var invoiceResult = await _layeredApiOrderClient.GenerateInvoiceAsync(
                     id,
-                    subtotal: 25.00m,
-                    taxAmount: 2.00m,
-                    deliveryFee: 3.00m,
-                    lineItems: $"[{{\"description\": \"{order.ServiceType} Service\", \"amount\": 25.00}}]");
+                    subtotal: quote.subtotal,
+                    taxAmount: 0,
+                    deliveryFee: 0,
+                    lineItems: quote.lineItems);
 
                 if (!invoiceResult.success)
                 {
@@ -142,13 +145,15 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
                     {
                         await _paymentService.GenerateInvoiceAsync(
                             id,
-                            subtotal: 25.00m,
-                            taxAmount: 2.00m,
-                            deliveryFee: 3.00m,
-                            lineItems: $"[{{\"description\": \"{order.ServiceType} Service\", \"amount\": 25.00}}]"
+                            subtotal: quote.subtotal,
+                            taxAmount: 0,
+                            deliveryFee: 0,
+                            lineItems: quote.lineItems
                         );
                     }
                 }
+
+                order.PaymentStatus = "ApprovalRequired";
             }
             catch (Exception ex)
             {
@@ -163,7 +168,11 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
                 _dbContext.AuditLogs.Add(auditLog);
             }
         }
-        else if (status == "Delivered" && order.PaymentStatus == "method_on_file")
+        else if (status == "Approved")
+        {
+            order.PaymentStatus = "Approved";
+        }
+        else if (status == "Ready" && (order.PaymentStatus == "PaymentMethodOnFile" || order.PaymentStatus == "Approved"))
         {
             try
             {
@@ -171,6 +180,8 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
 
                 if (attemptResult.success)
                 {
+                    order.PaymentStatus = "ChargeAttempted";
+
                     if (attemptResult.status == "success")
                     {
                         var apiOrder = await _layeredApiOrderClient.GetOrderAsync(id);
@@ -208,7 +219,13 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
 
                             if (attempt.Status == "success")
                             {
+                                dbOrder.PaymentStatus = "Paid";
                                 await _layeredApiJobClient.QueueReceiptEmailAsync(dbOrder, invoice, attempt);
+                            }
+                            else
+                            {
+                                dbOrder.Status = "PaymentFailed";
+                                dbOrder.PaymentStatus = "PaymentFailed";
                             }
                         }
                     }
@@ -240,6 +257,106 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         _dbContext.SaveChanges();
 
         return RedirectToAction("Index", new { status = currentStatus, search = search });
+    }
+
+    private (decimal subtotal, string lineItems) BuildQuote(LaundryOrder order)
+    {
+        var notes = (order.Notes ?? string.Empty).ToLowerInvariant();
+        var serviceType = (order.ServiceType ?? string.Empty).ToLowerInvariant();
+        var lineItems = new List<object>();
+        decimal subtotal = 0m;
+
+        var includesWashFold = serviceType.Contains("wash") || serviceType.Contains("fold");
+        var includesLarge = serviceType.Contains("large") || serviceType.Contains("bedding");
+        var includesHousehold = serviceType.Contains("household");
+
+        var isByRequest = notes.Contains("by request") || notes.Contains("request");
+        var washRate = isByRequest ? 2.25m : 2.00m;
+
+        if (includesWashFold)
+        {
+            var weight = ExtractWeight(notes);
+            var billableWeight = Math.Max(weight, 20m);
+            var washTotal = billableWeight * washRate;
+            subtotal += washTotal;
+            lineItems.Add(new { description = $"Wash & Fold ({billableWeight:0.##} lbs @ ${washRate:0.00}/lb)", amount = washTotal });
+        }
+
+        var largeCatalog = new Dictionary<string, decimal>
+        {
+            ["comforter (king)"] = 34.99m,
+            ["comforter (queen)"] = 34.99m,
+            ["comforter (full)"] = 32.99m,
+            ["comforter (twin)"] = 32.99m,
+            ["duvet cover"] = 19.99m,
+            ["blanket"] = 17.99m,
+        };
+
+        if (includesLarge || includesHousehold)
+        {
+            foreach (var item in largeCatalog)
+            {
+                var qty = ExtractQuantity(notes, item.Key);
+                if (qty <= 0) continue;
+                var amount = qty * item.Value;
+                subtotal += amount;
+                lineItems.Add(new { description = $"{item.Key} x{qty}", amount });
+            }
+
+            var weightedBlanketWeight = ExtractWeightedBlanketWeight(notes);
+            if (weightedBlanketWeight > 0)
+            {
+                var weightedAmount = weightedBlanketWeight * 2.85m;
+                subtotal += weightedAmount;
+                lineItems.Add(new { description = $"Weighted blanket ({weightedBlanketWeight:0.##} lbs @ $2.85/lb)", amount = weightedAmount });
+            }
+        }
+
+        var minimum = includesLarge || notes.Contains("weighted blanket") ? 50m : 0m;
+        if (includesWashFold)
+        {
+            minimum = Math.Max(minimum, 20m * washRate);
+        }
+
+        if (subtotal < minimum)
+        {
+            lineItems.Add(new { description = "Minimum pricing applied", amount = minimum - subtotal });
+            subtotal = minimum;
+        }
+
+        if (subtotal <= 0)
+        {
+            subtotal = 40m;
+            lineItems.Add(new { description = "Manual pricing placeholder", amount = subtotal });
+        }
+
+        return (subtotal, JsonSerializer.Serialize(lineItems));
+    }
+
+    private static decimal ExtractWeight(string notes)
+    {
+        var match = Regex.Match(notes, @"(\d+(?:\.\d+)?)\s*(lb|lbs|pounds)");
+        return match.Success && decimal.TryParse(match.Groups[1].Value, out var weight) ? weight : 0m;
+    }
+
+    private static int ExtractQuantity(string notes, string itemName)
+    {
+        var pattern = Regex.Escape(itemName) + @"\s*(x\s*(\d+))?";
+        var match = Regex.Match(notes, pattern);
+        if (!match.Success) return 0;
+
+        if (match.Groups.Count > 2 && int.TryParse(match.Groups[2].Value, out var qty))
+        {
+            return Math.Max(qty, 1);
+        }
+
+        return 1;
+    }
+
+    private static decimal ExtractWeightedBlanketWeight(string notes)
+    {
+        var match = Regex.Match(notes, @"weighted blanket[^\d]*(\d+(?:\.\d+)?)");
+        return match.Success && decimal.TryParse(match.Groups[1].Value, out var weight) ? weight : 0m;
     }
 
     [HttpPost]

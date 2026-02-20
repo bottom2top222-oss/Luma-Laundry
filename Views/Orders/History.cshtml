@@ -30,24 +30,31 @@ else
         {
             var badgeClass = o.Status switch
             {
-                "Scheduled" => "bg-warning text-dark",
+                "PendingPickup" => "bg-secondary",
+                "PickedUp" => "bg-info text-dark",
+                "WeighedOrCounted" => "bg-primary",
+                "Quoted" => "bg-warning text-dark",
+                "Approved" => "bg-info",
+                "InProgress" => "bg-primary",
+                "Ready" => "bg-warning text-dark",
                 "Paid" => "bg-success",
-                "In Progress" => "bg-info text-dark",
-                "Completed" => "bg-secondary",
                 "Delivered" => "bg-info text-dark",
-                "PaymentPending" => "bg-warning text-dark",
-                "Closed" => "bg-success",
+                "Completed" => "bg-secondary",
+                "PaymentFailed" => "bg-danger",
                 "Cancelled" => "bg-danger",
                 _ => "bg-dark"
             };
 
             var paymentBadgeClass = o.PaymentStatus switch
             {
-                "method_on_file" => "bg-info",
-                "pending" => "bg-warning text-dark",
-                "paid" => "bg-success",
-                "failed" => "bg-danger",
-                "past_due" => "bg-danger",
+                "NoPaymentMethod" => "bg-secondary",
+                "PaymentMethodOnFile" => "bg-info",
+                "ApprovalRequired" => "bg-warning text-dark",
+                "Approved" => "bg-info",
+                "ChargeAttempted" => "bg-warning text-dark",
+                "Paid" => "bg-success",
+                "PaymentFailed" => "bg-danger",
+                "Refunded" => "bg-dark",
                 _ => "bg-secondary"
             };
 
@@ -71,7 +78,7 @@ else
                 <td>@o.CreatedAt.ToString("g")</td>
                 <td>@o.GetDisplayAddress()</td>
                 <td class="text-end">
-                    @if (o.Status == "Scheduled" && o.PaymentStatus != "method_on_file")
+                    @if (o.Status == "PendingPickup" && o.PaymentStatus != "PaymentMethodOnFile")
                     {
                         <a href="/Orders/SavePaymentMethod/@o.Id" class="btn btn-sm btn-primary me-2">Save Card</a>
                         <form method="post" action="/Orders/Cancel/@o.Id" style="display:inline;">
@@ -79,11 +86,19 @@ else
                             <button class="btn btn-sm btn-outline-danger">Cancel</button>
                         </form>
                     }
-                    else if (o.Status == "Scheduled" && o.PaymentStatus == "method_on_file")
+                    else if (o.Status == "PendingPickup" && o.PaymentStatus == "PaymentMethodOnFile")
                     {
                         <span class="badge bg-success">Card Saved</span>
                     }
-                    else if (o.PaymentStatus == "failed")
+                    else if (o.Status == "Quoted" || o.PaymentStatus == "ApprovalRequired")
+                    {
+                        <form method="post" action="/Orders/ApproveQuote/@o.Id" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-success me-2">Approve & Continue</button>
+                        </form>
+                        <a href="mailto:support@luma-laundry.app" class="btn btn-sm btn-outline-light">Message Support</a>
+                    }
+                    else if (o.PaymentStatus == "PaymentFailed")
                     {
                         <a href="/Orders/UpdatePaymentMethod/@o.Id" class="btn btn-sm btn-warning me-2">Update Card</a>
                         <form method="post" action="/Orders/RetryPayment/@o.Id" style="display:inline;">

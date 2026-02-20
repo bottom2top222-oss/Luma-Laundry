@@ -59,8 +59,8 @@
 
 <div class="d-flex flex-wrap gap-2 mb-3">
     <a class="@pillClass("All")" href="/Admin?status=All@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">All (@ViewBag.CountAll)</a>
-    <a class="@pillClass("Scheduled")" href="/Admin?status=Scheduled@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Scheduled (@ViewBag.CountScheduled)</a>
-    <a class="@pillClass("In Progress")" href="/Admin?status=In%20Progress@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">In Progress (@ViewBag.CountInProgress)</a>
+    <a class="@pillClass("PendingPickup")" href="/Admin?status=PendingPickup@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Pending Pickup (@ViewBag.CountScheduled)</a>
+    <a class="@pillClass("InProgress")" href="/Admin?status=InProgress@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">In Progress (@ViewBag.CountInProgress)</a>
     <a class="@pillClass("Completed")" href="/Admin?status=Completed@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Completed (@ViewBag.CountCompleted)</a>
     <a class="@pillClass("Cancelled")" href="/Admin?status=Cancelled@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Cancelled (@ViewBag.CountCancelled)</a>
 </div>
@@ -73,8 +73,15 @@
             style="width:180px;"
             onchange="this.form.submit()">
         <option value="All" selected="@(ViewBag.Status == "All")">All</option>
-        <option value="Scheduled" selected="@(ViewBag.Status == "Scheduled")">Scheduled</option>
-        <option value="In Progress" selected="@(ViewBag.Status == "In Progress")">In Progress</option>
+        <option value="PendingPickup" selected="@(ViewBag.Status == "PendingPickup")">Pending Pickup</option>
+        <option value="PickedUp" selected="@(ViewBag.Status == "PickedUp")">Picked Up</option>
+        <option value="WeighedOrCounted" selected="@(ViewBag.Status == "WeighedOrCounted")">Weighed / Counted</option>
+        <option value="Quoted" selected="@(ViewBag.Status == "Quoted")">Quoted</option>
+        <option value="Approved" selected="@(ViewBag.Status == "Approved")">Approved</option>
+        <option value="InProgress" selected="@(ViewBag.Status == "InProgress")">In Progress</option>
+        <option value="Ready" selected="@(ViewBag.Status == "Ready")">Ready</option>
+        <option value="Paid" selected="@(ViewBag.Status == "Paid")">Paid</option>
+        <option value="Delivered" selected="@(ViewBag.Status == "Delivered")">Delivered</option>
         <option value="Completed" selected="@(ViewBag.Status == "Completed")">Completed</option>
         <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option>
     </select>
@@ -131,8 +138,15 @@
                             @{
                                 var badgeClass = o.Order.Status switch
                                 {
-                                    "Scheduled" => "bg-primary",
-                                    "In Progress" => "bg-warning text-dark",
+                                    "PendingPickup" => "bg-secondary",
+                                    "PickedUp" => "bg-info text-dark",
+                                    "WeighedOrCounted" => "bg-primary",
+                                    "Quoted" => "bg-warning text-dark",
+                                    "Approved" => "bg-info",
+                                    "InProgress" => "bg-primary",
+                                    "Ready" => "bg-warning text-dark",
+                                    "Paid" => "bg-success",
+                                    "Delivered" => "bg-success",
                                     "Completed" => "bg-success",
                                     "Cancelled" => "bg-secondary",
                                     _ => "bg-dark"
@@ -167,8 +181,15 @@
                                     <input type="hidden" name="search" value="@ViewBag.Search" />
                                 }
                                 <select name="status" class="form-select form-select-sm" style="width:140px;">
-                                    <option value="Scheduled" selected="@(o.Order.Status == "Scheduled")">Scheduled</option>
-                                    <option value="In Progress" selected="@(o.Order.Status == "In Progress")">In Progress</option>
+                                    <option value="PendingPickup" selected="@(o.Order.Status == "PendingPickup")">Pending Pickup</option>
+                                    <option value="PickedUp" selected="@(o.Order.Status == "PickedUp")">Picked Up</option>
+                                    <option value="WeighedOrCounted" selected="@(o.Order.Status == "WeighedOrCounted")">Weighed / Counted</option>
+                                    <option value="Quoted" selected="@(o.Order.Status == "Quoted")">Quoted</option>
+                                    <option value="Approved" selected="@(o.Order.Status == "Approved")">Approved</option>
+                                    <option value="InProgress" selected="@(o.Order.Status == "InProgress")">In Progress</option>
+                                    <option value="Ready" selected="@(o.Order.Status == "Ready")">Ready</option>
+                                    <option value="Paid" selected="@(o.Order.Status == "Paid")">Paid</option>
+                                    <option value="Delivered" selected="@(o.Order.Status == "Delivered")">Delivered</option>
                                     <option value="Completed" selected="@(o.Order.Status == "Completed")">Completed</option>
                                     <option value="Cancelled" selected="@(o.Order.Status == "Cancelled")">Cancelled</option>
                                 </select>

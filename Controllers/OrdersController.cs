@@ -37,7 +37,7 @@ public class OrdersController : Controller
     public async Task<IActionResult> Schedule(string serviceType, DateTime scheduledAt, string addressLine1, string? addressLine2, string city, string state, string zipCode, string? notes)
     {
         if (string.IsNullOrWhiteSpace(serviceType))
-            ModelState.AddModelError("", "Choose Pickup or Drop-off.");
+            ModelState.AddModelError("", "Choose an order type.");
 
         if (scheduledAt == default)
             ModelState.AddModelError("", "Choose a date and time.");
@@ -67,7 +67,8 @@ public class OrdersController : Controller
             State = state?.Trim() ?? "",
             ZipCode = zipCode?.Trim() ?? "",
             Notes = notes?.Trim() ?? "",
-            Status = "Scheduled",
+            Status = "PendingPickup",
+            PaymentStatus = "NoPaymentMethod",
             UserEmail = (User?.Identity?.Name ?? "").Trim()
         };
 
@@ -181,7 +182,8 @@ public class OrdersController : Controller
                     localOrder.UserEmail = email;
                     localOrder.TermsAccepted = true;
                     localOrder.TermsAcceptedAt = DateTime.Now.ToString("o");
-                    localOrder.PaymentStatus = "method_on_file";
+                    localOrder.Status = "PendingPickup";
+                    localOrder.PaymentStatus = "PaymentMethodOnFile";
                     localOrder.LastUpdatedAt = DateTime.Now;
                     _orderStore.Save();
                 }
@@ -190,6 +192,8 @@ public class OrdersController : Controller
             {
                 // Also ensure the order from API has the correct UserEmail
                 order.UserEmail = email;
+                order.Status = "PendingPickup";
+                order.PaymentStatus = "PaymentMethodOnFile";
             }
 
             return RedirectToAction("Confirm", new { id = order.Id });
@@ -294,7 +298,7 @@ public class OrdersController : Controller
 
             System.Threading.Thread.Sleep(2000);
             order.Status = "Paid";
-            order.PaymentStatus = "paid";
+            order.PaymentStatus = "Paid";
             _orderStore.Save();
 
             var invoice = _context.Invoices.FirstOrDefault(i => i.OrderId == id);
@@ -460,6 +464,33 @@ public class OrdersController : Controller
         return RedirectToAction("Invoice", new { id = id });
     }
 
+    [HttpPost]
+    public async Task<IActionResult> ApproveQuote(int id)
+    {
+        var email = User?.Identity?.Name ?? "";
+        var order = await GetOrderAsync(id);
+        if (order == null) return NotFound();
+        if (order.UserEmail != email) return Forbid();
+
+        var updatedViaApi = await _layeredApiOrderClient.UpdateOrderStatusAsync(id, "Approved");
+        if (!updatedViaApi)
+        {
+            if (_apiOnlyMode)
+            {
+                TempData["Error"] = "Unable to approve quote right now.";
+                return RedirectToAction("History");
+            }
+
+            order.Status = "Approved";
+            order.PaymentStatus = "Approved";
+            order.LastUpdatedAt = DateTime.Now;
+            _orderStore.Save();
+        }
+
+        TempData["Success"] = "Final total approved. We’ll begin processing your order.";
+        return RedirectToAction("History");
+    }
+
     [HttpGet]
     public async Task<IActionResult> History()
     {
@@ -496,7 +527,7 @@ public class OrdersController : Controller
         if (order.UserEmail != email) return Forbid();
         
         // Only allow cancellation of unpaid orders
-        if (order.Status != "Scheduled")
+        if (order.Status != "PendingPickup")
         {
             TempData["Error"] = "Cannot cancel orders that have already been paid.";
             return RedirectToAction("History");

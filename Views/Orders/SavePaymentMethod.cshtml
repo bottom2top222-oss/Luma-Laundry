@@ -32,7 +32,7 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <strong>No charge today.</strong> We'll charge your card after delivery is completed.
+                    <strong>No charge today.</strong> We’ll charge your card only after your laundry is processed and marked Ready.
                 </div>
 
                 @if (!ViewData.ModelState.IsValid)
@@ -77,7 +77,7 @@
                         <input type="hidden" name="acceptTerms" value="false" />
                         <input type="checkbox" name="acceptTerms" id="acceptTerms" value="true" class="form-check-input" required />
                         <label class="form-check-label" for="acceptTerms">
-                            I agree that my card will be charged after delivery is completed. Payment processing fees may apply. I have reviewed the <a href="/Account/Terms" target="_blank" rel="noopener">Terms and Conditions</a>.
+                            I agree that my card will only be charged when the final total is ready after processing. Payment processing fees may apply. I have reviewed the <a href="/Account/Terms" target="_blank" rel="noopener">Terms and Conditions</a>.
                         </label>
                     </div>
                     

@@ -70,7 +70,8 @@ public class PaymentService
 
         _context.Invoices.Add(invoice);
         order.InvoiceId = invoice.Id;
-        order.PaymentStatus = "pending";
+        order.Status = "Quoted";
+        order.PaymentStatus = "ApprovalRequired";
         await _context.SaveChangesAsync();
 
         return invoice;
@@ -114,14 +115,15 @@ public class PaymentService
             attempt.Status = "success";
             attempt.TransactionId = $"txn_{DateTime.Now.Ticks}";
             order.Status = "Paid";
-            order.PaymentStatus = "paid";
+            order.PaymentStatus = "Paid";
             order.Invoice.Status = "final";
         }
         else
         {
             attempt.Status = "failed";
             attempt.FailureReason = "Card declined - insufficient funds";
-            order.PaymentStatus = "failed";
+            order.Status = "PaymentFailed";
+            order.PaymentStatus = "PaymentFailed";
             
             // Schedule retry for 6 hours
             attempt.NextRetryAt = DateTime.Now.AddHours(6);
@@ -178,7 +180,7 @@ public class PaymentService
             newAttempt.Status = "success";
             newAttempt.TransactionId = $"txn_{DateTime.Now.Ticks}";
             order.Status = "Paid";
-            order.PaymentStatus = "paid";
+            order.PaymentStatus = "Paid";
             order.Invoice.Status = "final";
         }
         else
