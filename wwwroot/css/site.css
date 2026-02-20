@@ -42,6 +42,13 @@ body.landing-page {
 
 body.app-shell {
   font-family: 'Outfit', sans-serif;
+  background:
+    radial-gradient(900px 500px at 50% 22%, rgba(70, 20, 130, 0.30), transparent 70%),
+    radial-gradient(480px 320px at 96% 94%, rgba(173, 21, 165, 0.22), transparent 65%),
+    radial-gradient(520px 340px at 4% 88%, rgba(38, 110, 224, 0.16), transparent 68%),
+    #02081f;
+  background-attachment: fixed;
+  color: #dbe8ff;
 }
 
 .form-floating > .form-control-plaintext::placeholder,
