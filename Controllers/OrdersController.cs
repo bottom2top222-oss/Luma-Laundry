@@ -484,13 +484,6 @@ public class OrdersController : Controller
             }
         }
 
-        // Diagnostic info
-        var allDbOrders = _orderStore.All().ToList();
-        ViewBag.DiagEmail = email;
-        ViewBag.DiagOrderCount = orders.Count;
-        ViewBag.DiagAllOrders = allDbOrders.Count;
-        ViewBag.DiagAllEmails = string.Join(", ", allDbOrders.Select(o => $"'{o.UserEmail ?? "null"}'").Distinct());
-
         return View(orders);
     }
 
