@@ -473,16 +473,15 @@ public class OrdersController : Controller
         {
             orders = apiOrders;
         }
-        // If API is unavailable or returned empty and not in API-only mode, use local store
-        else if (!_apiOnlyMode)
-        {
-            orders = _orderStore.ByUser(email).ToList();
-        }
-        // API-only mode with no data
+        // If API is unavailable or returned empty, fall back to local store for read visibility
         else
         {
-            TempData["Error"] = "Order service is temporarily unavailable.";
-            orders = new List<LaundryOrder>();
+            orders = _orderStore.ByUser(email).ToList();
+
+            if (_apiOnlyMode && orders.Count == 0)
+            {
+                TempData["Error"] = "Order service is temporarily unavailable.";
+            }
         }
 
         // Diagnostic info
