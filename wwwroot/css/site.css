@@ -3,6 +3,7 @@
 html {
   font-size: 14px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  scroll-behavior: smooth;
 }
 
 @media (min-width: 768px) {
@@ -36,6 +37,10 @@ body.landing-page {
     radial-gradient(420px 280px at 95% 95%, rgba(173, 21, 165, 0.28), transparent 65%),
     #02081f;
   color: #dbe8ff;
+  font-family: 'Outfit', sans-serif;
+}
+
+body.app-shell {
   font-family: 'Outfit', sans-serif;
 }
 
@@ -369,6 +374,20 @@ footer a:hover {
 
 .landing-signin:hover {
   color: #ffffff;
+}
+
+.landing-ghost-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(180, 197, 255, 0.3);
+  background: rgba(9, 16, 46, 0.82);
+  color: #deebff;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+}
+
+.landing-ghost-btn:hover {
+  color: #ffffff;
+  border-color: rgba(180, 197, 255, 0.55);
 }
 
 .landing-cta-btn {

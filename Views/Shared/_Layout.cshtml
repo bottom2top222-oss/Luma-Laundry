@@ -8,130 +8,64 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LaundryApp.styles.css" asp-append-version="true" />
 </head>
-@{
-    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
-    var action = ViewContext.RouteData.Values["action"]?.ToString();
-    var isLanding = string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase);
-}
-<body class="@(isLanding ? "landing-page" : "")">
+<body class="app-shell">
     <header>
-        @if (isLanding)
-        {
-            <nav class="navbar navbar-expand-lg landing-nav mb-3">
-                <div class="container landing-nav-shell">
-                    <a class="navbar-brand landing-brand" asp-area="" asp-controller="Home" asp-action="Index">LUMA</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar"
-                            aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="navbar-collapse collapse" id="mainNavbar">
-                        <ul class="navbar-nav mx-auto landing-links">
-                            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/#features">Features</a></li>
-                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/#faq">FAQ</a></li>
-                        </ul>
-                        <div class="d-flex align-items-center gap-3">
-                            @if (User?.Identity?.IsAuthenticated ?? false)
+        <nav class="navbar navbar-expand-lg landing-nav mb-3">
+            <div class="container landing-nav-shell">
+                <a class="navbar-brand landing-brand" asp-area="" asp-controller="Home" asp-action="Index">LUMA</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse" id="mainNavbar">
+                    <ul class="navbar-nav mx-auto landing-links">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/#features">Features</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/#faq">FAQ</a></li>
+                        @if (User?.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Orders" asp-action="Schedule">Schedule</a></li>
+                            @if (User.IsInRole("Admin"))
                             {
-                                <a class="landing-signin" asp-area="" asp-controller="Home" asp-action="Dashboard">@User.Identity?.Name</a>
-                                <a class="btn landing-cta-btn" asp-area="" asp-controller="Orders" asp-action="Schedule">Schedule Pickup</a>
+                                <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a></li>
                             }
-                            else
-                            {
-                                <a class="landing-signin" asp-area="" asp-controller="Account" asp-action="Login">Sign in</a>
-                                <a class="btn landing-cta-btn" asp-area="" asp-controller="Account" asp-action="Register">Schedule Pickup</a>
-                            }
-                        </div>
+                        }
+                    </ul>
+                    <div class="d-flex align-items-center gap-3">
+                        @if (User?.Identity?.IsAuthenticated ?? false)
+                        {
+                            <a class="landing-signin" asp-area="" asp-controller="Home" asp-action="Dashboard">@User.Identity?.Name</a>
+                            <form method="post" action="/Account/Logout" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn landing-ghost-btn">Logout</button>
+                            </form>
+                            <a class="btn landing-cta-btn" asp-area="" asp-controller="Orders" asp-action="Schedule">Schedule Pickup</a>
+                        }
+                        else
+                        {
+                            <a class="landing-signin" asp-area="" asp-controller="Account" asp-action="Login">Sign in</a>
+                            <a class="btn landing-cta-btn" asp-area="" asp-controller="Account" asp-action="Register">Schedule Pickup</a>
+                        }
                     </div>
                 </div>
-            </nav>
-        }
-        else
-        {
-            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
-                <div class="container-fluid">
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Luma</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar"
-                            aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="navbar-collapse collapse" id="mainNavbar">
-                        <ul class="navbar-nav me-auto">
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a>
-                            </li>
-                            @if (User?.Identity?.IsAuthenticated ?? false)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Orders" asp-action="Schedule">Schedule</a>
-                                </li>
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
-                                    </li>
-                                }
-                            }
-                        </ul>
-                        <ul class="navbar-nav">
-                            @if (User?.Identity?.IsAuthenticated ?? false)
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        @User.Identity.Name
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Dashboard">Dashboard</a></li>
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ChangePassword">Change Password</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form method="post" action="/Account/Logout" class="d-inline">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="dropdown-item">Logout</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </li>
-                            }
-                            else
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-        }
+            </div>
+        </nav>
     </header>
 
-    <div class="container-fluid @(isLanding ? "px-0" : "")">
+    <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    @if (!isLanding)
-    {
-        <footer class="border-top footer text-muted">
-            <div class="container-fluid">
-                &copy; 2026 - Luma - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> -
-                <a asp-area="" asp-controller="Account" asp-action="Terms">Terms</a>
-            </div>
-        </footer>
-    }
+    <footer class="border-top footer text-muted">
+        <div class="container-fluid">
+            &copy; 2026 - Luma - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> -
+            <a asp-area="" asp-controller="Account" asp-action="Terms">Terms</a>
+        </div>
+    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
