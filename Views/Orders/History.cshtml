@@ -6,6 +6,14 @@
 
 <h1 class="mb-3">Order History</h1>
 
+@if (!string.IsNullOrEmpty(ViewBag.DebugInfo as string))
+{
+    <div class="alert alert-warning" role="alert">
+        <strong>Debug Info:</strong> @ViewBag.DebugInfo<br/>
+        <small>User Email: @ViewBag.CurrentUserEmail | Total Orders in DB: @ViewBag.TotalOrdersInDatabase</small>
+    </div>
+}
+
 @if (Model.Count == 0)
 {
     <p>No orders yet. <a href="/Orders/Schedule">Schedule one</a>.</p>

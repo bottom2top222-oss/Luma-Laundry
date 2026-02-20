@@ -478,6 +478,18 @@ public class OrdersController : Controller
             orders = new List<LaundryOrder>();
         }
 
+        // Debug info
+        ViewBag.CurrentUserEmail = email;
+        ViewBag.OrderCount = orders.Count;
+        
+        // Also get all orders to check if there are any unmatched
+        var allOrders = _orderStore.All().ToList();
+        ViewBag.TotalOrdersInDatabase = allOrders.Count;
+        if (allOrders.Count > 0 && orders.Count == 0)
+        {
+            ViewBag.DebugInfo = $"User email '{email}' - Found {allOrders.Count} total orders in database but none match this user";
+        }
+
         return View(orders);
     }
 
