@@ -81,7 +81,7 @@ public class OrdersController : Controller
         }
         else
         {
-            _orderStore.Add(order);
+            order = _orderStore.Add(order);
         }
 
         await _layeredApiJobClient.QueueOrderCreatedEmailAsync(order);
