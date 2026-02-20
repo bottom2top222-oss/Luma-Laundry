@@ -27,9 +27,13 @@ public class LaundryAppDbContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(e => e.Id);
             entity.Property(e => e.UserEmail).IsRequired();
             entity.Property(e => e.ServiceType).IsRequired();
+            entity.Property(e => e.PricingType).IsRequired();
             entity.Property(e => e.Address).IsRequired();
             entity.Property(e => e.Status).IsRequired();
             entity.Property(e => e.PaymentStatus).IsRequired();
+            entity.Property(e => e.ItemsJson).IsRequired();
+            entity.Property(e => e.Currency).IsRequired();
+            entity.Property(e => e.BagWeightLbs).HasPrecision(10, 2);
             
             // Foreign keys
             entity.HasOne(e => e.PaymentMethod)
@@ -87,6 +91,12 @@ public class LaundryAppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Action).IsRequired();
             entity.Property(e => e.Entity).IsRequired();
             entity.Property(e => e.Details).IsRequired();
+        });
+
+        modelBuilder.Entity<ApplicationUser>(entity =>
+        {
+            entity.Property(e => e.StripeCustomerId).IsRequired();
+            entity.Property(e => e.DefaultPaymentMethodId).IsRequired();
         });
     }
 }

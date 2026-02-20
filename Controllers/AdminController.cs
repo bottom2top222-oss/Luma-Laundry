@@ -17,16 +17,18 @@ public class AdminController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly LaundryAppDbContext _dbContext;
     private readonly PaymentService _paymentService;
+    private readonly StripeBillingService _stripeBillingService;
     private readonly LayeredApiJobClient _layeredApiJobClient;
     private readonly LayeredApiOrderClient _layeredApiOrderClient;
     private readonly bool _apiOnlyMode;
 
-    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext, PaymentService paymentService, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
+    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext, PaymentService paymentService, StripeBillingService stripeBillingService, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
     {
         _orderStore = orderStore;
         _userManager = userManager;
         _dbContext = dbContext;
         _paymentService = paymentService;
+        _stripeBillingService = stripeBillingService;
         _layeredApiJobClient = layeredApiJobClient;
         _layeredApiOrderClient = layeredApiOrderClient;
         _apiOnlyMode = bool.TryParse(configuration["LayeredServices:ApiOnlyMode"], out var apiOnly) && apiOnly;
@@ -137,74 +139,70 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         }
         else if (status == "Ready" && (order.PaymentStatus == "PaymentMethodOnFile" || order.PaymentStatus == "Approved"))
         {
-            try
+            if (_stripeBillingService.IsConfigured)
             {
-                var attemptResult = await _layeredApiOrderClient.AttemptPaymentAsync(id);
-
-                if (attemptResult.success)
+                try
                 {
+                    var pi = await _stripeBillingService.ChargeOrderAsync(id);
+                    order.StripePaymentIntentId = pi.Id;
                     order.PaymentStatus = "ChargeAttempted";
-
-                    if (attemptResult.status == "success")
-                    {
-                        var apiOrder = await _layeredApiOrderClient.GetOrderAsync(id);
-                        if (apiOrder != null)
-                        {
-                            var apiInvoice = await _layeredApiOrderClient.GetInvoiceAsync(id);
-                            var receiptAttempt = new PaymentAttempt
-                            {
-                                OrderId = id,
-                                Status = attemptResult.status,
-                                Amount = attemptResult.amount,
-                                TransactionId = attemptResult.transactionId,
-                                AttemptNumber = 1,
-                                CreatedAt = DateTime.Now
-                            };
-
-                            await _layeredApiJobClient.QueueReceiptEmailAsync(apiOrder, apiInvoice, receiptAttempt);
-                        }
-                    }
+                    order.LastUpdatedAt = DateTime.Now;
                 }
-                else
+                catch (Exception ex)
                 {
-                    if (_apiOnlyMode)
+                    var auditLog = new AuditLog
                     {
-                        throw new Exception("API payment attempt failed in API-only mode.");
-                    }
-
-                    var dbOrder = await _dbContext.Orders.FindAsync(id);
-                    if (dbOrder != null && dbOrder.InvoiceId != null)
-                    {
-                        var invoice = await _dbContext.Invoices.FindAsync(dbOrder.InvoiceId);
-                        if (invoice != null && dbOrder.PaymentMethodId != null)
-                        {
-                            var attempt = await _paymentService.AttemptPaymentAsync(id, invoice.Total, dbOrder.PaymentMethodId.Value);
-
-                            if (attempt.Status == "success")
-                            {
-                                dbOrder.PaymentStatus = "Paid";
-                                await _layeredApiJobClient.QueueReceiptEmailAsync(dbOrder, invoice, attempt);
-                            }
-                            else
-                            {
-                                dbOrder.Status = "PaymentFailed";
-                                dbOrder.PaymentStatus = "PaymentFailed";
-                            }
-                        }
-                    }
+                        UserEmail = User.Identity?.Name ?? "Unknown",
+                        Action = "Stripe Charge Failed",
+                        Entity = $"Order #{id}",
+                        Details = ex.Message
+                    };
+                    _dbContext.AuditLogs.Add(auditLog);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                // Log error but don't block status update
-                var auditLog = new AuditLog
+                try
                 {
-                    UserEmail = User.Identity?.Name ?? "Unknown",
-                    Action = "Payment Attempt Failed",
-                    Entity = $"Order #{id}",
-                    Details = $"Error: {ex.Message}"
-                };
-                _dbContext.AuditLogs.Add(auditLog);
+                    var attemptResult = await _layeredApiOrderClient.AttemptPaymentAsync(id);
+
+                    if (attemptResult.success)
+                    {
+                        order.PaymentStatus = "ChargeAttempted";
+
+                        if (attemptResult.status == "success")
+                        {
+                            var apiOrder = await _layeredApiOrderClient.GetOrderAsync(id);
+                            if (apiOrder != null)
+                            {
+                                var apiInvoice = await _layeredApiOrderClient.GetInvoiceAsync(id);
+                                var receiptAttempt = new PaymentAttempt
+                                {
+                                    OrderId = id,
+                                    Status = attemptResult.status,
+                                    Amount = attemptResult.amount,
+                                    TransactionId = attemptResult.transactionId,
+                                    AttemptNumber = 1,
+                                    CreatedAt = DateTime.Now
+                                };
+
+                                await _layeredApiJobClient.QueueReceiptEmailAsync(apiOrder, apiInvoice, receiptAttempt);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't block status update
+                    var auditLog = new AuditLog
+                    {
+                        UserEmail = User.Identity?.Name ?? "Unknown",
+                        Action = "Payment Attempt Failed",
+                        Entity = $"Order #{id}",
+                        Details = $"Error: {ex.Message}"
+                    };
+                    _dbContext.AuditLogs.Add(auditLog);
+                }
             }
         }
 

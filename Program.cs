@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using System.IO;
 using LaundryApp.Models;
 using LaundryApp.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,13 @@ builder.Services.AddScoped<LaundryApp.Data.OrderStore>();
 // Payment Service
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<EmailNotificationService>();
+builder.Services.AddScoped<StripeBillingService>();
+
+var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
+if (!string.IsNullOrWhiteSpace(stripeSecretKey))
+{
+    StripeConfiguration.ApiKey = stripeSecretKey;
+}
 
 var layeredApiBaseUrl = builder.Configuration["LayeredServices:ApiBaseUrl"] ?? "http://localhost:5080";
 builder.Services.AddHttpClient<LayeredApiJobClient>(client =>

@@ -13,4 +13,7 @@ public class ApplicationUser : IdentityUser
     public string ZipCode { get; set; } = "";
     public bool TermsAccepted { get; set; }
     public string TermsAcceptedAt { get; set; } = "";
+
+    public string StripeCustomerId { get; set; } = "";
+    public string DefaultPaymentMethodId { get; set; } = "";
 }

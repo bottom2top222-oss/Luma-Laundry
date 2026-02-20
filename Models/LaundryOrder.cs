@@ -6,6 +6,7 @@ public class LaundryOrder
 
     public string UserEmail { get; set; } = "";
     public string ServiceType { get; set; } = "";
+    public string PricingType { get; set; } = "Personal";
     public DateTime ScheduledAt { get; set; }
 
     public string Address { get; set; } = "";
@@ -32,6 +33,13 @@ public class LaundryOrder
     
     public bool TermsAccepted { get; set; } = false;
     public string TermsAcceptedAt { get; set; } = "";
+
+    public decimal? BagWeightLbs { get; set; }
+    public string ItemsJson { get; set; } = "[]";
+    public int QuoteAmountCents { get; set; }
+    public int FinalAmountCents { get; set; }
+    public string Currency { get; set; } = "usd";
+    public string StripePaymentIntentId { get; set; } = "";
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime LastUpdatedAt { get; set; } = DateTime.Now;
