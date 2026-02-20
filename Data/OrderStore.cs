@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Globalization;
 using LaundryApp.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,12 +38,28 @@ public class OrderStore
 
     public IReadOnlyList<LaundryOrder> ByUser(string userEmail)
     {
-        var normalizedEmail = (userEmail ?? string.Empty).Trim().ToLower();
-
         return _dbContext.Orders
-            .Where(o => ((o.UserEmail ?? string.Empty).Trim().ToLower()) == normalizedEmail)
+            .AsEnumerable()
+            .Where(o => EmailsMatch(o.UserEmail, userEmail))
             .OrderByDescending(o => o.CreatedAt)
             .ToList();
+    }
+
+    private static bool EmailsMatch(string? left, string? right)
+    {
+        var normalizedLeft = NormalizeEmail(left);
+        var normalizedRight = NormalizeEmail(right);
+        return string.Equals(normalizedLeft, normalizedRight, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeEmail(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+        return new string(value
+            .Trim()
+            .Where(c => !char.IsWhiteSpace(c) && !char.IsControl(c) && CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.Format)
+            .ToArray());
     }
 
     public bool Delete(int id)

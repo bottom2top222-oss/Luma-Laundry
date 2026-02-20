@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using LaundryApp.Api.Data;
 using LaundryApp.Api.Models;
 using Microsoft.EntityFrameworkCore;
@@ -358,14 +359,17 @@ app.MapGet("/api/orders", async (string userEmail, ApiDbContext db) =>
         return Results.BadRequest(new { error = "userEmail is required." });
     }
 
-    var normalizedEmail = userEmail.Trim().ToLower();
+    var normalizedEmail = ApiHelpers.NormalizeEmail(userEmail);
 
     var orders = await db.Orders
-        .Where(o => (o.UserEmail ?? string.Empty).Trim().ToLower() == normalizedEmail)
         .OrderByDescending(o => o.CreatedAt)
         .ToListAsync();
 
-    return Results.Ok(orders);
+    var filtered = orders
+        .Where(o => ApiHelpers.NormalizeEmail(o.UserEmail) == normalizedEmail)
+        .ToList();
+
+    return Results.Ok(filtered);
 });
 
 app.MapGet("/api/admin/orders", async (string? status, string? search, ApiDbContext db) =>
@@ -562,6 +566,17 @@ public record UpdateAdminNotesRequest(string? AdminNotes);
 
 public static class ApiHelpers
 {
+    public static string NormalizeEmail(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+        return new string(value
+            .Trim()
+            .Where(c => !char.IsWhiteSpace(c) && !char.IsControl(c) && CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.Format)
+            .ToArray())
+            .ToLowerInvariant();
+    }
+
     public static string BuildAddress(string? addressLine1, string? addressLine2, string? city, string? state, string? zipCode)
     {
         var segments = new List<string>();
