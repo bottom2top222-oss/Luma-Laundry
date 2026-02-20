@@ -4,6 +4,7 @@ using LaundryApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace LaundryApp.Controllers;
 
@@ -13,17 +14,23 @@ public class OrdersController : Controller
     private readonly OrderStore _orderStore;
     private readonly LaundryAppDbContext _context;
     private readonly PaymentService _paymentService;
+    private readonly StripeBillingService _stripeBillingService;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly LayeredApiJobClient _layeredApiJobClient;
     private readonly LayeredApiOrderClient _layeredApiOrderClient;
+    private readonly IConfiguration _configuration;
     private readonly bool _apiOnlyMode;
 
-    public OrdersController(OrderStore orderStore, LaundryAppDbContext context, PaymentService paymentService, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
+    public OrdersController(OrderStore orderStore, LaundryAppDbContext context, PaymentService paymentService, StripeBillingService stripeBillingService, UserManager<ApplicationUser> userManager, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
     {
         _orderStore = orderStore;
         _context = context;
         _paymentService = paymentService;
+        _stripeBillingService = stripeBillingService;
+        _userManager = userManager;
         _layeredApiJobClient = layeredApiJobClient;
         _layeredApiOrderClient = layeredApiOrderClient;
+        _configuration = configuration;
         _apiOnlyMode = bool.TryParse(configuration["LayeredServices:ApiOnlyMode"], out var apiOnly) && apiOnly;
     }
 
@@ -101,12 +108,15 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         if (order.UserEmail != email) return Forbid();
 
+        ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+        ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+
         // Pass order to view for context
         return View(order);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SavePaymentMethod(int id, string cardNumber, string expiry, string cvv, string cardholderName, string? acceptTerms)
+    public async Task<IActionResult> SavePaymentMethod(int id, string? setupIntentId, string? paymentMethodId, string? cardNumber, string? expiry, string? cvv, string? cardholderName, string? acceptTerms)
     {
         var order = await GetOrderAsync(id);
         if (order == null) return NotFound();
@@ -140,21 +150,100 @@ public class OrdersController : Controller
         if (!acceptedTerms)
             ModelState.AddModelError("", "You must accept the terms and conditions");
 
+        var usingStripeSetup = !string.IsNullOrWhiteSpace(paymentMethodId) && !string.IsNullOrWhiteSpace(setupIntentId);
+
+        if (!usingStripeSetup)
+        {
+            if (string.IsNullOrWhiteSpace(cardNumber) || cardNumber.Length < 13)
+                ModelState.AddModelError("", "Invalid card number");
+
+            if (string.IsNullOrWhiteSpace(expiry) || expiry.Length != 5)
+                ModelState.AddModelError("", "Invalid expiry date (MM/YY)");
+
+            if (string.IsNullOrWhiteSpace(cvv) || cvv.Length < 3)
+                ModelState.AddModelError("", "Invalid CVV");
+
+            if (string.IsNullOrWhiteSpace(cardholderName))
+                ModelState.AddModelError("", "Cardholder name required");
+        }
+
         if (!ModelState.IsValid)
+        {
+            ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+            ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
             return View(order);
+        }
         
 
         try
         {
-            // Extract card details for saving
-            string cardLast4 = cardNumber.Substring(cardNumber.Length - 4);
-            string cardBrand = DetermineCardBrand(cardNumber);
-            string expiryMonth = expiry.Split('/')[0];
-            string expiryYear = "20" + expiry.Split('/')[1];
+            if (usingStripeSetup)
+            {
+                if (User?.Identity?.IsAuthenticated != true)
+                {
+                    return Unauthorized();
+                }
+
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "Unable to find your user profile.");
+                    ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+                    ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+                    return View(order);
+                }
+
+                if (_stripeBillingService.IsConfigured)
+                {
+                    var (customerId, _) = await _stripeBillingService.EnsureCustomerAsync(user);
+                    await _stripeBillingService.SetDefaultPaymentMethodAsync(customerId, paymentMethodId!);
+                }
+                else
+                {
+                    user.DefaultPaymentMethodId = paymentMethodId!;
+                    await _userManager.UpdateAsync(user);
+                }
+
+                var statusUpdatedViaApi = await _layeredApiOrderClient.UpdateOrderStatusAsync(id, "PendingPickup");
+                var paymentStatusUpdatedViaApi = await _layeredApiOrderClient.UpdatePaymentStatusAsync(id, "PaymentMethodOnFile");
+
+                if (!(statusUpdatedViaApi && paymentStatusUpdatedViaApi))
+                {
+                    if (_apiOnlyMode)
+                    {
+                        ModelState.AddModelError("", "Unable to save payment method right now.");
+                        ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+                        ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+                        return View(order);
+                    }
+
+                    var localOrder = _orderStore.Get(id);
+                    if (localOrder != null)
+                    {
+                        localOrder.UserEmail = email;
+                        localOrder.TermsAccepted = true;
+                        localOrder.TermsAcceptedAt = DateTime.Now.ToString("o");
+                        localOrder.Status = "PendingPickup";
+                        localOrder.PaymentStatus = "PaymentMethodOnFile";
+                        localOrder.LastUpdatedAt = DateTime.Now;
+                        _orderStore.Save();
+                    }
+                }
+
+                return RedirectToAction("Confirm", new { id = order.Id });
+            }
+
+            // Legacy raw-card fallback path
+            string safeCardNumber = cardNumber!;
+            string safeExpiry = expiry!;
+            string cardLast4 = safeCardNumber.Substring(safeCardNumber.Length - 4);
+            string cardBrand = DetermineCardBrand(safeCardNumber);
+            string expiryMonth = safeExpiry.Split('/')[0];
+            string expiryYear = "20" + safeExpiry.Split('/')[1];
 
             var savedViaApi = await _layeredApiOrderClient.SavePaymentMethodAsync(
                 id,
-                cardNumber,
+                safeCardNumber,
                 cardLast4,
                 cardBrand,
                 expiryMonth,
@@ -166,7 +255,7 @@ public class OrdersController : Controller
                 // Fallback to database save when API is unavailable
                 await _paymentService.SavePaymentMethodAsync(
                     email,
-                    cardNumber,
+                    safeCardNumber,
                     cardLast4,
                     cardBrand,
                     expiryMonth,
@@ -201,6 +290,8 @@ public class OrdersController : Controller
         catch (Exception ex)
         {
             ModelState.AddModelError("", $"Error saving payment method: {ex.Message}");
+            ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+            ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
             return View(order);
         }
     }
