@@ -459,8 +459,18 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         var apiOrders = await _layeredApiOrderClient.GetUserOrdersAsync(email);
 
+        // Use local store if: API returned null OR (API returned empty AND not in API-only mode)
+        var shouldUseLocalStore = apiOrders == null || (apiOrders.Count == 0 && !_apiOnlyMode);
+        
         List<LaundryOrder> orders;
-        if (apiOrders != null)
+        if (shouldUseLocalStore && !_apiOnlyMode)
+        {
+            orders = _orderStore.All()
+                .Where(o => o.UserEmail == email)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+        }
+        else if (apiOrders != null)
         {
             orders = apiOrders;
         }
@@ -471,10 +481,7 @@ public class OrdersController : Controller
         }
         else
         {
-            orders = _orderStore.All()
-                .Where(o => o.UserEmail == email)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToList();
+            orders = new List<LaundryOrder>();
         }
 
         return View(orders);
