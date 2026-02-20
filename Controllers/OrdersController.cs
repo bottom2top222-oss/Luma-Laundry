@@ -459,28 +459,22 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         var apiOrders = await _layeredApiOrderClient.GetUserOrdersAsync(email);
 
-        // Use local store if: API returned null OR (API returned empty AND not in API-only mode)
-        var shouldUseLocalStore = apiOrders == null || (apiOrders.Count == 0 && !_apiOnlyMode);
-        
         List<LaundryOrder> orders;
-        if (shouldUseLocalStore && !_apiOnlyMode)
-        {
-            orders = _orderStore.All()
-                .Where(o => o.UserEmail == email)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToList();
-        }
-        else if (apiOrders != null)
+        
+        // Try API first if it returned data
+        if (apiOrders != null && apiOrders.Count > 0)
         {
             orders = apiOrders;
         }
-        else if (_apiOnlyMode)
+        // If API is unavailable or returned empty and not in API-only mode, use local store
+        else if (!_apiOnlyMode)
         {
-            TempData["Error"] = "Order service is temporarily unavailable.";
-            orders = new List<LaundryOrder>();
+            orders = _orderStore.ByUser(email).ToList();
         }
+        // API-only mode with no data
         else
         {
+            TempData["Error"] = "Order service is temporarily unavailable.";
             orders = new List<LaundryOrder>();
         }
 
