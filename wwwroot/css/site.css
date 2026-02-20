@@ -410,6 +410,28 @@ footer a:hover {
   color: #ffffff;
 }
 
+.landing-contact-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0;
+  background: linear-gradient(135deg, #1d77c8 0%, #2c89d8 100%);
+  color: #eaf4ff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(117, 184, 255, 0.75);
+  letter-spacing: 0.015em;
+  white-space: nowrap;
+}
+
+.landing-contact-box:hover {
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(74, 168, 255, 0.45);
+}
+
 .landing-dropdown-menu {
   background: rgba(7, 14, 38, 0.98);
   border: 1px solid rgba(96, 136, 232, 0.35);
