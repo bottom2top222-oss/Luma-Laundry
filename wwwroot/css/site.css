@@ -506,6 +506,11 @@ footer a:hover {
   text-shadow: 0 0 24px rgba(36, 212, 244, 0.28);
 }
 
+.home-hero-logo {
+  width: min(100%, 980px);
+  filter: drop-shadow(0 0 20px rgba(76, 192, 255, 0.45));
+}
+
 .home-hero-copy {
   max-width: 760px;
   font-size: 1.4rem;
