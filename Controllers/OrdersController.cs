@@ -125,19 +125,6 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         if (order.UserEmail != email) return Forbid();
 
-        // Validate card details
-        if (string.IsNullOrWhiteSpace(cardNumber) || cardNumber.Length < 13)
-            ModelState.AddModelError("", "Invalid card number");
-
-        if (string.IsNullOrWhiteSpace(expiry) || expiry.Length != 5)
-            ModelState.AddModelError("", "Invalid expiry date (MM/YY)");
-
-        if (string.IsNullOrWhiteSpace(cvv) || cvv.Length < 3)
-            ModelState.AddModelError("", "Invalid CVV");
-
-        if (string.IsNullOrWhiteSpace(cardholderName))
-            ModelState.AddModelError("", "Cardholder name required");
-
         var acceptedTerms = false;
         if (Request.HasFormContentType)
         {
