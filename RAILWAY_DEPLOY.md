@@ -141,6 +141,9 @@ ASPNETCORE_ENVIRONMENT=Production
 LayeredServices__ApiOnlyMode=true
 LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
 Database__Path=/var/data/laundry.db
+STRIPE_PUBLISHABLE_KEY=pk_live_or_test_xxx
+STRIPE_SECRET_KEY=sk_live_or_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
 ```
 
 #### `backend-server`
@@ -167,6 +170,9 @@ ASPNETCORE_ENVIRONMENT=Production
 LayeredServices__ApiOnlyMode=true
 LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
 Database__Path=/var/data/laundry.db
+STRIPE_PUBLISHABLE_KEY=pk_live_or_test_xxx
+STRIPE_SECRET_KEY=sk_live_or_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
 ```
 
 #### backend-server (.env style)
@@ -187,7 +193,10 @@ LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
    "ASPNETCORE_ENVIRONMENT": "Production",
    "LayeredServices__ApiOnlyMode": "true",
    "LayeredServices__ApiBaseUrl": "http://backend-server.railway.internal:8080",
-   "Database__Path": "/var/data/laundry.db"
+   "Database__Path": "/var/data/laundry.db",
+   "STRIPE_PUBLISHABLE_KEY": "pk_live_or_test_xxx",
+   "STRIPE_SECRET_KEY": "sk_live_or_test_xxx",
+   "STRIPE_WEBHOOK_SECRET": "whsec_xxx"
 }
 ```
 
@@ -241,7 +250,24 @@ ASPNETCORE_ENVIRONMENT=Production
 LayeredServices__ApiOnlyMode=true
 LayeredServices__ApiBaseUrl=http://backend-server.railway.internal:8080
 Database__Path=/var/data/laundry.db
+STRIPE_PUBLISHABLE_KEY=pk_live_or_test_xxx
+STRIPE_SECRET_KEY=sk_live_or_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
 ```
+
+### Stripe Webhook Checklist
+
+1. In Stripe Dashboard, add endpoint:
+   - `https://<your-frontend-domain>/api/stripe/webhook`
+2. Subscribe to events:
+   - `setup_intent.succeeded`
+   - `payment_intent.succeeded`
+   - `payment_intent.payment_failed`
+   - `payment_intent.processing`
+   - `payment_intent.requires_action`
+3. Copy signing secret (`whsec_...`) into Railway `frontend` variable:
+   - `STRIPE_WEBHOOK_SECRET`
+4. Redeploy `frontend` service.
 
 #### backend-server
 ```

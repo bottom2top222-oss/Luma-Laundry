@@ -39,6 +39,17 @@ Use double underscore (`__`) in environment variables to map nested config keys.
 - `Email__FromAddress`
 - `Email__FromName`
 
+### Stripe Settings
+
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+
+Notes:
+- Use Stripe dashboard values directly (single line, no extra quotes).
+- Use test keys in non-production and live keys in production.
+- `STRIPE_WEBHOOK_SECRET` must match the endpoint configured for `POST /api/stripe/webhook`.
+
 ### Seeded Admin (override defaults)
 
 - `DefaultAdmin__Email`

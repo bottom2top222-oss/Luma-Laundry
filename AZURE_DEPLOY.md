@@ -56,6 +56,12 @@ az webapp config appsettings set `
   --name $webAppName `
   --settings Database__Path=/home/site/wwwroot/App_Data/laundry.db
 
+# Configure Stripe keys/secrets (set your real values)
+az webapp config appsettings set `
+  --resource-group $resourceGroup `
+  --name $webAppName `
+  --settings STRIPE_PUBLISHABLE_KEY=pk_live_or_test_xxx STRIPE_SECRET_KEY=sk_live_or_test_xxx STRIPE_WEBHOOK_SECRET=whsec_xxx
+
 # Enable detailed error messages (optional, for debugging)
 az webapp config appsettings set `
   --resource-group $resourceGroup `
@@ -89,6 +95,24 @@ az webapp show --resource-group $resourceGroup --name $webAppName --query defaul
 ```
 
 Visit: https://{your-app-name}.azurewebsites.net
+
+## Step 6B: Configure Stripe Webhook
+
+In Stripe Dashboard:
+
+1. Add endpoint: `https://{your-app-name}.azurewebsites.net/api/stripe/webhook`
+2. Subscribe to events:
+  - `setup_intent.succeeded`
+  - `payment_intent.succeeded`
+  - `payment_intent.payment_failed`
+  - `payment_intent.processing`
+  - `payment_intent.requires_action`
+3. Copy the endpoint signing secret (`whsec_...`) and set it in App Settings as `STRIPE_WEBHOOK_SECRET`
+4. Restart the web app:
+
+```powershell
+az webapp restart --resource-group $resourceGroup --name $webAppName
+```
 
 ## Step 7: Add Custom Domain (luma-laundry.app)
 
