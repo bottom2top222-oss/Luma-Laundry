@@ -44,16 +44,19 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     selected ??= "All";
 
     var apiOrders = await _layeredApiOrderClient.GetAdminOrdersAsync(selected, search);
-    
-    // Use local store if: API returned null OR (API returned empty AND not in API-only mode AND we're filtering all statuses)
-    var shouldUseLocalStore = !_apiOnlyMode && (apiOrders == null ||
-        (apiOrders.Count == 0 && selected == "All"));
-    
-    var allOrders = shouldUseLocalStore ? _orderStore.All().ToList() : (apiOrders ?? new List<LaundryOrder>());
+    var localOrders = _orderStore.All().ToList();
 
-    if (apiOrders == null && _apiOnlyMode)
+    var apiUnavailable = apiOrders == null;
+    var apiEmptyAll = (apiOrders?.Count ?? 0) == 0 && selected == "All";
+    var shouldUseLocalStore = apiUnavailable || (apiEmptyAll && localOrders.Count > 0);
+
+    var allOrders = shouldUseLocalStore ? localOrders : (apiOrders ?? new List<LaundryOrder>());
+
+    if (shouldUseLocalStore)
     {
-        ViewBag.Error = "Order service is temporarily unavailable.";
+        ViewBag.Error = apiUnavailable
+            ? "Order API is unavailable. Showing local fallback orders."
+            : "Order API returned no records. Showing local fallback orders.";
     }
 
     // Apply search filter if provided
@@ -100,7 +103,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     [HttpPost]
     public async Task<IActionResult> UpdateStatus(int id, string status, string currentStatus = "All", string? search = null)
     {
-        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? _orderStore.Get(id);
         if (order == null) return NotFound();
 
         if (status == "Quoted")
@@ -221,7 +224,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     [HttpGet]
     public async Task<IActionResult> ProcessOrder(int id, string currentStatus = "All", string? search = null)
     {
-        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? _orderStore.Get(id);
         if (order == null)
         {
             TempData["Error"] = $"Order #{id} is unavailable right now. Refresh and try again.";
@@ -262,7 +265,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
             return View(model);
         }
 
-        var order = await _layeredApiOrderClient.GetOrderAsync(model.Id) ?? (_apiOnlyMode ? null : _orderStore.Get(model.Id));
+        var order = await _layeredApiOrderClient.GetOrderAsync(model.Id) ?? _orderStore.Get(model.Id);
         if (order == null)
         {
             TempData["Error"] = $"Order #{model.Id} is unavailable right now. Refresh and try again.";
@@ -369,7 +372,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     [HttpPost]
     public async Task<IActionResult> UpdateAdminNotes(int id, string adminNotes, string currentStatus = "All", string? search = null)
     {
-        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? _orderStore.Get(id);
         if (order == null) return NotFound();
 
         var oldNotes = order.AdminNotes;
@@ -404,7 +407,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     [HttpPost]
     public async Task<IActionResult> Delete(int id, string currentStatus = "All", string? search = null)
     {
-        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
+        var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? _orderStore.Get(id);
         if (order != null)
         {
             // Log audit before deleting

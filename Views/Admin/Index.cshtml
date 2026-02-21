@@ -36,6 +36,10 @@
     {
         <div class="alert alert-danger">@error</div>
     }
+    @if (ViewBag.Error is string viewError && !string.IsNullOrWhiteSpace(viewError))
+    {
+        <div class="alert alert-warning">@viewError</div>
+    }
 
 <!-- Search Form -->
 <div class="card dashboard-card mb-3">
