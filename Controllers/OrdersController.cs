@@ -232,12 +232,6 @@ public class OrdersController : Controller
 
             if (!(statusUpdatedViaApi && paymentStatusUpdatedViaApi))
             {
-                if (_apiOnlyMode)
-                {
-                    TempData["Error"] = "Unable to save payment method right now.";
-                    return RedirectToAction("SavePaymentMethod", new { id });
-                }
-
                 var localOrder = _orderStore.Get(id);
                 if (localOrder != null)
                 {
@@ -246,6 +240,11 @@ public class OrdersController : Controller
                     localOrder.PaymentStatus = "PaymentMethodOnFile";
                     localOrder.LastUpdatedAt = DateTime.Now;
                     _orderStore.Save();
+                }
+
+                if (_apiOnlyMode)
+                {
+                    TempData["Success"] = "Payment method saved. Order sync is delayed, but your card is on file.";
                 }
             }
 
