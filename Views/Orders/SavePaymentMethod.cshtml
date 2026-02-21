@@ -35,11 +35,16 @@
                     <strong>No charge today.</strong> We’ll charge your card only after your laundry is processed and marked Ready.
                 </div>
 
-                @if (!(ViewBag.StripeConfigured as bool? ?? false) || string.IsNullOrWhiteSpace(ViewBag.StripePublishableKey as string))
+                @if (!(ViewBag.StripeConfigured as bool? ?? false))
                 {
                     <div class="alert alert-warning">
-                        Stripe is not configured yet. Set <strong>Stripe:SecretKey</strong> and <strong>Stripe:PublishableKey</strong> in app settings.
+                        Stripe is not configured yet. Set <strong>Stripe:SecretKey</strong> in app settings.
                     </div>
+                }
+
+                @if (TempData["Error"] is string error && !string.IsNullOrWhiteSpace(error))
+                {
+                    <div class="alert alert-danger">@error</div>
                 }
 
                 @if (!ViewData.ModelState.IsValid)
@@ -55,19 +60,9 @@
                 <form method="post" id="stripeSaveMethodForm" action="/Orders/SavePaymentMethod/@Model.Id">
                     @Html.AntiForgeryToken()
 
-                    <input type="hidden" name="setupIntentId" id="setupIntentId" />
-                    <input type="hidden" name="paymentMethodId" id="paymentMethodId" />
-
-                    <div class="mb-3">
-                        <label class="form-label" for="cardholderName">Cardholder Name</label>
-                        <input type="text" name="cardholderName" id="cardholderName" class="form-control" placeholder="John Doe" required />
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Card details</label>
-                        <div id="card-element" class="form-control" style="padding-top:12px; padding-bottom:12px;"></div>
-                        <small class="text-muted">Your card is saved securely with Stripe for future off-session billing.</small>
-                    </div>
+                    <p class="mb-3 text-muted">
+                        You’ll continue to Stripe’s secure checkout page to save your card.
+                    </p>
 
                     <div class="mb-3 form-check">
                         <input type="hidden" name="acceptTerms" value="false" />
@@ -77,7 +72,7 @@
                         </label>
                     </div>
                     
-                    <button type="submit" id="saveCardBtn" class="btn btn-primary w-100">Save Card & Continue</button>
+                    <button type="submit" id="saveCardBtn" class="btn btn-primary w-100" @(ViewBag.StripeConfigured as bool? ?? false ? null : "disabled")>Continue to Secure Checkout</button>
                 </form>
                 
                 <div class="mt-3 text-center">
@@ -87,84 +82,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        (() => {
-            const stripePublishableKey = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((ViewBag.StripePublishableKey as string ?? string.Empty).Trim()));
-            const stripeConfigured = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.StripeConfigured as bool? ?? false));
-            if (!stripeConfigured || !stripePublishableKey) {
-                return;
-            }
-
-            const form = document.getElementById('stripeSaveMethodForm');
-            const submitBtn = document.getElementById('saveCardBtn');
-            const setupIntentIdInput = document.getElementById('setupIntentId');
-            const paymentMethodIdInput = document.getElementById('paymentMethodId');
-            const cardholderNameInput = document.getElementById('cardholderName');
-            const cardElementContainer = document.getElementById('card-element');
-
-            const stripe = Stripe(stripePublishableKey);
-            const elements = stripe.elements();
-            const cardElement = elements.create('card', { hidePostalCode: true });
-            cardElement.mount(cardElementContainer);
-
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                submitBtn.disabled = true;
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Saving card...';
-
-                try {
-                    const cardholderName = (cardholderNameInput.value || '').trim();
-                    if (!cardholderName) {
-                        throw new Error('Cardholder name required.');
-                    }
-
-                    const setupIntentResp = await fetch('/api/billing/setup-intent', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'same-origin'
-                    });
-
-                    if (!setupIntentResp.ok) {
-                        throw new Error('Unable to initialize secure card setup.');
-                    }
-
-                    const setupIntentPayload = await setupIntentResp.json();
-                    const clientSecret = setupIntentPayload.clientSecret;
-                    if (!clientSecret) {
-                        throw new Error('Missing setup intent secret from server.');
-                    }
-
-                    const result = await stripe.confirmCardSetup(clientSecret, {
-                        payment_method: {
-                            card: cardElement,
-                            billing_details: {
-                                name: cardholderName
-                            }
-                        }
-                    });
-
-                    if (result.error) {
-                        throw new Error(result.error.message || 'Unable to save card.');
-                    }
-
-                    const setupIntent = result.setupIntent;
-                    setupIntentIdInput.value = setupIntent.id;
-                    paymentMethodIdInput.value = setupIntent.payment_method;
-
-                    form.submit();
-                } catch (error) {
-                    alert(error.message || 'Unable to save card right now. Please try again.');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
-                }
-            });
-        })();
-    </script>
-}

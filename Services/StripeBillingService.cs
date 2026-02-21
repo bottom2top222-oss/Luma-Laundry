@@ -3,6 +3,7 @@ using LaundryApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
+using Stripe.Checkout;
 
 namespace LaundryApp.Services;
 
@@ -62,6 +63,95 @@ public class StripeBillingService
             Usage = "off_session",
             PaymentMethodTypes = new List<string> { "card" }
         });
+    }
+
+    public async Task<string> CreateSetupCheckoutSessionAsync(ApplicationUser user, string successUrl, string cancelUrl, int? orderId = null)
+    {
+        if (!IsConfigured)
+        {
+            throw new InvalidOperationException("Stripe is not configured. Set Stripe:SecretKey.");
+        }
+
+        if (string.IsNullOrWhiteSpace(successUrl) || string.IsNullOrWhiteSpace(cancelUrl))
+        {
+            throw new InvalidOperationException("Success and cancel URLs are required.");
+        }
+
+        var (customerId, _) = await EnsureCustomerAsync(user);
+
+        var sessionService = new SessionService();
+        var session = await sessionService.CreateAsync(new SessionCreateOptions
+        {
+            Mode = "setup",
+            Customer = customerId,
+            SuccessUrl = successUrl,
+            CancelUrl = cancelUrl,
+            PaymentMethodTypes = new List<string> { "card" },
+            SetupIntentData = new SessionSetupIntentDataOptions
+            {
+                Metadata = new Dictionary<string, string>
+                {
+                    ["userId"] = user.Id,
+                    ["orderId"] = orderId?.ToString() ?? string.Empty
+                }
+            }
+        });
+
+        if (string.IsNullOrWhiteSpace(session.Url))
+        {
+            throw new InvalidOperationException("Stripe did not return a checkout URL.");
+        }
+
+        return session.Url;
+    }
+
+    public async Task<string> FinalizeSetupCheckoutSessionAsync(ApplicationUser user, string checkoutSessionId)
+    {
+        if (!IsConfigured)
+        {
+            throw new InvalidOperationException("Stripe is not configured. Set Stripe:SecretKey.");
+        }
+
+        if (string.IsNullOrWhiteSpace(checkoutSessionId))
+        {
+            throw new InvalidOperationException("Missing checkout session id.");
+        }
+
+        var (customerId, _) = await EnsureCustomerAsync(user);
+
+        var sessionService = new SessionService();
+        var session = await sessionService.GetAsync(checkoutSessionId);
+        if (session == null)
+        {
+            throw new InvalidOperationException("Unable to load Stripe checkout session.");
+        }
+
+        if (!string.Equals(session.CustomerId, customerId, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("Checkout session does not belong to the current customer.");
+        }
+
+        var setupIntentId = session.SetupIntentId;
+        if (string.IsNullOrWhiteSpace(setupIntentId))
+        {
+            throw new InvalidOperationException("Stripe checkout session did not return a setup intent.");
+        }
+
+        var setupIntentService = new SetupIntentService();
+        var setupIntent = await setupIntentService.GetAsync(setupIntentId);
+        if (setupIntent == null)
+        {
+            throw new InvalidOperationException("Unable to load Stripe setup intent.");
+        }
+
+        var paymentMethodId = setupIntent.PaymentMethodId;
+        if (string.IsNullOrWhiteSpace(paymentMethodId))
+        {
+            throw new InvalidOperationException("Stripe setup intent did not produce a payment method.");
+        }
+
+        await SetDefaultPaymentMethodAsync(customerId, paymentMethodId);
+        return paymentMethodId;
     }
 
     public async Task SetDefaultPaymentMethodAsync(string stripeCustomerId, string paymentMethodId)

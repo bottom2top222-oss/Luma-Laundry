@@ -5,12 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 
 namespace LaundryApp.Controllers;
 
 [Authorize]
 public class OrdersController : Controller
 {
+    private const string SavePaymentTermsSessionPrefix = "save-payment-terms:";
+
     private readonly OrderStore _orderStore;
     private readonly LaundryAppDbContext _context;
     private readonly PaymentService _paymentService;
@@ -108,7 +111,6 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         if (order.UserEmail != email) return Forbid();
 
-        ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
         ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
 
         // Pass order to view for context
@@ -116,7 +118,7 @@ public class OrdersController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SavePaymentMethod(int id, string? setupIntentId, string? paymentMethodId, string? cardNumber, string? expiry, string? cvv, string? cardholderName, string? acceptTerms)
+    public async Task<IActionResult> SavePaymentMethod(int id, string? acceptTerms)
     {
         var order = await GetOrderAsync(id);
         if (order == null) return NotFound();
@@ -137,29 +139,8 @@ public class OrdersController : Controller
         if (!acceptedTerms)
             ModelState.AddModelError("", "You must accept the terms and conditions");
 
-        var usingStripeSetup = !string.IsNullOrWhiteSpace(paymentMethodId) && !string.IsNullOrWhiteSpace(setupIntentId);
-
-        if (usingStripeSetup && string.IsNullOrWhiteSpace(cardholderName))
-            ModelState.AddModelError("", "Cardholder name required");
-
-        if (!usingStripeSetup)
-        {
-            if (string.IsNullOrWhiteSpace(cardNumber) || cardNumber.Length < 13)
-                ModelState.AddModelError("", "Invalid card number");
-
-            if (string.IsNullOrWhiteSpace(expiry) || expiry.Length != 5)
-                ModelState.AddModelError("", "Invalid expiry date (MM/YY)");
-
-            if (string.IsNullOrWhiteSpace(cvv) || cvv.Length < 3)
-                ModelState.AddModelError("", "Invalid CVV");
-
-            if (string.IsNullOrWhiteSpace(cardholderName))
-                ModelState.AddModelError("", "Cardholder name required");
-        }
-
         if (!ModelState.IsValid)
         {
-            ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
             ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
             return View(order);
         }
@@ -167,122 +148,121 @@ public class OrdersController : Controller
 
         try
         {
-            if (usingStripeSetup)
+            if (User?.Identity?.IsAuthenticated != true)
             {
-                if (User?.Identity?.IsAuthenticated != true)
-                {
-                    return Unauthorized();
-                }
-
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                {
-                    ModelState.AddModelError("", "Unable to find your user profile.");
-                    ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
-                    ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
-                    return View(order);
-                }
-
-                if (_stripeBillingService.IsConfigured)
-                {
-                    var (customerId, _) = await _stripeBillingService.EnsureCustomerAsync(user);
-                    await _stripeBillingService.SetDefaultPaymentMethodAsync(customerId, paymentMethodId!);
-                }
-                else
-                {
-                    user.DefaultPaymentMethodId = paymentMethodId!;
-                    await _userManager.UpdateAsync(user);
-                }
-
-                var statusUpdatedViaApi = await _layeredApiOrderClient.UpdateOrderStatusAsync(id, "PendingPickup");
-                var paymentStatusUpdatedViaApi = await _layeredApiOrderClient.UpdatePaymentStatusAsync(id, "PaymentMethodOnFile");
-
-                if (!(statusUpdatedViaApi && paymentStatusUpdatedViaApi))
-                {
-                    if (_apiOnlyMode)
-                    {
-                        ModelState.AddModelError("", "Unable to save payment method right now.");
-                        ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
-                        ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
-                        return View(order);
-                    }
-
-                    var localOrder = _orderStore.Get(id);
-                    if (localOrder != null)
-                    {
-                        localOrder.UserEmail = email;
-                        localOrder.TermsAccepted = true;
-                        localOrder.TermsAcceptedAt = DateTime.Now.ToString("o");
-                        localOrder.Status = "PendingPickup";
-                        localOrder.PaymentStatus = "PaymentMethodOnFile";
-                        localOrder.LastUpdatedAt = DateTime.Now;
-                        _orderStore.Save();
-                    }
-                }
-
-                return RedirectToAction("Confirm", new { id = order.Id });
+                return Unauthorized();
             }
 
-            // Legacy raw-card fallback path
-            string safeCardNumber = cardNumber!;
-            string safeExpiry = expiry!;
-            string cardLast4 = safeCardNumber.Substring(safeCardNumber.Length - 4);
-            string cardBrand = DetermineCardBrand(safeCardNumber);
-            string expiryMonth = safeExpiry.Split('/')[0];
-            string expiryYear = "20" + safeExpiry.Split('/')[1];
-
-            var savedViaApi = await _layeredApiOrderClient.SavePaymentMethodAsync(
-                id,
-                safeCardNumber,
-                cardLast4,
-                cardBrand,
-                expiryMonth,
-                expiryYear,
-                acceptedTerms);
-
-            if (!savedViaApi)
+            if (!_stripeBillingService.IsConfigured)
             {
-                // Fallback to database save when API is unavailable
-                await _paymentService.SavePaymentMethodAsync(
-                    email,
-                    safeCardNumber,
-                    cardLast4,
-                    cardBrand,
-                    expiryMonth,
-                    expiryYear,
-                    isDefault: true
-                );
+                ModelState.AddModelError("", "Stripe is not configured. Please contact support.");
+                ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+                return View(order);
+            }
 
-                // Reload order from local store to ensure it's tracked by DbContext
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Unable to find your user profile.");
+                ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+                return View(order);
+            }
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var successUrl = $"{baseUrl}/Orders/SavePaymentMethodSuccess/{id}?session_id={{CHECKOUT_SESSION_ID}}";
+            var cancelUrl = $"{baseUrl}/Orders/SavePaymentMethod/{id}";
+
+            HttpContext.Session.SetString($"{SavePaymentTermsSessionPrefix}{id}", "true");
+
+            var checkoutUrl = await _stripeBillingService.CreateSetupCheckoutSessionAsync(user, successUrl, cancelUrl, id);
+            return Redirect(checkoutUrl);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", $"Error saving payment method: {ex.Message}");
+            ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+            return View(order);
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SavePaymentMethodSuccess(int id, string? session_id)
+    {
+        var order = await GetOrderAsync(id);
+        if (order == null) return NotFound();
+
+        var email = User?.Identity?.Name ?? "";
+        if (order.UserEmail != email) return Forbid();
+
+        var acceptedTerms = string.Equals(
+            HttpContext.Session.GetString($"{SavePaymentTermsSessionPrefix}{id}"),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+
+        if (!acceptedTerms)
+        {
+            TempData["Error"] = "Please accept terms before saving your payment method.";
+            return RedirectToAction("SavePaymentMethod", new { id });
+        }
+
+        if (string.IsNullOrWhiteSpace(session_id))
+        {
+            TempData["Error"] = "Missing checkout session details from Stripe.";
+            return RedirectToAction("SavePaymentMethod", new { id });
+        }
+
+        if (User?.Identity?.IsAuthenticated != true)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            TempData["Error"] = "Unable to find your user profile.";
+            return RedirectToAction("SavePaymentMethod", new { id });
+        }
+
+        try
+        {
+            await _stripeBillingService.FinalizeSetupCheckoutSessionAsync(user, session_id);
+
+            var statusUpdatedViaApi = await _layeredApiOrderClient.UpdateOrderStatusAsync(id, "PendingPickup");
+            var paymentStatusUpdatedViaApi = await _layeredApiOrderClient.UpdatePaymentStatusAsync(id, "PaymentMethodOnFile");
+
+            if (!(statusUpdatedViaApi && paymentStatusUpdatedViaApi))
+            {
+                if (_apiOnlyMode)
+                {
+                    TempData["Error"] = "Unable to save payment method right now.";
+                    return RedirectToAction("SavePaymentMethod", new { id });
+                }
+
                 var localOrder = _orderStore.Get(id);
                 if (localOrder != null)
                 {
-                    // Ensure UserEmail matches the current logged-in user
                     localOrder.UserEmail = email;
-                    localOrder.TermsAccepted = true;
-                    localOrder.TermsAcceptedAt = DateTime.Now.ToString("o");
                     localOrder.Status = "PendingPickup";
                     localOrder.PaymentStatus = "PaymentMethodOnFile";
                     localOrder.LastUpdatedAt = DateTime.Now;
                     _orderStore.Save();
                 }
             }
-            else
-            {
-                // Also ensure the order from API has the correct UserEmail
-                order.UserEmail = email;
-                order.Status = "PendingPickup";
-                order.PaymentStatus = "PaymentMethodOnFile";
-            }
+
+            order.TermsAccepted = true;
+            order.TermsAcceptedAt = DateTime.Now.ToString("o");
+            order.PaymentStatus = "PaymentMethodOnFile";
+            order.LastUpdatedAt = DateTime.Now;
+            _orderStore.Save();
+
+            HttpContext.Session.Remove($"{SavePaymentTermsSessionPrefix}{id}");
 
             return RedirectToAction("Confirm", new { id = order.Id });
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", $"Error saving payment method: {ex.Message}");
-            ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
-            ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
-            return View(order);
+            TempData["Error"] = $"Error confirming payment method: {ex.Message}";
+            return RedirectToAction("SavePaymentMethod", new { id });
         }
     }
 
@@ -444,11 +424,13 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         if (order.UserEmail != email) return Forbid();
 
+        ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
         return View(order);
     }
 
     [HttpPost]
-    public async Task<IActionResult> UpdatePaymentMethod(int id, string cardNumber, string expiry, string cvv, string cardholderName)
+    [ActionName("UpdatePaymentMethod")]
+    public async Task<IActionResult> UpdatePaymentMethodPost(int id)
     {
         var order = await GetOrderAsync(id);
         if (order == null) return NotFound();
@@ -457,58 +439,79 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         if (order.UserEmail != email) return Forbid();
 
-        // Validate card details
-        if (string.IsNullOrWhiteSpace(cardNumber) || cardNumber.Length < 13)
-            ModelState.AddModelError("", "Invalid card number");
+        try
+        {
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                return Unauthorized();
+            }
 
-        if (string.IsNullOrWhiteSpace(expiry) || expiry.Length != 5)
-            ModelState.AddModelError("", "Invalid expiry date (MM/YY)");
+            if (!_stripeBillingService.IsConfigured)
+            {
+                ModelState.AddModelError("", "Stripe is not configured. Please contact support.");
+                ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+                return View(order);
+            }
 
-        if (string.IsNullOrWhiteSpace(cvv) || cvv.Length < 3)
-            ModelState.AddModelError("", "Invalid CVV");
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Unable to find your user profile.");
+                ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
+                return View(order);
+            }
 
-        if (string.IsNullOrWhiteSpace(cardholderName))
-            ModelState.AddModelError("", "Cardholder name required");
-
-        if (!ModelState.IsValid)
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var successUrl = $"{baseUrl}/Orders/UpdatePaymentMethodSuccess/{id}?session_id={{CHECKOUT_SESSION_ID}}";
+            var cancelUrl = $"{baseUrl}/Orders/UpdatePaymentMethod/{id}";
+            var checkoutUrl = await _stripeBillingService.CreateSetupCheckoutSessionAsync(user, successUrl, cancelUrl, id);
+            return Redirect(checkoutUrl);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", $"Error updating payment method: {ex.Message}");
+            ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
             return View(order);
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> UpdatePaymentMethodSuccess(int id, string? session_id)
+    {
+        var order = await GetOrderAsync(id);
+        if (order == null) return NotFound();
+
+        var email = User?.Identity?.Name ?? "";
+        if (order.UserEmail != email) return Forbid();
+
+        if (string.IsNullOrWhiteSpace(session_id))
+        {
+            TempData["Error"] = "Missing checkout session details from Stripe.";
+            return RedirectToAction("UpdatePaymentMethod", new { id });
+        }
+
+        if (User?.Identity?.IsAuthenticated != true)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            TempData["Error"] = "Unable to find your user profile.";
+            return RedirectToAction("UpdatePaymentMethod", new { id });
+        }
 
         try
         {
-            // Extract card details for saving
-            string cardLast4 = cardNumber.Substring(cardNumber.Length - 4);
-            string cardBrand = DetermineCardBrand(cardNumber);
-            string expiryMonth = expiry.Split('/')[0];
-            string expiryYear = "20" + expiry.Split('/')[1];
-
-            var updatedViaApi = await _layeredApiOrderClient.UpdatePaymentMethodAsync(
-                id,
-                cardNumber,
-                cardLast4,
-                cardBrand,
-                expiryMonth,
-                expiryYear);
-
-            if (!updatedViaApi)
-            {
-                await _paymentService.SavePaymentMethodAsync(
-                    email,
-                    cardNumber,
-                    cardLast4,
-                    cardBrand,
-                    expiryMonth,
-                    expiryYear,
-                    isDefault: true
-                );
-            }
-
+            await _stripeBillingService.FinalizeSetupCheckoutSessionAsync(user, session_id);
             TempData["Success"] = "Payment method updated successfully.";
             return RedirectToAction("History");
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", $"Error updating payment method: {ex.Message}");
-            return View(order);
+            TempData["Error"] = $"Error confirming payment method: {ex.Message}";
+            return RedirectToAction("UpdatePaymentMethod", new { id });
         }
     }
 
