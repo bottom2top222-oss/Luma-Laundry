@@ -387,11 +387,13 @@ app.MapGet("/api/admin/orders", async (string? status, string? search, ApiDbCont
 
     if (!string.IsNullOrWhiteSpace(search))
     {
-        var lowered = search.ToLower();
+        var lowered = search.Trim().ToLower();
+        var hasNumericSearch = int.TryParse(search.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var searchOrderId);
+
         query = query.Where(o =>
-            o.UserEmail.ToLower().Contains(lowered) ||
-            o.Id.ToString().Contains(lowered) ||
-            o.Address.ToLower().Contains(lowered));
+            ((o.UserEmail ?? string.Empty).ToLower().Contains(lowered)) ||
+            ((o.Address ?? string.Empty).ToLower().Contains(lowered)) ||
+            (hasNumericSearch && o.Id == searchOrderId));
     }
 
     var orders = await query
