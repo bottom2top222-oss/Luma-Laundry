@@ -86,6 +86,15 @@
                 Final total is calculated from exact weights/items. Payment is charged when order moves to <strong>Ready</strong>.
             </div>
 
+            <div class="alert alert-secondary mb-3" id="quotePreviewPanel">
+                <div class="d-flex flex-wrap gap-3">
+                    <div><strong>Live Total:</strong> <span id="quotePreviewTotal">$0.00</span></div>
+                    <div><strong>Applied Minimum:</strong> <span id="quotePreviewMinimum">$0.00</span></div>
+                    <div><strong>Approval:</strong> <span id="quotePreviewApproval">Auto-approved</span></div>
+                </div>
+                <small class="text-muted" id="quotePreviewStatus">Preview updates as values change.</small>
+            </div>
+
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Calculate & Send Quote</button>
                 <a class="btn btn-outline-secondary" href="/Admin?status=@ViewBag.CurrentStatus@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Cancel</a>
@@ -93,3 +102,86 @@
         </div>
     </form>
 </div>
+
+<script>
+    (function () {
+        const form = document.querySelector('form[action="/Admin/ProcessOrder"]');
+        if (!form) return;
+
+        const totalEl = document.getElementById('quotePreviewTotal');
+        const minimumEl = document.getElementById('quotePreviewMinimum');
+        const approvalEl = document.getElementById('quotePreviewApproval');
+        const statusEl = document.getElementById('quotePreviewStatus');
+
+        const numberOrNull = (value) => {
+            if (value === '' || value === null || typeof value === 'undefined') return null;
+            const n = Number(value);
+            return Number.isFinite(n) ? n : null;
+        };
+
+        const intOrZero = (name) => {
+            const n = Number(form.elements[name]?.value ?? 0);
+            return Number.isFinite(n) ? Math.max(0, Math.trunc(n)) : 0;
+        };
+
+        const decimalOrNull = (name) => numberOrNull(form.elements[name]?.value);
+
+        const formatMoney = (value) => `$${(Number(value) || 0).toFixed(2)}`;
+
+        const payload = () => ({
+            id: Number(form.elements['Id']?.value ?? 0),
+            washFoldWeightLbs: decimalOrNull('WashFoldWeightLbs'),
+            weightedBlanketWeightLbs: decimalOrNull('WeightedBlanketWeightLbs'),
+            useByRequestRate: !!form.elements['UseByRequestRate']?.checked,
+            comforterKingQty: intOrZero('ComforterKingQty'),
+            comforterQueenQty: intOrZero('ComforterQueenQty'),
+            comforterFullQty: intOrZero('ComforterFullQty'),
+            comforterTwinQty: intOrZero('ComforterTwinQty'),
+            duvetCoverQty: intOrZero('DuvetCoverQty'),
+            blanketQty: intOrZero('BlanketQty'),
+            bedspreadQty: intOrZero('BedspreadQty'),
+            cushionSlipCoverQty: intOrZero('CushionSlipCoverQty'),
+            chairSlipCoverQty: intOrZero('ChairSlipCoverQty'),
+            sofaSlipCoverQty: intOrZero('SofaSlipCoverQty'),
+            pillowShamQty: intOrZero('PillowShamQty'),
+            standardPillowQty: intOrZero('StandardPillowQty'),
+            mattressCoverQty: intOrZero('MattressCoverQty'),
+            estimatedTotal: decimalOrNull('EstimatedTotal')
+        });
+
+        let previewTimer;
+
+        const runPreview = async () => {
+            statusEl.textContent = 'Updating preview...';
+            try {
+                const response = await fetch('/Admin/PreviewQuote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload())
+                });
+
+                if (!response.ok) throw new Error('Preview unavailable');
+
+                const data = await response.json();
+                totalEl.textContent = formatMoney(data.total);
+                minimumEl.textContent = formatMoney(data.appliedMinimum);
+                approvalEl.textContent = data.requiresApproval ? 'Customer approval required' : 'Auto-approved';
+                statusEl.textContent = 'Preview updates as values change.';
+            } catch {
+                statusEl.textContent = 'Preview temporarily unavailable.';
+            }
+        };
+
+        const queuePreview = () => {
+            window.clearTimeout(previewTimer);
+            previewTimer = window.setTimeout(runPreview, 150);
+        };
+
+        form.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', queuePreview);
+            input.addEventListener('change', queuePreview);
+        });
+
+        runPreview();
+    })();
+</script>

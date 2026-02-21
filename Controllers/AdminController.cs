@@ -264,13 +264,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         var order = await _layeredApiOrderClient.GetOrderAsync(model.Id) ?? (_apiOnlyMode ? null : _orderStore.Get(model.Id));
         if (order == null) return NotFound();
 
-        var quote = _quoteCalculator.Calculate(new QuoteCalculationInput(
-            model.UseByRequestRate ? "Request" : "Personal",
-            model.WashFoldWeightLbs,
-            model.WeightedBlanketWeightLbs,
-            BuildQuoteItems(model),
-            model.EstimatedTotal,
-            null));
+        var quote = _quoteCalculator.Calculate(BuildQuoteInput(model));
 
         var requiresApproval = quote.RequiresApproval;
 
@@ -315,6 +309,36 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
             : "Quote generated and auto-approved.";
 
         return RedirectToAction("Index", new { status = currentStatus, search });
+    }
+
+    [HttpPost]
+    public IActionResult PreviewQuote([FromBody] ProcessOrderViewModel model)
+    {
+        if (model == null)
+        {
+            return BadRequest(new { message = "Invalid quote input." });
+        }
+
+        var quote = _quoteCalculator.Calculate(BuildQuoteInput(model));
+
+        return Ok(new
+        {
+            total = quote.Total,
+            appliedMinimum = quote.AppliedMinimum,
+            requiresApproval = quote.RequiresApproval,
+            lineItemsJson = quote.LineItemsJson
+        });
+    }
+
+    private static QuoteCalculationInput BuildQuoteInput(ProcessOrderViewModel model)
+    {
+        return new QuoteCalculationInput(
+            model.UseByRequestRate ? "Request" : "Personal",
+            model.WashFoldWeightLbs,
+            model.WeightedBlanketWeightLbs,
+            BuildQuoteItems(model),
+            model.EstimatedTotal,
+            null);
     }
 
     private static List<QuoteCalculationItemInput> BuildQuoteItems(ProcessOrderViewModel model)
