@@ -29,8 +29,13 @@ export default function Hero() {
                     transition={{ type: 'spring', stiffness: 250, damping: 70, mass: 1 }}
                     className="text-[clamp(3rem,14vw,7rem)] font-semibold tracking-[0.2em] mb-6"
                 >
-                    <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-300 to-cyan-400">
-                        LUMA
+                    <span className="luma-galaxy-wrap">
+                        <span
+                            className="luma-galaxy-word bg-clip-text text-transparent bg-linear-to-r from-cyan-200 via-cyan-300 to-blue-300"
+                            data-text="LUMA"
+                        >
+                            LUMA
+                        </span>
                     </span>
                 </motion.div>
 
