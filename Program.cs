@@ -9,9 +9,9 @@ using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var stripeSecretFromEnv = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
-var stripePublishableFromEnv = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
-var stripeWebhookFromEnv = Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET");
+var stripeSecretFromEnv = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")?.Trim();
+var stripePublishableFromEnv = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY")?.Trim();
+var stripeWebhookFromEnv = Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET")?.Trim();
 
 var stripeOverrides = new Dictionary<string, string?>();
 if (!string.IsNullOrWhiteSpace(stripeSecretFromEnv))
@@ -120,6 +120,33 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+
+static bool HasSuspiciousStripeChars(string value)
+{
+    if (string.IsNullOrEmpty(value)) return false;
+
+    return value.Any(char.IsWhiteSpace)
+        || value.Contains(';')
+        || value.Contains('"')
+        || value.Contains('\'')
+        || value.Contains("&#")
+        || value.Contains("&quot;", StringComparison.OrdinalIgnoreCase)
+        || value.Contains("&apos;", StringComparison.OrdinalIgnoreCase);
+}
+
+void WarnIfSuspiciousStripeValue(string keyName, string? value)
+{
+    if (string.IsNullOrWhiteSpace(value)) return;
+
+    if (HasSuspiciousStripeChars(value))
+    {
+        app.Logger.LogWarning("{ConfigKey} appears malformed (contains whitespace or encoded/special characters). Re-enter the value in environment variables as a single plain line.", keyName);
+    }
+}
+
+WarnIfSuspiciousStripeValue("Stripe:PublishableKey", app.Configuration["Stripe:PublishableKey"]?.Trim());
+WarnIfSuspiciousStripeValue("Stripe:SecretKey", app.Configuration["Stripe:SecretKey"]?.Trim());
+WarnIfSuspiciousStripeValue("Stripe:WebhookSecret", app.Configuration["Stripe:WebhookSecret"]?.Trim());
 
 // Apply migrations on startup
 using (var scope = app.Services.CreateScope())

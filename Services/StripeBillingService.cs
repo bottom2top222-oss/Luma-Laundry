@@ -25,7 +25,7 @@ public class StripeBillingService
         _logger = logger;
     }
 
-    public bool IsConfigured => !string.IsNullOrWhiteSpace(_configuration["Stripe:SecretKey"]);
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(_configuration["Stripe:SecretKey"]?.Trim());
 
     public async Task<(string customerId, bool created)> EnsureCustomerAsync(ApplicationUser user)
     {

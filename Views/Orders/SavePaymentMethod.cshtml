@@ -87,8 +87,8 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script>
         (() => {
-            const stripePublishableKey = '@(ViewBag.StripePublishableKey as string ?? string.Empty)';
-            const stripeConfigured = '@((ViewBag.StripeConfigured as bool? ?? false).ToString().ToLowerInvariant())' === 'true';
+            const stripePublishableKey = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((ViewBag.StripePublishableKey as string ?? string.Empty).Trim()));
+            const stripeConfigured = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.StripeConfigured as bool? ?? false));
             if (!stripeConfigured || !stripePublishableKey) {
                 return;
             }

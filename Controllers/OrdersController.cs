@@ -108,7 +108,7 @@ public class OrdersController : Controller
         var email = User?.Identity?.Name ?? "";
         if (order.UserEmail != email) return Forbid();
 
-        ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+        ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
         ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
 
         // Pass order to view for context
@@ -169,7 +169,7 @@ public class OrdersController : Controller
 
         if (!ModelState.IsValid)
         {
-            ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+            ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
             ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
             return View(order);
         }
@@ -188,7 +188,7 @@ public class OrdersController : Controller
                 if (user == null)
                 {
                     ModelState.AddModelError("", "Unable to find your user profile.");
-                    ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+                    ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
                     ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
                     return View(order);
                 }
@@ -212,7 +212,7 @@ public class OrdersController : Controller
                     if (_apiOnlyMode)
                     {
                         ModelState.AddModelError("", "Unable to save payment method right now.");
-                        ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+                        ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
                         ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
                         return View(order);
                     }
@@ -290,7 +290,7 @@ public class OrdersController : Controller
         catch (Exception ex)
         {
             ModelState.AddModelError("", $"Error saving payment method: {ex.Message}");
-            ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"] ?? "";
+            ViewBag.StripePublishableKey = (_configuration["Stripe:PublishableKey"] ?? "").Trim();
             ViewBag.StripeConfigured = _stripeBillingService.IsConfigured;
             return View(order);
         }
