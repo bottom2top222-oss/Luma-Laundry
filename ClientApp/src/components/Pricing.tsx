@@ -7,7 +7,7 @@ import { useRef } from 'react';
 
 export default function Pricing() {
     const refs = useRef<(HTMLDivElement | null)[]>([]);
-    const visiblePlans = plansData.slice(0, 1);
+    const visiblePlans = plansData;
     return (
         <section id="pricing" className="py-20 bg-white/3 border-t border-white/6">
             <div className="max-w-6xl mx-auto px-4">
@@ -18,7 +18,7 @@ export default function Pricing() {
                     description="Affordable laundry services for individuals, families, and businesses."
                 />
 
-                <div className="grid md:grid-cols-1 gap-6 max-w-xl mx-auto">
+                <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     {visiblePlans.map((plan, i) => (
                         <motion.div
                             key={i}
