@@ -38,6 +38,7 @@ builder.Services.AddScoped<LaundryApp.Data.OrderStore>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<EmailNotificationService>();
 builder.Services.AddScoped<StripeBillingService>();
+builder.Services.AddScoped<QuoteCalculator>();
 
 var stripeSecretKey = builder.Configuration["Stripe:SecretKey"];
 if (!string.IsNullOrWhiteSpace(stripeSecretKey))

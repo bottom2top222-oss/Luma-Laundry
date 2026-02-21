@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 
 namespace LaundryApp.Controllers;
 
@@ -18,17 +17,19 @@ public class AdminController : Controller
     private readonly LaundryAppDbContext _dbContext;
     private readonly PaymentService _paymentService;
     private readonly StripeBillingService _stripeBillingService;
+    private readonly QuoteCalculator _quoteCalculator;
     private readonly LayeredApiJobClient _layeredApiJobClient;
     private readonly LayeredApiOrderClient _layeredApiOrderClient;
     private readonly bool _apiOnlyMode;
 
-    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext, PaymentService paymentService, StripeBillingService stripeBillingService, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
+    public AdminController(OrderStore orderStore, UserManager<ApplicationUser> userManager, LaundryAppDbContext dbContext, PaymentService paymentService, StripeBillingService stripeBillingService, QuoteCalculator quoteCalculator, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
     {
         _orderStore = orderStore;
         _userManager = userManager;
         _dbContext = dbContext;
         _paymentService = paymentService;
         _stripeBillingService = stripeBillingService;
+        _quoteCalculator = quoteCalculator;
         _layeredApiJobClient = layeredApiJobClient;
         _layeredApiOrderClient = layeredApiOrderClient;
         _apiOnlyMode = bool.TryParse(configuration["LayeredServices:ApiOnlyMode"], out var apiOnly) && apiOnly;
@@ -263,11 +264,17 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         var order = await _layeredApiOrderClient.GetOrderAsync(model.Id) ?? (_apiOnlyMode ? null : _orderStore.Get(model.Id));
         if (order == null) return NotFound();
 
-        var quote = BuildQuote(model);
-        var estimated = model.EstimatedTotal.GetValueOrDefault(quote.appliedMinimum);
-        var requiresApproval = quote.total > quote.appliedMinimum || (estimated > 0 && quote.total > (estimated * 1.20m));
+        var quote = _quoteCalculator.Calculate(new QuoteCalculationInput(
+            model.UseByRequestRate ? "Request" : "Personal",
+            model.WashFoldWeightLbs,
+            model.WeightedBlanketWeightLbs,
+            BuildQuoteItems(model),
+            model.EstimatedTotal,
+            null));
 
-        var invoiceResult = await _layeredApiOrderClient.GenerateInvoiceAsync(model.Id, quote.total, 0m, 0m, quote.lineItemsJson);
+        var requiresApproval = quote.RequiresApproval;
+
+        var invoiceResult = await _layeredApiOrderClient.GenerateInvoiceAsync(model.Id, quote.Total, 0m, 0m, quote.LineItemsJson);
         if (!invoiceResult.success)
         {
             if (_apiOnlyMode)
@@ -276,7 +283,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
                 return RedirectToAction("Index", new { status = currentStatus, search });
             }
 
-            await _paymentService.GenerateInvoiceAsync(model.Id, quote.total, 0m, 0m, quote.lineItemsJson);
+            await _paymentService.GenerateInvoiceAsync(model.Id, quote.Total, 0m, 0m, quote.LineItemsJson);
         }
 
         var targetStatus = requiresApproval ? "Quoted" : "Approved";
@@ -298,7 +305,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
             UserEmail = User.Identity?.Name ?? "Unknown",
             Action = "Order Processed",
             Entity = $"Order #{model.Id}",
-            Details = $"Total ${quote.total:0.00}; ApprovalRequired={requiresApproval}; MinimumApplied=${quote.appliedMinimum:0.00}"
+            Details = $"Total ${quote.Total:0.00}; ApprovalRequired={requiresApproval}; MinimumApplied=${quote.AppliedMinimum:0.00}"
         };
         _dbContext.AuditLogs.Add(auditLog);
         _dbContext.SaveChanges();
@@ -310,77 +317,24 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         return RedirectToAction("Index", new { status = currentStatus, search });
     }
 
-    private (decimal total, decimal appliedMinimum, string lineItemsJson) BuildQuote(ProcessOrderViewModel model)
+    private static List<QuoteCalculationItemInput> BuildQuoteItems(ProcessOrderViewModel model)
     {
-        var lineItems = new List<object>();
-        decimal subtotal = 0m;
-
-        var washWeight = model.WashFoldWeightLbs.GetValueOrDefault();
-        var washRate = model.UseByRequestRate ? 2.25m : 2.00m;
-        if (washWeight > 0)
-        {
-            var billableWashWeight = Math.Max(washWeight, 20m);
-            var washAmount = billableWashWeight * washRate;
-            subtotal += washAmount;
-            lineItems.Add(new { description = $"Wash & Fold ({billableWashWeight:0.##} lbs @ ${washRate:0.00}/lb)", amount = washAmount });
-            if (washWeight < 20m)
-            {
-                lineItems.Add(new { description = "20 lb minimum applied", amount = 0m });
-            }
-        }
-
-        void AddItem(string description, int qty, decimal unitPrice)
-        {
-            if (qty <= 0) return;
-            var amount = qty * unitPrice;
-            subtotal += amount;
-            lineItems.Add(new { description = $"{description} x{qty}", amount });
-        }
-
-        AddItem("Comforter (King)", model.ComforterKingQty, 34.99m);
-        AddItem("Comforter (Queen)", model.ComforterQueenQty, 34.99m);
-        AddItem("Comforter (Full)", model.ComforterFullQty, 32.99m);
-        AddItem("Comforter (Twin)", model.ComforterTwinQty, 32.99m);
-        AddItem("Duvet Cover", model.DuvetCoverQty, 19.99m);
-        AddItem("Blanket", model.BlanketQty, 17.99m);
-
-        AddItem("Bedspread", model.BedspreadQty, 15.99m);
-        AddItem("Cushion Slip Cover", model.CushionSlipCoverQty, 8.99m);
-        AddItem("Chair Slip Cover", model.ChairSlipCoverQty, 17.99m);
-        AddItem("Sofa Slip Cover", model.SofaSlipCoverQty, 22.99m);
-        AddItem("Pillow Sham", model.PillowShamQty, 3.99m);
-        AddItem("Standard Pillow", model.StandardPillowQty, 9.99m);
-        AddItem("Mattress Cover", model.MattressCoverQty, 11.99m);
-
-        var weightedBlanketWeight = model.WeightedBlanketWeightLbs.GetValueOrDefault();
-        if (weightedBlanketWeight > 0)
-        {
-            var weightedAmount = weightedBlanketWeight * 2.85m;
-            subtotal += weightedAmount;
-            lineItems.Add(new { description = $"Weighted Blanket ({weightedBlanketWeight:0.##} lbs @ $2.85/lb)", amount = weightedAmount });
-        }
-
-        var hasLargeBeddingOrWeighted = model.ComforterKingQty > 0 || model.ComforterQueenQty > 0 ||
-            model.ComforterFullQty > 0 || model.ComforterTwinQty > 0 || model.DuvetCoverQty > 0 ||
-            model.BlanketQty > 0 || weightedBlanketWeight > 0;
-
-        var washMinimum = washWeight > 0 ? 20m * washRate : 0m;
-        var largeMinimum = hasLargeBeddingOrWeighted ? 50m : 0m;
-        var appliedMinimum = Math.Max(washMinimum, largeMinimum);
-
-        if (appliedMinimum > 0 && subtotal < appliedMinimum)
-        {
-            lineItems.Add(new { description = "Minimum pricing adjustment", amount = appliedMinimum - subtotal });
-            subtotal = appliedMinimum;
-        }
-
-        if (subtotal <= 0)
-        {
-            subtotal = appliedMinimum > 0 ? appliedMinimum : 40m;
-            lineItems.Add(new { description = "Manual pricing adjustment", amount = subtotal });
-        }
-
-        return (subtotal, appliedMinimum, JsonSerializer.Serialize(lineItems));
+        return
+        [
+            new QuoteCalculationItemInput("comforter_king", model.ComforterKingQty),
+            new QuoteCalculationItemInput("comforter_queen", model.ComforterQueenQty),
+            new QuoteCalculationItemInput("comforter_full", model.ComforterFullQty),
+            new QuoteCalculationItemInput("comforter_twin", model.ComforterTwinQty),
+            new QuoteCalculationItemInput("duvet_cover", model.DuvetCoverQty),
+            new QuoteCalculationItemInput("blanket", model.BlanketQty),
+            new QuoteCalculationItemInput("bedspread", model.BedspreadQty),
+            new QuoteCalculationItemInput("cushion_slip_cover", model.CushionSlipCoverQty),
+            new QuoteCalculationItemInput("chair_slip_cover", model.ChairSlipCoverQty),
+            new QuoteCalculationItemInput("sofa_slip_cover", model.SofaSlipCoverQty),
+            new QuoteCalculationItemInput("pillow_sham", model.PillowShamQty),
+            new QuoteCalculationItemInput("standard_pillow", model.StandardPillowQty),
+            new QuoteCalculationItemInput("mattress_cover", model.MattressCoverQty)
+        ];
     }
 
     [HttpPost]
