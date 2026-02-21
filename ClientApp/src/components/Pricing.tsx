@@ -50,9 +50,9 @@ export default function Pricing() {
                             <div className="mb-6">
                                 <p>{plan.name}</p>
                                 <div className="flex items-end gap-3">
-                                    <span className="text-3xl font-extrabold">{plan.price}</span>
+                                    <span className="text-3xl font-extrabold">$2</span>
                                     <span className="text-sm text-gray-400">
-                                        / {plan.credits}
+                                        / lb
                                     </span>
                                 </div>
                                 <p className="text-sm text-gray-300 mt-2">
