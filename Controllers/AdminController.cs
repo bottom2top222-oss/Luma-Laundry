@@ -46,8 +46,8 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     var apiOrders = await _layeredApiOrderClient.GetAdminOrdersAsync(selected, search);
     
     // Use local store if: API returned null OR (API returned empty AND not in API-only mode AND we're filtering all statuses)
-    var shouldUseLocalStore = apiOrders == null || 
-        (apiOrders.Count == 0 && !_apiOnlyMode && selected == "All");
+    var shouldUseLocalStore = !_apiOnlyMode && (apiOrders == null ||
+        (apiOrders.Count == 0 && selected == "All"));
     
     var allOrders = shouldUseLocalStore ? _orderStore.All().ToList() : (apiOrders ?? new List<LaundryOrder>());
 
@@ -222,7 +222,11 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
     public async Task<IActionResult> ProcessOrder(int id, string currentStatus = "All", string? search = null)
     {
         var order = await _layeredApiOrderClient.GetOrderAsync(id) ?? (_apiOnlyMode ? null : _orderStore.Get(id));
-        if (order == null) return NotFound();
+        if (order == null)
+        {
+            TempData["Error"] = $"Order #{id} is unavailable right now. Refresh and try again.";
+            return RedirectToAction("Index", new { status = currentStatus, search });
+        }
 
         ViewBag.CurrentStatus = currentStatus;
         ViewBag.Search = search;
@@ -259,7 +263,11 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
         }
 
         var order = await _layeredApiOrderClient.GetOrderAsync(model.Id) ?? (_apiOnlyMode ? null : _orderStore.Get(model.Id));
-        if (order == null) return NotFound();
+        if (order == null)
+        {
+            TempData["Error"] = $"Order #{model.Id} is unavailable right now. Refresh and try again.";
+            return RedirectToAction("Index", new { status = currentStatus, search });
+        }
 
         var quote = _quoteCalculator.Calculate(BuildQuoteInput(model));
 
