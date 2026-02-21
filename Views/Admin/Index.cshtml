@@ -139,7 +139,7 @@
                     <th>Admin Notes</th>
                     <th>Created</th>
                     <th>Last Updated</th>
-                    <th class="text-end" style="width:240px;">Actions</th>
+                    <th class="text-end" style="width:340px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -190,48 +190,48 @@
                         <td>@o.Order.CreatedAt.ToString("g")</td>
                         <td>@o.Order.LastUpdatedAt.ToString("g")</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-outline-info me-2" href="/Admin/ProcessOrder?id=@o.Order.Id&currentStatus=@ViewBag.Status@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Process</a>
+                            <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                                <a class="btn btn-sm btn-outline-info" href="/Admin/ProcessOrder?id=@o.Order.Id&currentStatus=@ViewBag.Status@(ViewBag.Search != null ? $"&search={ViewBag.Search}" : "")">Process</a>
 
-                            <!-- Update status -->
-                            <form method="post" action="/Admin/UpdateStatus" class="d-inline-flex gap-2">
-                                <input type="hidden" name="id" value="@o.Order.Id" />
-                                @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
-                                {
-                                    <input type="hidden" name="search" value="@ViewBag.Search" />
-                                }
-                                <select name="status" class="form-select form-select-sm" style="width:140px;">
-                                    <option value="PendingPickup" selected="@(o.Order.Status == "PendingPickup")">Pending Pickup</option>
-                                    <option value="PickedUp" selected="@(o.Order.Status == "PickedUp")">Picked Up</option>
-                                    <option value="WeighedOrCounted" selected="@(o.Order.Status == "WeighedOrCounted")">Weighed / Counted</option>
-                                    <option value="Quoted" selected="@(o.Order.Status == "Quoted")">Quoted</option>
-                                    <option value="Approved" selected="@(o.Order.Status == "Approved")">Approved</option>
-                                    <option value="InProgress" selected="@(o.Order.Status == "InProgress")">In Progress</option>
-                                    <option value="Ready" selected="@(o.Order.Status == "Ready")">Ready</option>
-                                    <option value="Paid" selected="@(o.Order.Status == "Paid")">Paid</option>
-                                    <option value="Delivered" selected="@(o.Order.Status == "Delivered")">Delivered</option>
-                                    <option value="Completed" selected="@(o.Order.Status == "Completed")">Completed</option>
-                                    <option value="Cancelled" selected="@(o.Order.Status == "Cancelled")">Cancelled</option>
-                                </select>
-                                @* If disabled, browser won't submit it—so keep status in the POST *@
-                                @if (isFinal)
-                                {
-                                    <input type="hidden" name="status" value="@o.Order.Status" />
-                                }
-                                <button class="btn btn-sm btn-primary" @(isFinal ? "disabled" : "")>Save</button>
-                            </form>
+                                <!-- Update status -->
+                                <form method="post" action="/Admin/UpdateStatus" class="d-inline-flex align-items-center gap-2 mb-0">
+                                    <input type="hidden" name="id" value="@o.Order.Id" />
+                                    @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                    {
+                                        <input type="hidden" name="search" value="@ViewBag.Search" />
+                                    }
+                                    <select name="status" class="form-select form-select-sm" style="width:130px; margin-right:2px;">
+                                        <option value="PendingPickup" selected="@(o.Order.Status == "PendingPickup")">Pending Pickup</option>
+                                        <option value="PickedUp" selected="@(o.Order.Status == "PickedUp")">Picked Up</option>
+                                        <option value="WeighedOrCounted" selected="@(o.Order.Status == "WeighedOrCounted")">Weighed / Counted</option>
+                                        <option value="Quoted" selected="@(o.Order.Status == "Quoted")">Quoted</option>
+                                        <option value="Approved" selected="@(o.Order.Status == "Approved")">Approved</option>
+                                        <option value="InProgress" selected="@(o.Order.Status == "InProgress")">In Progress</option>
+                                        <option value="Ready" selected="@(o.Order.Status == "Ready")">Ready</option>
+                                        <option value="Paid" selected="@(o.Order.Status == "Paid")">Paid</option>
+                                        <option value="Delivered" selected="@(o.Order.Status == "Delivered")">Delivered</option>
+                                        <option value="Completed" selected="@(o.Order.Status == "Completed")">Completed</option>
+                                        <option value="Cancelled" selected="@(o.Order.Status == "Cancelled")">Cancelled</option>
+                                    </select>
+                                    @if (isFinal)
+                                    {
+                                        <input type="hidden" name="status" value="@o.Order.Status" />
+                                    }
+                                    <button class="btn btn-sm btn-primary" @(isFinal ? "disabled" : "")>Save</button>
+                                </form>
 
-                            <!-- Delete -->
-                            <form method="post" action="/Admin/Delete" class="d-inline"
-                                onsubmit="return confirm('Delete order #@o.Order.Id?');">
-                                <input type="hidden" name="id" value="@o.Order.Id" />
-                                <input type="hidden" name="currentStatus" value="@ViewBag.Status" />
-                                @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
-                                {
-                                    <input type="hidden" name="search" value="@ViewBag.Search" />
-                                }
-                                 <button class="btn btn-sm btn-outline-danger ms-2">Delete</button>
-                            </form>
-
+                                <!-- Delete -->
+                                <form method="post" action="/Admin/Delete" class="d-inline mb-0"
+                                    onsubmit="return confirm('Delete order #@o.Order.Id?');">
+                                    <input type="hidden" name="id" value="@o.Order.Id" />
+                                    <input type="hidden" name="currentStatus" value="@ViewBag.Status" />
+                                    @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                    {
+                                        <input type="hidden" name="search" value="@ViewBag.Search" />
+                                    }
+                                     <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }
