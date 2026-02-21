@@ -47,9 +47,9 @@ export default function Pricing() {
                                 </p>
                             )}
 
-                            <div className="mb-6">
+                            <div className="mb-6 text-center">
                                 <p>{plan.name}</p>
-                                <div className="flex items-end gap-3">
+                                <div className="flex items-end justify-center gap-3">
                                     <span className="text-3xl font-extrabold">$2</span>
                                     <span className="text-sm text-gray-400">
                                         / lb
@@ -64,7 +64,7 @@ export default function Pricing() {
                                 {plan.features.map((feat, i) => (
                                     <li
                                         key={i}
-                                        className="flex items-center gap-3 text-sm text-gray-300"
+                                        className="flex items-center justify-center gap-3 text-sm text-gray-300"
                                     >
                                         <Check className="w-4 h-4 text-indigo-400" />
                                         {feat}
