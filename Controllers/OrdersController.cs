@@ -139,6 +139,9 @@ public class OrdersController : Controller
 
         var usingStripeSetup = !string.IsNullOrWhiteSpace(paymentMethodId) && !string.IsNullOrWhiteSpace(setupIntentId);
 
+        if (usingStripeSetup && string.IsNullOrWhiteSpace(cardholderName))
+            ModelState.AddModelError("", "Cardholder name required");
+
         if (!usingStripeSetup)
         {
             if (string.IsNullOrWhiteSpace(cardNumber) || cardNumber.Length < 13)
