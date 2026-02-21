@@ -16,6 +16,12 @@ builder.Services.AddDbContext<ApiDbContext>(options => options.UseSqlite(connect
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+    db.Database.EnsureCreated();
+}
+
 var queue = new ConcurrentQueue<QueuedEmailJob>();
 
 app.MapGet("/health", () => Results.Ok(new
