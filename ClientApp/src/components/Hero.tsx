@@ -17,20 +17,6 @@ const featureChips = [
     }
 ];
 
-const sparkleDots = [
-    { left: '6%', top: '16%', size: 3, delay: 0.15 },
-    { left: '14%', top: '30%', size: 2, delay: 0.4 },
-    { left: '21%', top: '10%', size: 4, delay: 0.9 },
-    { left: '30%', top: '24%', size: 2, delay: 0.55 },
-    { left: '39%', top: '12%', size: 3, delay: 0.75 },
-    { left: '49%', top: '30%', size: 2, delay: 0.25 },
-    { left: '58%', top: '14%', size: 4, delay: 0.65 },
-    { left: '69%', top: '26%', size: 2, delay: 0.5 },
-    { left: '77%', top: '11%', size: 3, delay: 0.95 },
-    { left: '86%', top: '22%', size: 2, delay: 0.35 },
-    { left: '93%', top: '15%', size: 3, delay: 0.8 }
-];
-
 export default function Hero() {
 
     return (
@@ -41,28 +27,9 @@ export default function Hero() {
                     whileInView={{ y: 0, opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ type: 'spring', stiffness: 250, damping: 70, mass: 1 }}
-                    className="relative text-[clamp(3rem,14vw,7rem)] font-semibold tracking-[0.2em] mb-12"
+                    className="text-[clamp(3rem,14vw,7rem)] font-semibold tracking-[0.2em] mb-6"
                 >
-                    <span className="pointer-events-none absolute -inset-x-16 -top-8 -bottom-14">
-                        {sparkleDots.map((sparkle, index) => (
-                            <motion.span
-                                key={`${sparkle.left}-${sparkle.top}-${index}`}
-                                className="absolute rounded-full bg-cyan-100"
-                                style={{
-                                    left: sparkle.left,
-                                    top: sparkle.top,
-                                    width: `${sparkle.size}px`,
-                                    height: `${sparkle.size}px`,
-                                    boxShadow: '0 0 12px rgba(103, 232, 249, 0.95), 0 0 26px rgba(59, 130, 246, 0.55)'
-                                }}
-                                initial={{ opacity: 0.45, scale: 0.9 }}
-                                animate={{ opacity: [0.25, 1, 0.35], scale: [0.9, 1.35, 1] }}
-                                transition={{ duration: 2.8, repeat: Infinity, repeatType: 'mirror', delay: sparkle.delay }}
-                            />
-                        ))}
-                    </span>
-
-                    <span className="relative inline-block pb-14">
+                    <span className="relative inline-block">
                         <span
                             aria-hidden="true"
                             className="absolute inset-0 blur-2xl opacity-70 text-cyan-300"
@@ -77,21 +44,6 @@ export default function Hero() {
                         </span>
                         <span className="relative bg-clip-text text-transparent bg-linear-to-b from-cyan-100 via-cyan-300 to-blue-400 drop-shadow-[0_0_16px] drop-shadow-cyan-300">
                             LUMA
-                        </span>
-
-                        <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute left-1/2 top-full -translate-x-1/2 blur-[1.5px]"
-                            style={{
-                                transform: 'translateX(-50%) scaleY(-0.55)',
-                                opacity: 0.34,
-                                WebkitMaskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0))',
-                                maskImage: 'linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0))'
-                            }}
-                        >
-                            <span className="bg-clip-text text-transparent bg-linear-to-b from-cyan-100 via-cyan-300 to-blue-500 drop-shadow-[0_0_16px] drop-shadow-cyan-300">
-                                LUMA
-                            </span>
                         </span>
                     </span>
                 </motion.div>
