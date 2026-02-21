@@ -116,7 +116,27 @@ public class StripeBillingService
             throw new InvalidOperationException("Final amount not set.");
         }
 
+        if (order.PaymentStatus == "Paid")
+        {
+            throw new InvalidOperationException("Order is already paid.");
+        }
+
+        if (order.Status != "Ready")
+        {
+            throw new InvalidOperationException("Order must be in Ready status before charging.");
+        }
+
         var paymentIntentService = new PaymentIntentService();
+
+        if (!string.IsNullOrWhiteSpace(order.StripePaymentIntentId) &&
+            (order.PaymentStatus == "ChargeAttempted" || order.PaymentStatus == "PaymentActionRequired"))
+        {
+            var existing = await paymentIntentService.GetAsync(order.StripePaymentIntentId);
+            if (existing != null)
+            {
+                return existing;
+            }
+        }
 
         try
         {
@@ -134,10 +154,12 @@ public class StripeBillingService
                     ["orderId"] = order.Id.ToString(),
                     ["userId"] = user.Id
                 }
+            }, new RequestOptions
+            {
+                IdempotencyKey = $"ready-charge-order-{order.Id}-amount-{order.FinalAmountCents}"
             });
 
             order.StripePaymentIntentId = pi.Id;
-            order.Status = "ChargeAttempted";
             order.PaymentStatus = "ChargeAttempted";
             order.LastUpdatedAt = DateTime.Now;
             await _db.SaveChangesAsync();
@@ -156,12 +178,7 @@ public class StripeBillingService
 
     public async Task HandlePaymentIntentSucceededAsync(PaymentIntent paymentIntent)
     {
-        if (paymentIntent.Metadata == null || !paymentIntent.Metadata.TryGetValue("orderId", out var orderIdValue) || !int.TryParse(orderIdValue, out var orderId))
-        {
-            return;
-        }
-
-        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        var order = await ResolveOrderAsync(paymentIntent);
         if (order == null) return;
 
         order.StripePaymentIntentId = paymentIntent.Id;
@@ -173,12 +190,7 @@ public class StripeBillingService
 
     public async Task HandlePaymentIntentFailedAsync(PaymentIntent paymentIntent)
     {
-        if (paymentIntent.Metadata == null || !paymentIntent.Metadata.TryGetValue("orderId", out var orderIdValue) || !int.TryParse(orderIdValue, out var orderId))
-        {
-            return;
-        }
-
-        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        var order = await ResolveOrderAsync(paymentIntent);
         if (order == null) return;
 
         order.StripePaymentIntentId = paymentIntent.Id;
@@ -186,5 +198,48 @@ public class StripeBillingService
         order.PaymentStatus = "PaymentFailed";
         order.LastUpdatedAt = DateTime.Now;
         await _db.SaveChangesAsync();
+    }
+
+    public async Task HandlePaymentIntentProcessingAsync(PaymentIntent paymentIntent)
+    {
+        var order = await ResolveOrderAsync(paymentIntent);
+        if (order == null) return;
+
+        order.StripePaymentIntentId = paymentIntent.Id;
+        order.PaymentStatus = "ChargeAttempted";
+        order.LastUpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task HandlePaymentIntentRequiresActionAsync(PaymentIntent paymentIntent)
+    {
+        var order = await ResolveOrderAsync(paymentIntent);
+        if (order == null) return;
+
+        order.StripePaymentIntentId = paymentIntent.Id;
+        order.PaymentStatus = "PaymentActionRequired";
+        order.LastUpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+    }
+
+    private async Task<LaundryOrder?> ResolveOrderAsync(PaymentIntent paymentIntent)
+    {
+        if (!string.IsNullOrWhiteSpace(paymentIntent.Id))
+        {
+            var byIntent = await _db.Orders.FirstOrDefaultAsync(o => o.StripePaymentIntentId == paymentIntent.Id);
+            if (byIntent != null)
+            {
+                return byIntent;
+            }
+        }
+
+        if (paymentIntent.Metadata != null &&
+            paymentIntent.Metadata.TryGetValue("orderId", out var orderIdValue) &&
+            int.TryParse(orderIdValue, out var orderId))
+        {
+            return await _db.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        }
+
+        return null;
     }
 }

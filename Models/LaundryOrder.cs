@@ -21,7 +21,7 @@ public class LaundryOrder
     // Order Status: PendingPickup, PickedUp, WeighedOrCounted, Quoted, Approved, InProgress, Ready, Paid, Delivered, Completed, Cancelled
     public string Status { get; set; } = "PendingPickup";
     
-    // Payment Status: NoPaymentMethod, PaymentMethodOnFile, ApprovalRequired, Approved, ChargeAttempted, Paid, PaymentFailed, Refunded
+    // Payment Status: NoPaymentMethod, PaymentMethodOnFile, ApprovalRequired, Approved, ChargeAttempted, PaymentActionRequired, Paid, PaymentFailed, Refunded
     public string PaymentStatus { get; set; } = "NoPaymentMethod";
     
     // Payment Fields

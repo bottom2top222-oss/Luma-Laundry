@@ -144,10 +144,7 @@ public async Task<IActionResult> Index(string? status, string? filter, string? s
             {
                 try
                 {
-                    var pi = await _stripeBillingService.ChargeOrderAsync(id);
-                    order.StripePaymentIntentId = pi.Id;
-                    order.PaymentStatus = "ChargeAttempted";
-                    order.LastUpdatedAt = DateTime.Now;
+                    await _stripeBillingService.ChargeOrderAsync(id);
                 }
                 catch (Exception ex)
                 {

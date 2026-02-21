@@ -65,6 +65,22 @@ public class StripeWebhookController : ControllerBase
                 await _stripeBillingService.HandlePaymentIntentFailedAsync(paymentIntent);
             }
         }
+        else if (stripeEvent.Type == "payment_intent.processing")
+        {
+            var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+            if (paymentIntent != null)
+            {
+                await _stripeBillingService.HandlePaymentIntentProcessingAsync(paymentIntent);
+            }
+        }
+        else if (stripeEvent.Type == "payment_intent.requires_action")
+        {
+            var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+            if (paymentIntent != null)
+            {
+                await _stripeBillingService.HandlePaymentIntentRequiresActionAsync(paymentIntent);
+            }
+        }
 
         return Ok();
     }
