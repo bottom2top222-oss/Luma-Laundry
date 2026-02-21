@@ -9,6 +9,31 @@ using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var stripeSecretFromEnv = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+var stripePublishableFromEnv = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
+var stripeWebhookFromEnv = Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET");
+
+var stripeOverrides = new Dictionary<string, string?>();
+if (!string.IsNullOrWhiteSpace(stripeSecretFromEnv))
+{
+    stripeOverrides["Stripe:SecretKey"] = stripeSecretFromEnv;
+}
+
+if (!string.IsNullOrWhiteSpace(stripePublishableFromEnv))
+{
+    stripeOverrides["Stripe:PublishableKey"] = stripePublishableFromEnv;
+}
+
+if (!string.IsNullOrWhiteSpace(stripeWebhookFromEnv))
+{
+    stripeOverrides["Stripe:WebhookSecret"] = stripeWebhookFromEnv;
+}
+
+if (stripeOverrides.Count > 0)
+{
+    builder.Configuration.AddInMemoryCollection(stripeOverrides);
+}
+
 // Add services
 builder.Services.AddControllersWithViews();
 
