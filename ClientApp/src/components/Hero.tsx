@@ -27,7 +27,7 @@ export default function Hero() {
                     whileInView={{ y: 0, opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ type: 'spring', stiffness: 250, damping: 70, mass: 1 }}
-                    className="text-[clamp(3rem,14vw,7rem)] font-semibold tracking-[0.2em] mb-6"
+                    className="text-[clamp(3rem,14vw,7rem)] font-semibold tracking-[0.23em] mb-6"
                 >
                     <span className="luma-galaxy-wrap">
                         <span
@@ -40,7 +40,7 @@ export default function Hero() {
                 </motion.div>
 
                 <motion.p
-                    className="text-gray-300 text-lg max-w-2xl mx-auto mb-8"
+                    className="text-gray-300/85 leading-relaxed text-lg max-w-2xl mx-auto mb-8"
                     initial={{ y: 60, opacity: 0 }}
                     whileInView={{ y: 0, opacity: 1 }}
                     viewport={{ once: true }}
@@ -79,7 +79,7 @@ export default function Hero() {
                     {featureChips.map((chip) => (
                         <div
                             key={chip.label}
-                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/6 border border-white/12 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
                         >
                             {chip.icon}
                             <span>{chip.label}</span>
