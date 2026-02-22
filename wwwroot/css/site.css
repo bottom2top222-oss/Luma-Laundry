@@ -307,6 +307,7 @@ footer a:hover {
 }
 
 .how-page {
+  position: relative;
   background:
     radial-gradient(900px 500px at 50% 24%, rgba(70, 20, 130, 0.28), transparent 70%),
     radial-gradient(420px 280px at 95% 95%, rgba(173, 21, 165, 0.2), transparent 65%),
@@ -316,9 +317,45 @@ footer a:hover {
 
 .how-hero,
 .how-panel {
+  position: relative;
+  overflow: hidden;
   background: rgba(8, 16, 45, 0.85);
   border: 1px solid rgba(90, 130, 255, 0.35);
   box-shadow: 0 0.8rem 1.4rem rgba(2, 8, 32, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.how-hero::before,
+.how-panel::before,
+.how-hero-panel::before,
+.how-step::before,
+.how-process-strip::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(201, 231, 255, 0.38), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.how-hero::after {
+  content: "";
+  position: absolute;
+  width: 480px;
+  height: 280px;
+  right: -120px;
+  top: -70px;
+  background: radial-gradient(circle, rgba(71, 156, 255, 0.12), rgba(71, 156, 255, 0));
+  pointer-events: none;
+}
+
+.how-divider {
+  height: 2px;
+  margin: 1.2rem 0 1.35rem;
+  background: linear-gradient(90deg, rgba(83, 165, 255, 0), rgba(83, 165, 255, 0.22), rgba(83, 165, 255, 0));
+  opacity: 0.42;
 }
 
 .how-hero h1,
@@ -330,27 +367,82 @@ footer a:hover {
 }
 
 .how-hero-panel {
+  position: relative;
+  overflow: hidden;
   background: rgba(10, 20, 58, 0.78);
   border: 1px solid rgba(86, 140, 255, 0.38);
   color: #eaf0ff;
+  backdrop-filter: blur(4px);
+}
+
+.how-glance-list li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  opacity: 0;
+  animation: how-check-fade 460ms ease forwards;
+}
+
+.how-glance-list li:nth-child(1) {
+  animation-delay: 60ms;
+}
+
+.how-glance-list li:nth-child(2) {
+  animation-delay: 170ms;
+}
+
+.how-glance-list li:nth-child(3) {
+  animation-delay: 280ms;
+}
+
+.how-glance-list li:nth-child(4) {
+  animation-delay: 390ms;
+}
+
+.how-check {
+  color: #7fe9ff;
+  text-shadow: 0 0 10px rgba(95, 228, 255, 0.4);
+}
+
+@keyframes how-check-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .how-step {
+  position: relative;
+  overflow: hidden;
   background: rgba(10, 20, 58, 0.75);
   border: 1px solid rgba(90, 130, 255, 0.35);
   box-shadow: 0 0.65rem 1.2rem rgba(2, 8, 32, 0.4);
+  backdrop-filter: blur(4px);
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+}
+
+.how-step:hover {
+  transform: translateY(-3px);
+  border-color: rgba(111, 188, 255, 0.55);
+  box-shadow: 0 0.95rem 1.5rem rgba(2, 8, 32, 0.5), 0 0 18px rgba(67, 185, 255, 0.18);
 }
 
 .how-step-icon {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  background: rgba(56, 217, 255, 0.12);
-  border: 1px solid rgba(56, 217, 255, 0.45);
+  font-size: 1rem;
+  background: radial-gradient(circle at 30% 25%, rgba(131, 205, 255, 0.45), rgba(40, 141, 255, 0.2) 60%, rgba(40, 141, 255, 0.08));
+  border: 1px solid rgba(100, 186, 255, 0.5);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1), 0 0 14px rgba(67, 183, 255, 0.25);
 }
 
 .how-step-number {
@@ -368,11 +460,44 @@ footer a:hover {
   box-shadow: 0 0 14px rgba(45, 170, 255, 0.5);
 }
 
+.how-step-flow {
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .how-step-flow::before {
+    content: "";
+    position: absolute;
+    top: 22px;
+    left: 16.66%;
+    right: 16.66%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(83, 165, 255, 0.18), rgba(114, 200, 255, 0.42), rgba(83, 165, 255, 0.18));
+    z-index: 0;
+  }
+
+  .how-step-flow .col-md-4 {
+    position: relative;
+    z-index: 1;
+  }
+
+  .how-step-flow .col-md-4:not(:last-child)::after {
+    content: "➤";
+    position: absolute;
+    top: 10px;
+    right: -8px;
+    color: rgba(122, 223, 255, 0.55);
+    font-size: 0.9rem;
+    z-index: 2;
+  }
+}
+
 .how-muted {
   color: rgba(215, 229, 255, 0.82) !important;
 }
 
 .how-checklist-item {
+  position: relative;
   display: grid;
   grid-template-columns: 34px 1fr;
   gap: 0.75rem;
@@ -381,6 +506,7 @@ footer a:hover {
   border: 1px solid rgba(90, 130, 255, 0.35);
   border-radius: 10px;
   padding: 0.65rem 0.8rem;
+  backdrop-filter: blur(3px);
 }
 
 .how-checklist-item span {
@@ -398,9 +524,22 @@ footer a:hover {
 }
 
 .how-process-strip {
+  position: relative;
+  overflow: hidden;
   background: rgba(8, 16, 45, 0.85);
   border: 1px solid rgba(90, 130, 255, 0.35);
   box-shadow: 0 0.8rem 1.4rem rgba(2, 8, 32, 0.45);
+}
+
+.how-process-strip::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 220px;
+  left: -90px;
+  bottom: -95px;
+  background: radial-gradient(circle, rgba(145, 77, 255, 0.12), rgba(145, 77, 255, 0));
+  pointer-events: none;
 }
 
 .how-pill {
