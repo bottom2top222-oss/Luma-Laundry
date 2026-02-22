@@ -40,9 +40,9 @@
     @Html.AntiForgeryToken()
     <input type="hidden" name="scheduledAt" id="scheduledAt" />
     <input type="hidden" name="serviceType" value="@prefillServiceType" />
-    <input type="hidden" name="fromPickupOptions" value="@fromPickupOptions" />
+    <input type="hidden" name="fromPickupOptions" value="@fromPickupOptions.ToString().ToLowerInvariant()" />
     <input type="hidden" name="standardLaundryBagCount" value="@standardLaundryBagCount" />
-    <input type="hidden" name="sameDayDelivery" value="@sameDayDelivery" />
+    <input type="hidden" name="sameDayDelivery" value="@sameDayDelivery.ToString().ToLowerInvariant()" />
     <input type="hidden" name="prefillServiceType" value="@prefillServiceType" />
     <input type="hidden" name="prefillNotes" value="@prefillNotes" />
     <input type="hidden" name="selectedOptionsSummary" value="@selectedOptionsSummary" />
