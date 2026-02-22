@@ -44,17 +44,73 @@ public class OrdersController : Controller
     }
 
     [HttpPost]
-    public IActionResult PickupOptions(int standardLaundryBagCount, int largeBeddingBagCount, int householdItemsBagCount, bool sameDayDelivery)
+    public IActionResult PickupOptions(IFormCollection form)
     {
-        if (standardLaundryBagCount < 0 || largeBeddingBagCount < 0 || householdItemsBagCount < 0)
+        int ParseQuantity(string key)
+        {
+            var raw = form[key].ToString();
+            if (!int.TryParse(raw, out var parsed) || parsed < 0)
+            {
+                return 0;
+            }
+
+            return parsed;
+        }
+
+        var standardLaundryBagCount = ParseQuantity("standardLaundryBagCount");
+        var sameDayDelivery = form["sameDayDelivery"].Any(v =>
+            string.Equals(v, "true", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(v, "on", StringComparison.OrdinalIgnoreCase));
+
+        var largeBeddingItems = new (string Key, string Label)[]
+        {
+            ("comforterKingQty", "Comforter (King)"),
+            ("comforterQueenQty", "Comforter (Queen)"),
+            ("comforterFullQty", "Comforter (Full)"),
+            ("comforterTwinQty", "Comforter (Twin)")
+        };
+
+        var householdItems = new (string Key, string Label)[]
+        {
+            ("bedspreadQty", "Bedspread"),
+            ("cushionSlipCoverQty", "Cushion Slip Cover"),
+            ("chairSlipCoverQty", "Chair Slip Cover"),
+            ("sofaSlipCoverQty", "Sofa Slip Cover"),
+            ("blanketQty", "Blanket"),
+            ("pillowShamQty", "Pillow Sham"),
+            ("duvetCoverQty", "Duvet Cover"),
+            ("weightedBlanketQty", "Weighted Blanket"),
+            ("standardPillowQty", "Standard Pillow"),
+            ("mattressCoverQty", "Mattress Cover")
+        };
+
+        var selectedItems = new List<(string Label, int Quantity)>();
+        foreach (var item in largeBeddingItems)
+        {
+            var qty = ParseQuantity(item.Key);
+            if (qty > 0)
+            {
+                selectedItems.Add((item.Label, qty));
+            }
+        }
+
+        foreach (var item in householdItems)
+        {
+            var qty = ParseQuantity(item.Key);
+            if (qty > 0)
+            {
+                selectedItems.Add((item.Label, qty));
+            }
+        }
+
+        if (standardLaundryBagCount < 0)
         {
             ModelState.AddModelError("", "Bag counts cannot be negative.");
         }
 
-        var totalBags = standardLaundryBagCount + largeBeddingBagCount + householdItemsBagCount;
-        if (totalBags <= 0)
+        if (standardLaundryBagCount == 0 && selectedItems.Count == 0)
         {
-            ModelState.AddModelError("", "Select at least one bag for pickup.");
+            ModelState.AddModelError("", "Select at least one Standard Laundry Bag or item quantity.");
         }
 
         if (!ModelState.IsValid)
@@ -62,35 +118,52 @@ public class OrdersController : Controller
             return View();
         }
 
+        var hasLargeBeddingItems = selectedItems.Any(i => largeBeddingItems.Any(l => l.Label == i.Label));
+        var hasHouseholdItems = selectedItems.Any(i => householdItems.Any(h => h.Label == i.Label));
+
         var serviceType = "Wash & Fold";
-        if (standardLaundryBagCount == 0 && largeBeddingBagCount > 0)
+        if (standardLaundryBagCount == 0 && hasLargeBeddingItems && !hasHouseholdItems)
         {
             serviceType = "Large Bedding";
         }
-        else if (standardLaundryBagCount == 0 && householdItemsBagCount > 0)
+        else if (standardLaundryBagCount == 0 && hasHouseholdItems)
         {
             serviceType = "Household Items";
         }
 
-        var prefillNotes = string.Join(Environment.NewLine, new[]
+        var optionSummaryLines = new List<string>
+        {
+            $"Standard Laundry Bag(s): {standardLaundryBagCount}",
+            $"Same-Day Delivery: {(sameDayDelivery ? "Yes" : "No")}"
+        };
+
+        if (selectedItems.Count > 0)
+        {
+            optionSummaryLines.Add("Selected Items:");
+            optionSummaryLines.AddRange(selectedItems.Select(i => $"- {i.Label}: {i.Quantity}"));
+        }
+
+        var selectedOptionsSummary = string.Join(Environment.NewLine, optionSummaryLines);
+
+        var prefillNotesLines = new List<string>
         {
             "Pickup Options:",
             $"- Standard Laundry Bag(s): {standardLaundryBagCount}",
-            $"- Large Bedding Bag(s): {largeBeddingBagCount}",
-            $"- Household Items Bag(s): {householdItemsBagCount}",
-            $"- Same-Day Delivery: {(sameDayDelivery ? "Yes" : "No")}",
-            ""
-        });
+            $"- Same-Day Delivery: {(sameDayDelivery ? "Yes" : "No")}" 
+        };
+
+        prefillNotesLines.AddRange(selectedItems.Select(i => $"- {i.Label}: {i.Quantity}"));
+        prefillNotesLines.Add(string.Empty);
+        var prefillNotes = string.Join(Environment.NewLine, prefillNotesLines);
 
         return RedirectToAction("Schedule", new
         {
             fromPickupOptions = true,
             standardLaundryBagCount,
-            largeBeddingBagCount,
-            householdItemsBagCount,
             sameDayDelivery,
             serviceType,
-            prefillNotes
+            prefillNotes,
+            selectedOptionsSummary
         });
     }
 
@@ -98,29 +171,42 @@ public class OrdersController : Controller
     public IActionResult Schedule(
         bool fromPickupOptions = false,
         int standardLaundryBagCount = 0,
-        int largeBeddingBagCount = 0,
-        int householdItemsBagCount = 0,
         bool sameDayDelivery = false,
         string? serviceType = null,
-        string? prefillNotes = null)
+        string? prefillNotes = null,
+        string? selectedOptionsSummary = null)
     {
         if (!fromPickupOptions)
         {
             return RedirectToAction("PickupOptions");
         }
 
-        ViewBag.StandardLaundryBagCount = standardLaundryBagCount;
-        ViewBag.LargeBeddingBagCount = largeBeddingBagCount;
-        ViewBag.HouseholdItemsBagCount = householdItemsBagCount;
-        ViewBag.SameDayDelivery = sameDayDelivery;
-        ViewBag.PrefillServiceType = serviceType ?? "Wash & Fold";
-        ViewBag.PrefillNotes = prefillNotes ?? "";
+        SetSchedulePrefillViewBag(
+            standardLaundryBagCount,
+            sameDayDelivery,
+            serviceType ?? "Wash & Fold",
+            prefillNotes ?? "",
+            selectedOptionsSummary ?? "");
 
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Schedule(string serviceType, DateTime scheduledAt, string addressLine1, string? addressLine2, string city, string state, string zipCode, string? notes)
+    public async Task<IActionResult> Schedule(
+        string serviceType,
+        DateTime scheduledAt,
+        string addressLine1,
+        string? addressLine2,
+        string city,
+        string state,
+        string zipCode,
+        string? notes,
+        bool fromPickupOptions = false,
+        int standardLaundryBagCount = 0,
+        bool sameDayDelivery = false,
+        string? prefillServiceType = null,
+        string? prefillNotes = null,
+        string? selectedOptionsSummary = null)
     {
         if (string.IsNullOrWhiteSpace(serviceType))
             ModelState.AddModelError("", "Choose an order type.");
@@ -141,7 +227,16 @@ public class OrdersController : Controller
             ModelState.AddModelError("", "Enter a ZIP code.");
 
         if (!ModelState.IsValid)
+        {
+            SetSchedulePrefillViewBag(
+                standardLaundryBagCount,
+                sameDayDelivery,
+                prefillServiceType ?? serviceType ?? "Wash & Fold",
+                prefillNotes ?? notes ?? "",
+                selectedOptionsSummary ?? "");
+
             return View();
+        }
 
         var order = new LaundryOrder
         {
@@ -708,16 +803,26 @@ public class OrdersController : Controller
         return RedirectToAction("History");
     }
 
-        private async Task<LaundryOrder?> GetOrderAsync(int id)
-        {
-            var orderFromApi = await _layeredApiOrderClient.GetOrderAsync(id);
-            if (orderFromApi != null)
-            {
-                return orderFromApi;
-            }
+    private void SetSchedulePrefillViewBag(int standardLaundryBagCount, bool sameDayDelivery, string serviceType, string prefillNotes, string selectedOptionsSummary)
+    {
+        ViewBag.StandardLaundryBagCount = standardLaundryBagCount;
+        ViewBag.SameDayDelivery = sameDayDelivery;
+        ViewBag.PrefillServiceType = serviceType;
+        ViewBag.PrefillNotes = prefillNotes;
+        ViewBag.SelectedOptionsSummary = selectedOptionsSummary;
+        ViewBag.FromPickupOptions = true;
+    }
 
-            return _orderStore.Get(id);
+    private async Task<LaundryOrder?> GetOrderAsync(int id)
+    {
+        var orderFromApi = await _layeredApiOrderClient.GetOrderAsync(id);
+        if (orderFromApi != null)
+        {
+            return orderFromApi;
         }
+
+        return _orderStore.Get(id);
+    }
 }
 
 

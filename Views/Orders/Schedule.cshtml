@@ -1,10 +1,13 @@
 @{
     ViewData["Title"] = "Schedule Pickup & Payment Method";
+    var fromPickupOptions = ViewBag.FromPickupOptions is bool fromOptions && fromOptions;
     var prefillServiceType = (ViewBag.PrefillServiceType as string) ?? "";
     var prefillNotes = (ViewBag.PrefillNotes as string) ?? "";
     var standardLaundryBagCount = ViewBag.StandardLaundryBagCount is int s ? s : 0;
-    var largeBeddingBagCount = ViewBag.LargeBeddingBagCount is int b ? b : 0;
-    var householdItemsBagCount = ViewBag.HouseholdItemsBagCount is int h ? h : 0;
+    var selectedOptionsSummary = (ViewBag.SelectedOptionsSummary as string) ?? "";
+    var selectedOptionsLines = selectedOptionsSummary
+        .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+        .ToList();
     var sameDayDelivery = ViewBag.SameDayDelivery is bool sameDay && sameDay;
 }
 
@@ -15,14 +18,19 @@
     </div>
 </section>
 
-<div class="alert alert-primary schedule-summary mb-4">
-    <strong>Selected Pickup Options:</strong>
-    <span class="ms-2">Standard Laundry Bags: @standardLaundryBagCount</span>
-    <span class="ms-3">Large Bedding Bags: @largeBeddingBagCount</span>
-    <span class="ms-3">Household Items Bags: @householdItemsBagCount</span>
-    <span class="ms-3">Same-Day Delivery: @(sameDayDelivery ? "Yes" : "No")</span>
-    <a class="ms-3" href="/Orders/PickupOptions">Edit options</a>
-</div>
+@if (selectedOptionsLines.Count > 0)
+{
+    <div class="alert alert-primary schedule-summary mb-4">
+        <strong>Selected Pickup Options:</strong>
+        <ul class="mb-0 mt-2 ps-3">
+            @foreach (var line in selectedOptionsLines)
+            {
+                <li>@line</li>
+            }
+        </ul>
+        <a class="d-inline-block mt-2" href="/Orders/PickupOptions">Edit options</a>
+    </div>
+}
 
 @if (!ViewData.ModelState.IsValid)
 {
@@ -37,6 +45,12 @@
 <form method="post" id="scheduleForm">
     @Html.AntiForgeryToken()
     <input type="hidden" name="scheduledAt" id="scheduledAt" />
+    <input type="hidden" name="fromPickupOptions" value="@fromPickupOptions" />
+    <input type="hidden" name="standardLaundryBagCount" value="@standardLaundryBagCount" />
+    <input type="hidden" name="sameDayDelivery" value="@sameDayDelivery" />
+    <input type="hidden" name="prefillServiceType" value="@prefillServiceType" />
+    <input type="hidden" name="prefillNotes" value="@prefillNotes" />
+    <input type="hidden" name="selectedOptionsSummary" value="@selectedOptionsSummary" />
 
     <div class="row g-4">
         <div class="col-lg-5">

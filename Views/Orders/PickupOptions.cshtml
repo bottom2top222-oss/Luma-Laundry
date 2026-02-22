@@ -22,21 +22,77 @@
 <form method="post" class="card schedule-card">
     @Html.AntiForgeryToken()
     <div class="card-body">
-        <h5 class="mb-3">Bag Counts</h5>
+        <h5 class="mb-3">Wash & Fold</h5>
 
-        <div class="row g-3">
-            <div class="col-md-4">
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-lg-4">
                 <label class="form-label" for="standardLaundryBagCount">Standard Laundry Bag(s)</label>
                 <input class="form-control" type="number" min="0" id="standardLaundryBagCount" name="standardLaundryBagCount" value="0" required />
                 <div class="form-text">Wash & Fold pricing bags are labeled as Standard Laundry Bag.</div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label" for="largeBeddingBagCount">Large Bedding Bag(s)</label>
-                <input class="form-control" type="number" min="0" id="largeBeddingBagCount" name="largeBeddingBagCount" value="0" required />
+        </div>
+
+        <h5 class="mb-3">Large Bedding Items</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="comforterKingQty">Comforter (King)</label>
+                <input class="form-control" type="number" min="0" id="comforterKingQty" name="comforterKingQty" value="0" />
             </div>
-            <div class="col-md-4">
-                <label class="form-label" for="householdItemsBagCount">Household Items Bag(s)</label>
-                <input class="form-control" type="number" min="0" id="householdItemsBagCount" name="householdItemsBagCount" value="0" required />
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="comforterQueenQty">Comforter (Queen)</label>
+                <input class="form-control" type="number" min="0" id="comforterQueenQty" name="comforterQueenQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="comforterFullQty">Comforter (Full)</label>
+                <input class="form-control" type="number" min="0" id="comforterFullQty" name="comforterFullQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="comforterTwinQty">Comforter (Twin)</label>
+                <input class="form-control" type="number" min="0" id="comforterTwinQty" name="comforterTwinQty" value="0" />
+            </div>
+        </div>
+
+        <h5 class="mb-3">Household Items</h5>
+        <div class="row g-3">
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="bedspreadQty">Bedspread</label>
+                <input class="form-control" type="number" min="0" id="bedspreadQty" name="bedspreadQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="cushionSlipCoverQty">Cushion Slip Cover</label>
+                <input class="form-control" type="number" min="0" id="cushionSlipCoverQty" name="cushionSlipCoverQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="chairSlipCoverQty">Chair Slip Cover</label>
+                <input class="form-control" type="number" min="0" id="chairSlipCoverQty" name="chairSlipCoverQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="sofaSlipCoverQty">Sofa Slip Cover</label>
+                <input class="form-control" type="number" min="0" id="sofaSlipCoverQty" name="sofaSlipCoverQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="blanketQty">Blanket</label>
+                <input class="form-control" type="number" min="0" id="blanketQty" name="blanketQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="pillowShamQty">Pillow Sham</label>
+                <input class="form-control" type="number" min="0" id="pillowShamQty" name="pillowShamQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="duvetCoverQty">Duvet Cover</label>
+                <input class="form-control" type="number" min="0" id="duvetCoverQty" name="duvetCoverQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="weightedBlanketQty">Weighted Blanket</label>
+                <input class="form-control" type="number" min="0" id="weightedBlanketQty" name="weightedBlanketQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="standardPillowQty">Standard Pillow</label>
+                <input class="form-control" type="number" min="0" id="standardPillowQty" name="standardPillowQty" value="0" />
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label" for="mattressCoverQty">Mattress Cover</label>
+                <input class="form-control" type="number" min="0" id="mattressCoverQty" name="mattressCoverQty" value="0" />
             </div>
         </div>
 
