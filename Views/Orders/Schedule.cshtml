@@ -18,20 +18,6 @@
     </div>
 </section>
 
-@if (selectedOptionsLines.Count > 0)
-{
-    <div class="alert alert-primary schedule-summary mb-4">
-        <strong>Selected Pickup Options:</strong>
-        <ul class="mb-0 mt-2 ps-3">
-            @foreach (var line in selectedOptionsLines)
-            {
-                <li>@line</li>
-            }
-        </ul>
-        <a class="d-inline-block mt-2" href="/Orders/PickupOptions">Edit options</a>
-    </div>
-}
-
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
@@ -45,6 +31,7 @@
 <form method="post" id="scheduleForm">
     @Html.AntiForgeryToken()
     <input type="hidden" name="scheduledAt" id="scheduledAt" />
+    <input type="hidden" name="serviceType" value="@prefillServiceType" />
     <input type="hidden" name="fromPickupOptions" value="@fromPickupOptions" />
     <input type="hidden" name="standardLaundryBagCount" value="@standardLaundryBagCount" />
     <input type="hidden" name="sameDayDelivery" value="@sameDayDelivery" />
@@ -89,36 +76,19 @@
                 <div class="card-body">
                     <h5 class="mb-3">Service Details</h5>
 
-                    <div class="mb-3">
-                        <label class="form-label">Order Type</label>
-                        <select class="form-select" name="serviceType" required>
-                            <option value="">Select one</option>
-                            @if (prefillServiceType == "Wash & Fold")
-                            {
-                                <option value="Wash & Fold" selected>Wash & Fold (Standard Laundry Bags)</option>
-                            }
-                            else
-                            {
-                                <option value="Wash & Fold">Wash & Fold (Standard Laundry Bags)</option>
-                            }
-                            @if (prefillServiceType == "Large Bedding")
-                            {
-                                <option value="Large Bedding" selected>Large Bedding</option>
-                            }
-                            else
-                            {
-                                <option value="Large Bedding">Large Bedding</option>
-                            }
-                            @if (prefillServiceType == "Household Items")
-                            {
-                                <option value="Household Items" selected>Household Items</option>
-                            }
-                            else
-                            {
-                                <option value="Household Items">Household Items</option>
-                            }
-                        </select>
-                    </div>
+                    @if (selectedOptionsLines.Count > 0)
+                    {
+                        <div class="alert alert-primary schedule-summary mb-3">
+                            <strong>Selected Pickup Options:</strong>
+                            <ul class="mb-0 mt-2 ps-3">
+                                @foreach (var line in selectedOptionsLines)
+                                {
+                                    <li>@line</li>
+                                }
+                            </ul>
+                            <a class="d-inline-block mt-2" href="/Orders/PickupOptions">Edit options</a>
+                        </div>
+                    }
 
                     <div class="mb-3">
                         <label class="form-label">Pickup/Drop-off Address</label>
