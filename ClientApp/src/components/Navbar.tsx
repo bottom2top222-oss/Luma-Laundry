@@ -113,32 +113,28 @@ export default function Navbar() {
             viewport={{ once: true }}
             transition={{ type: "spring", stiffness: 250, damping: 70, mass: 1 }}
         >
-            <div className='max-w-6xl mx-auto flex items-center justify-between bg-black/45 backdrop-blur-xl border border-white/10 border-b-white/15 rounded-2xl p-3'>
+            <div className='max-w-6xl mx-auto flex items-center justify-between bg-black/50 backdrop-blur-md border border-white/4 rounded-2xl p-3'>
                 <a href='/'>
                     <img src='/luma-logo.svg' alt="Luma Laundry" className="h-8" />
                 </a>
 
-                <div className='hidden md:flex items-center gap-8 text-sm font-medium text-gray-300/80'>
+                <div className='hidden md:flex items-center gap-8 text-sm font-medium text-gray-300'>
                     {navLinks.map((link) => (
                         <a
                             href={link.href}
                             key={link.name}
                             onClick={() => setActiveHref(link.href)}
-                            aria-current={activeHref === link.href ? 'page' : undefined}
                             className={`${activeHref === link.href
-                                ? 'relative text-white pb-1'
-                                : 'text-gray-300/75 hover:text-white'} transition`}
+                                ? 'text-white [text-shadow:0_0_14px_rgba(56,217,255,0.45)] border-b-2 border-cyan-400 pb-0.5'
+                                : 'text-gray-300 hover:text-white'} transition`}
                         >
                             {link.name}
-                            {activeHref === link.href && (
-                                <span className="absolute left-1/2 -bottom-1.5 size-1.5 -translate-x-1/2 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(56,217,255,0.9)]" aria-hidden="true" />
-                            )}
                         </a>
                     ))}
                 </div>
 
                 <div className='hidden md:flex items-center gap-3'>
-                    <a href='/Account/Login' className='text-sm font-medium text-gray-300/80 hover:text-white transition max-sm:hidden'>
+                    <a href='/Account/Login' className='text-sm font-medium text-gray-300 hover:text-white transition max-sm:hidden'>
                         Sign in
                     </a>
                     <a href='/Orders/Schedule'>
@@ -159,7 +155,7 @@ export default function Navbar() {
                             setActiveHref(link.href);
                             setIsOpen(false);
                         }}
-                        className={activeHref === link.href ? 'text-white' : 'text-gray-300 hover:text-white'}
+                        className={activeHref === link.href ? 'text-white [text-shadow:0_0_14px_rgba(56,217,255,0.45)]' : 'text-gray-300 hover:text-white'}
                     >
                         {link.name}
                     </a>
