@@ -145,16 +145,7 @@ public class OrdersController : Controller
 
         var selectedOptionsSummary = string.Join(Environment.NewLine, optionSummaryLines);
 
-        var prefillNotesLines = new List<string>
-        {
-            "Pickup Options:",
-            $"- Standard Laundry Bag(s): {standardLaundryBagCount}",
-            $"- Same-Day Delivery: {(sameDayDelivery ? "Yes" : "No")}" 
-        };
-
-        prefillNotesLines.AddRange(selectedItems.Select(i => $"- {i.Label}: {i.Quantity}"));
-        prefillNotesLines.Add(string.Empty);
-        var prefillNotes = string.Join(Environment.NewLine, prefillNotesLines);
+        var prefillNotes = string.Empty;
 
         return RedirectToAction("Schedule", new
         {
