@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Pickup Options";
+}
+
+<section class="schedule-hero mb-4">
+    <div class="schedule-hero__inner">
+        <h1 class="mb-2">Pickup Options</h1>
+        <p class="mb-0">Choose your bag counts and whether this order is same-day delivery before scheduling your pickup time.</p>
+    </div>
+</section>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@err.ErrorMessage</div>
+        }
+    </div>
+}
+
+<form method="post" class="card schedule-card">
+    @Html.AntiForgeryToken()
+    <div class="card-body">
+        <h5 class="mb-3">Bag Counts</h5>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" for="standardLaundryBagCount">Standard Laundry Bag(s)</label>
+                <input class="form-control" type="number" min="0" id="standardLaundryBagCount" name="standardLaundryBagCount" value="0" required />
+                <div class="form-text">Wash & Fold pricing bags are labeled as Standard Laundry Bag.</div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="largeBeddingBagCount">Large Bedding Bag(s)</label>
+                <input class="form-control" type="number" min="0" id="largeBeddingBagCount" name="largeBeddingBagCount" value="0" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="householdItemsBagCount">Household Items Bag(s)</label>
+                <input class="form-control" type="number" min="0" id="householdItemsBagCount" name="householdItemsBagCount" value="0" required />
+            </div>
+        </div>
+
+        <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" id="sameDayDelivery" name="sameDayDelivery" value="true" />
+            <label class="form-check-label" for="sameDayDelivery">
+                Same-day delivery
+            </label>
+        </div>
+
+        <div class="alert alert-info mt-4 mb-0">
+            <strong>Next step:</strong> you’ll pick your date/time and confirm address details on the schedule page.
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" type="submit">Continue to Schedule</button>
+            <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back</a>
+        </div>
+    </div>
+</form>
+
+<style>
+    .schedule-hero {
+        background: linear-gradient(135deg, #006994 0%, #0099b6 100%);
+        border-radius: 14px;
+        color: #fff;
+        padding: 1.5rem;
+    }
+
+    .schedule-hero__inner h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .schedule-card {
+        border: 1px solid #c8e6f5;
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(0, 105, 148, 0.08);
+    }
+</style>

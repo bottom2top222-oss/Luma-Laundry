@@ -38,8 +38,84 @@ public class OrdersController : Controller
     }
 
     [HttpGet]
-    public IActionResult Schedule()
+    public IActionResult PickupOptions()
     {
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult PickupOptions(int standardLaundryBagCount, int largeBeddingBagCount, int householdItemsBagCount, bool sameDayDelivery)
+    {
+        if (standardLaundryBagCount < 0 || largeBeddingBagCount < 0 || householdItemsBagCount < 0)
+        {
+            ModelState.AddModelError("", "Bag counts cannot be negative.");
+        }
+
+        var totalBags = standardLaundryBagCount + largeBeddingBagCount + householdItemsBagCount;
+        if (totalBags <= 0)
+        {
+            ModelState.AddModelError("", "Select at least one bag for pickup.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View();
+        }
+
+        var serviceType = "Wash & Fold";
+        if (standardLaundryBagCount == 0 && largeBeddingBagCount > 0)
+        {
+            serviceType = "Large Bedding";
+        }
+        else if (standardLaundryBagCount == 0 && householdItemsBagCount > 0)
+        {
+            serviceType = "Household Items";
+        }
+
+        var prefillNotes = string.Join(Environment.NewLine, new[]
+        {
+            "Pickup Options:",
+            $"- Standard Laundry Bag(s): {standardLaundryBagCount}",
+            $"- Large Bedding Bag(s): {largeBeddingBagCount}",
+            $"- Household Items Bag(s): {householdItemsBagCount}",
+            $"- Same-Day Delivery: {(sameDayDelivery ? "Yes" : "No")}",
+            ""
+        });
+
+        return RedirectToAction("Schedule", new
+        {
+            fromPickupOptions = true,
+            standardLaundryBagCount,
+            largeBeddingBagCount,
+            householdItemsBagCount,
+            sameDayDelivery,
+            serviceType,
+            prefillNotes
+        });
+    }
+
+    [HttpGet]
+    public IActionResult Schedule(
+        bool fromPickupOptions = false,
+        int standardLaundryBagCount = 0,
+        int largeBeddingBagCount = 0,
+        int householdItemsBagCount = 0,
+        bool sameDayDelivery = false,
+        string? serviceType = null,
+        string? prefillNotes = null)
+    {
+        if (!fromPickupOptions)
+        {
+            return RedirectToAction("PickupOptions");
+        }
+
+        ViewBag.StandardLaundryBagCount = standardLaundryBagCount;
+        ViewBag.LargeBeddingBagCount = largeBeddingBagCount;
+        ViewBag.HouseholdItemsBagCount = householdItemsBagCount;
+        ViewBag.SameDayDelivery = sameDayDelivery;
+        ViewBag.PrefillServiceType = serviceType ?? "Wash & Fold";
+        ViewBag.PrefillNotes = prefillNotes ?? "";
+
         return View();
     }
 

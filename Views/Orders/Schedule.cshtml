@@ -1,5 +1,11 @@
 @{
     ViewData["Title"] = "Schedule Pickup & Payment Method";
+    var prefillServiceType = (ViewBag.PrefillServiceType as string) ?? "";
+    var prefillNotes = (ViewBag.PrefillNotes as string) ?? "";
+    var standardLaundryBagCount = ViewBag.StandardLaundryBagCount is int s ? s : 0;
+    var largeBeddingBagCount = ViewBag.LargeBeddingBagCount is int b ? b : 0;
+    var householdItemsBagCount = ViewBag.HouseholdItemsBagCount is int h ? h : 0;
+    var sameDayDelivery = ViewBag.SameDayDelivery is bool sameDay && sameDay;
 }
 
 <section class="schedule-hero mb-4">
@@ -8,6 +14,15 @@
         <p class="mb-0">Book pickup details now, add your card on file, and pay only after processing is complete.</p>
     </div>
 </section>
+
+<div class="alert alert-primary schedule-summary mb-4">
+    <strong>Selected Pickup Options:</strong>
+    <span class="ms-2">Standard Laundry Bags: @standardLaundryBagCount</span>
+    <span class="ms-3">Large Bedding Bags: @largeBeddingBagCount</span>
+    <span class="ms-3">Household Items Bags: @householdItemsBagCount</span>
+    <span class="ms-3">Same-Day Delivery: @(sameDayDelivery ? "Yes" : "No")</span>
+    <a class="ms-3" href="/Orders/PickupOptions">Edit options</a>
+</div>
 
 @if (!ViewData.ModelState.IsValid)
 {
@@ -64,9 +79,30 @@
                         <label class="form-label">Order Type</label>
                         <select class="form-select" name="serviceType" required>
                             <option value="">Select one</option>
-                            <option value="Wash & Fold">Wash & Fold (bags)</option>
-                            <option value="Large Bedding">Large Bedding</option>
-                            <option value="Household Items">Household Items</option>
+                            @if (prefillServiceType == "Wash & Fold")
+                            {
+                                <option value="Wash & Fold" selected>Wash & Fold (Standard Laundry Bags)</option>
+                            }
+                            else
+                            {
+                                <option value="Wash & Fold">Wash & Fold (Standard Laundry Bags)</option>
+                            }
+                            @if (prefillServiceType == "Large Bedding")
+                            {
+                                <option value="Large Bedding" selected>Large Bedding</option>
+                            }
+                            else
+                            {
+                                <option value="Large Bedding">Large Bedding</option>
+                            }
+                            @if (prefillServiceType == "Household Items")
+                            {
+                                <option value="Household Items" selected>Household Items</option>
+                            }
+                            else
+                            {
+                                <option value="Household Items">Household Items</option>
+                            }
                         </select>
                     </div>
 
@@ -97,7 +133,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Special Instructions (optional)</label>
-                        <textarea class="form-control" name="notes" rows="3" placeholder="e.g. 3 bags, King comforter + weighted blanket"></textarea>
+                        <textarea class="form-control" name="notes" rows="6" placeholder="e.g. 3 bags, King comforter + weighted blanket">@prefillNotes</textarea>
                     </div>
 
                     <div class="alert alert-info">
@@ -106,7 +142,7 @@
 
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary">Confirm</button>
-                        <a class="btn btn-outline-secondary" href="/Home/Dashboard">Back</a>
+                        <a class="btn btn-outline-secondary" href="/Orders/PickupOptions">Back</a>
                     </div>
                 </div>
             </div>
@@ -201,6 +237,12 @@
         border: 1px solid #c8e6f5;
         border-radius: 14px;
         box-shadow: 0 10px 24px rgba(0, 105, 148, 0.08);
+    }
+
+    .schedule-summary {
+        border: 1px solid #b6ddff;
+        background: #eef7ff;
+        color: #073b5b;
     }
 
     .calendar-weekdays {
