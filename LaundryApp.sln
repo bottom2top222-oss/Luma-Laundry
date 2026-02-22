@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaundryApp", "LaundryApp.cs
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{5854FF58-B8C5-05C6-5BF2-ACE42193F22B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaundryApp.Api", "services\LaundryApp.Api\LaundryApp.Api.csproj", "{6B3C3225-6F53-4165-89C9-E55CB9069857}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaundryApp.Api", "Services\LaundryApp.Api\LaundryApp.Api.csproj", "{6B3C3225-6F53-4165-89C9-E55CB9069857}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaundryApp.Worker", "services\LaundryApp.Worker\LaundryApp.Worker.csproj", "{7C3C9248-92B7-4B5E-BFCB-D408034C869A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaundryApp.Worker", "Services\LaundryApp.Worker\LaundryApp.Worker.csproj", "{7C3C9248-92B7-4B5E-BFCB-D408034C869A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
