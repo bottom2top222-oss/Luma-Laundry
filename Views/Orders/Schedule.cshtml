@@ -8,6 +8,14 @@
     var selectedOptionsLines = selectedOptionsSummary
         .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
         .ToList();
+    var selectedOptionsMap = selectedOptionsLines
+        .Select(line => line.Split('|', 2))
+        .Where(parts => parts.Length == 2)
+        .ToDictionary(parts => parts[0], parts => parts[1]);
+    var standardLaundrySummary = selectedOptionsMap.TryGetValue("StandardLaundryBags", out var standardValue) ? standardValue : "0";
+    var sameDaySummary = selectedOptionsMap.TryGetValue("SameDayDelivery", out var sameDayValue) ? sameDayValue : "No";
+    var largeBeddingSummary = selectedOptionsMap.TryGetValue("LargeBeddingItems", out var largeBeddingValue) ? largeBeddingValue : "";
+    var householdSummary = selectedOptionsMap.TryGetValue("HouseholdItems", out var householdValue) ? householdValue : "";
     var sameDayDelivery = ViewBag.SameDayDelivery is bool sameDay && sameDay;
 }
 
@@ -80,12 +88,45 @@
                     {
                         <div class="alert alert-primary schedule-summary mb-3">
                             <strong>Selected Pickup Options:</strong>
-                            <ul class="mb-0 mt-2 ps-3">
-                                @foreach (var line in selectedOptionsLines)
+                            <div class="pickup-option-list mt-2">
+                                <div class="pickup-option-row">
+                                    <span class="pickup-option-icon" aria-hidden="true">🧺</span>
+                                    <div>
+                                        <div class="pickup-option-title">Standard Laundry Bags</div>
+                                        <div class="pickup-option-value">@standardLaundrySummary</div>
+                                    </div>
+                                </div>
+
+                                <div class="pickup-option-row">
+                                    <span class="pickup-option-icon" aria-hidden="true">⚡</span>
+                                    <div>
+                                        <div class="pickup-option-title">Same-Day Delivery</div>
+                                        <div class="pickup-option-value">@sameDaySummary</div>
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(largeBeddingSummary))
                                 {
-                                    <li>@line</li>
+                                    <div class="pickup-option-row">
+                                        <span class="pickup-option-icon" aria-hidden="true">🛏️</span>
+                                        <div>
+                                            <div class="pickup-option-title">Large Bedding Items</div>
+                                            <div class="pickup-option-value">@largeBeddingSummary</div>
+                                        </div>
+                                    </div>
                                 }
-                            </ul>
+
+                                @if (!string.IsNullOrWhiteSpace(householdSummary))
+                                {
+                                    <div class="pickup-option-row">
+                                        <span class="pickup-option-icon" aria-hidden="true">🏠</span>
+                                        <div>
+                                            <div class="pickup-option-title">Household Items</div>
+                                            <div class="pickup-option-value">@householdSummary</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                             <a class="d-inline-block mt-2" href="/Orders/PickupOptions">Edit options</a>
                         </div>
                     }
@@ -227,6 +268,39 @@
         border: 1px solid #b6ddff;
         background: #eef7ff;
         color: #073b5b;
+    }
+
+    .pickup-option-list {
+        display: grid;
+        gap: 0.6rem;
+    }
+
+    .pickup-option-row {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 0.55rem;
+        align-items: start;
+    }
+
+    .pickup-option-icon {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #d9ecff;
+        border: 1px solid #a8cff3;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .pickup-option-title {
+        font-weight: 700;
+    }
+
+    .pickup-option-value {
+        color: #0a4a71;
     }
 
     .calendar-weekdays {

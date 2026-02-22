@@ -84,24 +84,29 @@ public class OrdersController : Controller
             ("mattressCoverQty", "Mattress Cover")
         };
 
-        var selectedItems = new List<(string Label, int Quantity)>();
+        var largeBeddingSelections = new List<(string Label, int Quantity)>();
         foreach (var item in largeBeddingItems)
         {
             var qty = ParseQuantity(item.Key);
             if (qty > 0)
             {
-                selectedItems.Add((item.Label, qty));
+                largeBeddingSelections.Add((item.Label, qty));
             }
         }
 
+        var householdSelections = new List<(string Label, int Quantity)>();
         foreach (var item in householdItems)
         {
             var qty = ParseQuantity(item.Key);
             if (qty > 0)
             {
-                selectedItems.Add((item.Label, qty));
+                householdSelections.Add((item.Label, qty));
             }
         }
+
+        var selectedItems = largeBeddingSelections
+            .Concat(householdSelections)
+            .ToList();
 
         if (standardLaundryBagCount < 0)
         {
@@ -133,14 +138,22 @@ public class OrdersController : Controller
 
         var optionSummaryLines = new List<string>
         {
-            $"Standard Laundry Bag(s): {standardLaundryBagCount}",
-            $"Same-Day Delivery: {(sameDayDelivery ? "Yes" : "No")}"
+            $"StandardLaundryBags|{standardLaundryBagCount}",
+            $"SameDayDelivery|{(sameDayDelivery ? "Yes" : "No")}"
         };
 
-        if (selectedItems.Count > 0)
+        if (largeBeddingSelections.Count > 0)
         {
-            optionSummaryLines.Add("Selected Items:");
-            optionSummaryLines.AddRange(selectedItems.Select(i => $"- {i.Label}: {i.Quantity}"));
+            var largeBeddingSummary = string.Join(", ",
+                largeBeddingSelections.Select(i => $"{i.Label} x{i.Quantity}"));
+            optionSummaryLines.Add($"LargeBeddingItems|{largeBeddingSummary}");
+        }
+
+        if (householdSelections.Count > 0)
+        {
+            var householdSummary = string.Join(", ",
+                householdSelections.Select(i => $"{i.Label} x{i.Quantity}"));
+            optionSummaryLines.Add($"HouseholdItems|{householdSummary}");
         }
 
         var selectedOptionsSummary = string.Join(Environment.NewLine, optionSummaryLines);
