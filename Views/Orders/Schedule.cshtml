@@ -12,8 +12,10 @@
         .Select(line => line.Split('|', 2))
         .Where(parts => parts.Length == 2)
         .ToDictionary(parts => parts[0], parts => parts[1]);
-    var standardLaundrySummary = selectedOptionsMap.TryGetValue("StandardLaundryBags", out var standardValue) ? standardValue : "0";
-    var sameDaySummary = selectedOptionsMap.TryGetValue("SameDayDelivery", out var sameDayValue) ? sameDayValue : "No";
+    var hasStandardLaundrySummary = selectedOptionsMap.TryGetValue("StandardLaundryBags", out var standardValue);
+    var standardLaundrySummary = hasStandardLaundrySummary ? standardValue : "0";
+    var hasSameDaySummary = selectedOptionsMap.TryGetValue("SameDayDelivery", out var sameDayValue);
+    var sameDaySummary = hasSameDaySummary ? sameDayValue : "No";
     var largeBeddingSummary = selectedOptionsMap.TryGetValue("LargeBeddingItems", out var largeBeddingValue) ? largeBeddingValue : "";
     var householdSummary = selectedOptionsMap.TryGetValue("HouseholdItems", out var householdValue) ? householdValue : "";
     var sameDayDelivery = ViewBag.SameDayDelivery is bool sameDay && sameDay;
@@ -89,21 +91,27 @@
                         <div class="alert alert-primary schedule-summary mb-3">
                             <strong>Selected Pickup Options:</strong>
                             <div class="pickup-option-list mt-2">
-                                <div class="pickup-option-row">
-                                    <span class="pickup-option-icon" aria-hidden="true">🧺</span>
-                                    <div>
-                                        <div class="pickup-option-title">Standard Laundry Bags</div>
-                                        <div class="pickup-option-value">@standardLaundrySummary</div>
+                                @if (hasStandardLaundrySummary)
+                                {
+                                    <div class="pickup-option-row">
+                                        <span class="pickup-option-icon" aria-hidden="true">🧺</span>
+                                        <div>
+                                            <div class="pickup-option-title">Standard Laundry Bags</div>
+                                            <div class="pickup-option-value">@standardLaundrySummary</div>
+                                        </div>
                                     </div>
-                                </div>
+                                }
 
-                                <div class="pickup-option-row">
-                                    <span class="pickup-option-icon" aria-hidden="true">⚡</span>
-                                    <div>
-                                        <div class="pickup-option-title">Same-Day Delivery</div>
-                                        <div class="pickup-option-value">@sameDaySummary</div>
+                                @if (hasSameDaySummary)
+                                {
+                                    <div class="pickup-option-row">
+                                        <span class="pickup-option-icon" aria-hidden="true">⚡</span>
+                                        <div>
+                                            <div class="pickup-option-title">Same-Day Delivery</div>
+                                            <div class="pickup-option-value">@sameDaySummary</div>
+                                        </div>
                                     </div>
-                                </div>
+                                }
 
                                 @if (!string.IsNullOrWhiteSpace(largeBeddingSummary))
                                 {

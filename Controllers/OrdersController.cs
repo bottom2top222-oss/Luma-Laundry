@@ -138,11 +138,17 @@ public class OrdersController : Controller
             serviceType = "Household Items";
         }
 
-        var optionSummaryLines = new List<string>
+        var optionSummaryLines = new List<string>();
+
+        if (standardLaundryBagCount > 0)
         {
-            $"StandardLaundryBags|{standardLaundryBagCount}",
-            $"SameDayDelivery|{(sameDayDelivery ? "Yes" : "No")}"
-        };
+            optionSummaryLines.Add($"StandardLaundryBags|{standardLaundryBagCount}");
+        }
+
+        if (sameDayDelivery)
+        {
+            optionSummaryLines.Add("SameDayDelivery|Yes");
+        }
 
         if (largeBeddingSelections.Count > 0)
         {
