@@ -19,18 +19,20 @@ public class OrdersController : Controller
     private readonly PaymentService _paymentService;
     private readonly StripeBillingService _stripeBillingService;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ServiceAreaService _serviceAreaService;
     private readonly LayeredApiJobClient _layeredApiJobClient;
     private readonly LayeredApiOrderClient _layeredApiOrderClient;
     private readonly IConfiguration _configuration;
     private readonly bool _apiOnlyMode;
 
-    public OrdersController(OrderStore orderStore, LaundryAppDbContext context, PaymentService paymentService, StripeBillingService stripeBillingService, UserManager<ApplicationUser> userManager, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
+    public OrdersController(OrderStore orderStore, LaundryAppDbContext context, PaymentService paymentService, StripeBillingService stripeBillingService, UserManager<ApplicationUser> userManager, ServiceAreaService serviceAreaService, LayeredApiJobClient layeredApiJobClient, LayeredApiOrderClient layeredApiOrderClient, IConfiguration configuration)
     {
         _orderStore = orderStore;
         _context = context;
         _paymentService = paymentService;
         _stripeBillingService = stripeBillingService;
         _userManager = userManager;
+        _serviceAreaService = serviceAreaService;
         _layeredApiJobClient = layeredApiJobClient;
         _layeredApiOrderClient = layeredApiOrderClient;
         _configuration = configuration;
@@ -229,6 +231,9 @@ public class OrdersController : Controller
 
         if (string.IsNullOrWhiteSpace(zipCode))
             ModelState.AddModelError("", "Enter a ZIP code.");
+
+        if (ModelState.IsValid && !_serviceAreaService.IsAddressServed(city, state, zipCode, out var serviceAreaMessage))
+            ModelState.AddModelError("", serviceAreaMessage);
 
         if (!ModelState.IsValid)
         {

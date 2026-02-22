@@ -14,6 +14,7 @@ public class AccountController : Controller
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly EmailNotificationService _emailNotificationService;
+    private readonly ServiceAreaService _serviceAreaService;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
@@ -21,12 +22,14 @@ public class AccountController : Controller
         SignInManager<ApplicationUser> signInManager,
         IConfiguration configuration,
         EmailNotificationService emailNotificationService,
+        ServiceAreaService serviceAreaService,
         ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _emailNotificationService = emailNotificationService;
+        _serviceAreaService = serviceAreaService;
         _logger = logger;
     }
 
@@ -119,9 +122,34 @@ public class AccountController : Controller
             ModelState.AddModelError("", "Password must be at least 6 characters long.");
         }
 
+        if (string.IsNullOrWhiteSpace(addressLine1))
+        {
+            ModelState.AddModelError("", "Street address is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            ModelState.AddModelError("", "City is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(state))
+        {
+            ModelState.AddModelError("", "State is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(zipCode))
+        {
+            ModelState.AddModelError("", "ZIP code is required.");
+        }
+
         if (!acceptedTerms)
         {
             ModelState.AddModelError("", "You must accept the Terms of Service to create an account.");
+        }
+
+        if (ModelState.IsValid && !_serviceAreaService.IsAddressServed(city, state, zipCode, out var serviceAreaMessage))
+        {
+            ModelState.AddModelError("", serviceAreaMessage);
         }
 
         if (!ModelState.IsValid)

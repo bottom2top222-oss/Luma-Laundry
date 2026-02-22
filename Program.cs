@@ -36,6 +36,8 @@ if (stripeOverrides.Count > 0)
 
 // Add services
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<ServiceAreaOptions>(builder.Configuration.GetSection("ServiceArea"));
+builder.Services.AddScoped<ServiceAreaService>();
 
 // Database
 var configuredDbPath = builder.Configuration["Database:Path"];
