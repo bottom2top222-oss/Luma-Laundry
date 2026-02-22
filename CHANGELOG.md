@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Added active-link highlighting for `Home`, `How It Works`, and `Pricing` in the Razor nav.
 - Added active-link highlighting for landing sections (`Home`, `Features`, `FAQ`) and page links in the React nav.
 - Upgraded landing nav section tracking from scroll listener to `IntersectionObserver` and tuned transition thresholds for smoother active-state behavior.
+- Expanded the `How It Works` page with richer visual sections for onboarding, preference setup, pickup preparation, and post-pickup process flow.
+- Updated `How It Works` copy and step structure to explicitly cover sign-up, customizing laundry preferences, and leaving bags out for pickup.
 
 ### Notes
 - Styling remains consistent with the existing Luma visual system and theme.
