@@ -9,18 +9,18 @@
             <div class="row g-4 align-items-center">
                 <div class="col-lg-7">
                     <h1 class="display-6 fw-bold mb-3">How Luma Works</h1>
-                    <p class="lead mb-3 how-muted">Laundry day should be effortless. We pick up your clothes, clean and fold everything with care, and return your order right to your door.</p>
-                    <p class="mb-4 how-muted">Set your own schedule, choose standard or same-day turnaround, and track your order from pickup to delivery.</p>
+                    <p class="lead mb-3 how-muted">Laundry day should be effortless. Luma makes it easy to sign up, personalize your service, and get doorstep pickup without changing your routine.</p>
+                    <p class="mb-4 how-muted">Create your account, set your laundry preferences once, and simply leave your bag out in your pickup window.</p>
                     <a class="btn btn-lg home-glow-btn" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Book Your First Pickup</a>
                 </div>
                 <div class="col-lg-5">
                     <div class="how-hero-panel rounded-4 p-4">
-                        <h2 class="h4 mb-3">Fast Snapshot</h2>
+                        <h2 class="h4 mb-3">At-a-Glance</h2>
                         <ul class="list-unstyled mb-0 d-grid gap-2">
-                            <li>✓ Pickup windows that fit your routine</li>
-                            <li>✓ Washed, dried, and neatly folded</li>
-                            <li>✓ Delivery notifications and status updates</li>
-                            <li>✓ Easy rebooking from your account dashboard</li>
+                            <li>✓ Fast account setup in minutes</li>
+                            <li>✓ Preference-based care for every order</li>
+                            <li>✓ Doorstep pickup and delivery updates</li>
+                            <li>✓ Easy rebooking from your dashboard</li>
                         </ul>
                     </div>
                 </div>
@@ -28,55 +28,77 @@
         </div>
 
         <div class="how-panel rounded-4 p-4 p-lg-5 mb-4">
-            <h2 class="h2 mb-4 text-center">Three Simple Steps</h2>
+            <h2 class="h2 mb-2 text-center">Your First Pickup in Three Steps</h2>
+            <p class="how-muted text-center mb-4">From account creation to pickup-ready laundry, everything is designed to be simple and visual.</p>
             <div class="row g-4">
                 <div class="col-md-4">
                     <article class="how-step h-100 rounded-4 p-4">
                         <div class="how-step-number mb-3">1</div>
-                        <h3 class="h4 mb-2">Schedule Pickup</h3>
-                        <p class="mb-0">Choose your date, preferred pickup window, and service type in under a minute.</p>
+                        <div class="how-step-icon mb-3" aria-hidden="true">👤</div>
+                        <h3 class="h4 mb-2">Sign Up</h3>
+                        <p class="mb-0">Create your account, add your address, and choose your first pickup window in just a few taps.</p>
                     </article>
                 </div>
                 <div class="col-md-4">
                     <article class="how-step h-100 rounded-4 p-4">
                         <div class="how-step-number mb-3">2</div>
-                        <h3 class="h4 mb-2">We Clean & Fold</h3>
-                        <p class="mb-0">Our team professionally processes your laundry and quality-checks every order.</p>
+                        <div class="how-step-icon mb-3" aria-hidden="true">⚙️</div>
+                        <h3 class="h4 mb-2">Customize Preferences</h3>
+                        <p class="mb-0">Tell us your detergent, temperature, drying, and folding preferences so each order is handled your way.</p>
                     </article>
                 </div>
                 <div class="col-md-4">
                     <article class="how-step h-100 rounded-4 p-4">
                         <div class="how-step-number mb-3">3</div>
-                        <h3 class="h4 mb-2">Doorstep Delivery</h3>
-                        <p class="mb-0">Your items return fresh, folded, and ready to put away at your selected delivery time.</p>
+                        <div class="how-step-icon mb-3" aria-hidden="true">🧺</div>
+                        <h3 class="h4 mb-2">Leave It Out for Pickup</h3>
+                        <p class="mb-0">Place your tied laundry bag at your selected pickup spot and we’ll take care of the rest.</p>
                     </article>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4 align-items-stretch">
+        <div class="row g-4 align-items-stretch mb-4">
             <div class="col-lg-6">
                 <div class="how-panel h-100 rounded-4 p-4">
-                    <h2 class="h3 mb-3">What You Can Expect</h2>
+                    <h2 class="h3 mb-3">Set Preferences Once</h2>
+                    <p class="how-muted mb-3">Save your defaults so every future order follows your routine automatically.</p>
                     <ul class="list-unstyled d-grid gap-3 mb-0">
-                        <li class="d-flex"><span class="feature-dot"></span><span>Transparent pricing with no hidden service fees.</span></li>
-                        <li class="d-flex"><span class="feature-dot"></span><span>Flexible recurring or one-time scheduling.</span></li>
-                        <li class="d-flex"><span class="feature-dot"></span><span>Careful handling for everyday clothes and essentials.</span></li>
-                        <li class="d-flex"><span class="feature-dot"></span><span>Friendly support whenever you need changes.</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Detergent type and scent preferences</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Cold, warm, or hot wash temperature choices</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Tumble dry levels and hang-dry instructions</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Fold style notes and special care reminders</span></li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-6">
                 <div class="how-panel h-100 rounded-4 p-4 d-flex flex-column justify-content-between">
                     <div>
-                        <h2 class="h3 mb-3">Turnaround Options</h2>
-                        <p class="mb-2"><strong>Standard:</strong> Next-day return for most orders.</p>
-                        <p class="mb-2"><strong>Same-day:</strong> Expedited option based on route availability.</p>
-                        <p class="mb-0 how-muted">Need help choosing? Start with standard service and upgrade any eligible order at checkout.</p>
+                        <h2 class="h3 mb-3">Pickup Day Checklist</h2>
+                        <div class="how-checklist d-grid gap-2">
+                            <div class="how-checklist-item"><span>01</span><p class="mb-0">Bag your laundry securely.</p></div>
+                            <div class="how-checklist-item"><span>02</span><p class="mb-0">Tag items that need special care.</p></div>
+                            <div class="how-checklist-item"><span>03</span><p class="mb-0">Leave it at your selected pickup spot.</p></div>
+                            <div class="how-checklist-item"><span>04</span><p class="mb-0">You’ll get notified once pickup is complete.</p></div>
+                        </div>
                     </div>
-                    <a class="btn home-glow-btn mt-4 align-self-start" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Schedule Now</a>
+                    <a class="btn home-glow-btn mt-4 align-self-start" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Set Pickup Preferences</a>
                 </div>
             </div>
+        </div>
+
+        <div class="how-process-strip rounded-4 p-4 p-lg-5 text-center">
+            <h2 class="h3 mb-3">After Pickup, We Handle Everything</h2>
+            <div class="how-mini-flow d-flex flex-wrap justify-content-center align-items-center gap-2 gap-md-3 mb-3">
+                <span class="how-pill">Pickup</span>
+                <span class="how-flow-arrow">→</span>
+                <span class="how-pill">Wash & Dry</span>
+                <span class="how-flow-arrow">→</span>
+                <span class="how-pill">Fold & Quality Check</span>
+                <span class="how-flow-arrow">→</span>
+                <span class="how-pill">Delivered Back</span>
+            </div>
+            <p class="how-muted mb-0">Your laundry returns fresh, folded, and ready to put away.</p>
         </div>
     </div>
 </section>
