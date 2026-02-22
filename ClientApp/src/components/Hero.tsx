@@ -62,6 +62,11 @@ export default function Hero() {
                             Schedule pickup <ArrowRightIcon className="size-4" />
                         </PrimaryButton>
                     </a>
+                    <a href="/Home/FirstOrder" className="w-full sm:w-auto">
+                        <GhostButton className="max-sm:w-full max-sm:justify-center py-3 px-6">
+                            First order guide
+                        </GhostButton>
+                    </a>
                     <a href="#pricing" className="w-full sm:w-auto">
                         <GhostButton className="max-sm:w-full max-sm:justify-center py-3 px-6">
                             View pricing

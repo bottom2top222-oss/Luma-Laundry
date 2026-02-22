@@ -26,6 +26,7 @@ export default function CTA() {
                             Schedule your first pickup today and experience the convenience of professional laundry service.
                         </motion.p>
                         <motion.div
+                            className="flex flex-col sm:flex-row items-center justify-center gap-3"
                             initial={{ y: 60, opacity: 0 }}
                             whileInView={{ y: 0, opacity: 1 }}
                             viewport={{ once: true }}
@@ -34,6 +35,11 @@ export default function CTA() {
                             <a href="/Orders/Schedule">
                                 <GhostButton className="px-8 py-3 gap-2">
                                     Schedule pickup <ArrowRightIcon size={20} />
+                                </GhostButton>
+                            </a>
+                            <a href="/Home/FirstOrder">
+                                <GhostButton className="px-8 py-3">
+                                    First order guide
                                 </GhostButton>
                             </a>
                         </motion.div>

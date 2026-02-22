@@ -52,6 +52,13 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult FirstOrder()
+    {
+        ViewData["Title"] = "First Order Guide";
+        return View();
+    }
+
     private bool IsLoggedIn()
         => User?.Identity?.IsAuthenticated ?? false;
 }

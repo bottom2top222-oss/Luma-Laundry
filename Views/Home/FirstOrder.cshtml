@@ -1,0 +1,157 @@
+@{
+    ViewData["Title"] = "First Order Guide";
+    var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+}
+
+<section class="first-order-page py-4 py-md-5">
+    <div class="container">
+        <div class="fo-hero rounded-4 p-4 p-lg-5 mb-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-6 fw-bold mb-3">First Order Guide</h1>
+                    <p class="lead fo-muted mb-3">Everything you need to know before your first Luma pickup, from scheduling to delivery.</p>
+                    <p class="fo-muted mb-4">Follow this quick guide once, and your future orders become one-click easy.</p>
+                    <a class="btn btn-lg home-glow-btn" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Start First Order</a>
+                </div>
+                <div class="col-lg-5">
+                    <div class="fo-hero-card rounded-4 p-4">
+                        <h2 class="h4 mb-3">What to Expect</h2>
+                        <ul class="list-unstyled mb-0 d-grid gap-2 fo-list">
+                            <li><span class="fo-check">✓</span><span>Fast account and pickup setup</span></li>
+                            <li><span class="fo-check">✓</span><span>Doorstep pickup during your selected window</span></li>
+                            <li><span class="fo-check">✓</span><span>Fresh fold delivered back ready to put away</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fo-divider" aria-hidden="true"></div>
+
+        <div class="fo-panel rounded-4 p-4 p-lg-5 mb-4">
+            <h2 class="h2 mb-3 text-center">How Your First Order Works</h2>
+            <p class="fo-muted text-center mb-5">Book your service, prep your bag, and let us handle the rest.</p>
+
+            <div class="row g-4 fo-step-grid">
+                <div class="col-md-3">
+                    <article class="fo-step h-100 rounded-4 p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="fo-step-number">1</span>
+                            <span class="fo-step-icon" aria-hidden="true">📝</span>
+                        </div>
+                        <h3 class="h5 mb-2">Create Account</h3>
+                        <p class="mb-0">Sign up, add your address, and choose a pickup day and time window.</p>
+                    </article>
+                </div>
+                <div class="col-md-3">
+                    <article class="fo-step h-100 rounded-4 p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="fo-step-number">2</span>
+                            <span class="fo-step-icon" aria-hidden="true">⚙️</span>
+                        </div>
+                        <h3 class="h5 mb-2">Set Preferences</h3>
+                        <p class="mb-0">Choose detergent, dry settings, fold preferences, and care notes once.</p>
+                    </article>
+                </div>
+                <div class="col-md-3">
+                    <article class="fo-step h-100 rounded-4 p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="fo-step-number">3</span>
+                            <span class="fo-step-icon" aria-hidden="true">🧺</span>
+                        </div>
+                        <h3 class="h5 mb-2">Leave Bag Out</h3>
+                        <p class="mb-0">Place your tied bag at your pickup spot before your selected window.</p>
+                    </article>
+                </div>
+                <div class="col-md-3">
+                    <article class="fo-step h-100 rounded-4 p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="fo-step-number">4</span>
+                            <span class="fo-step-icon" aria-hidden="true">🚚</span>
+                        </div>
+                        <h3 class="h5 mb-2">Receive Delivery</h3>
+                        <p class="mb-0">Your order is washed, folded, quality checked, and delivered fresh.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+
+        <div class="fo-divider" aria-hidden="true"></div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="fo-panel h-100 rounded-4 p-4">
+                    <h2 class="h3 mb-3">Before Pickup Day</h2>
+                    <ul class="list-unstyled d-grid gap-3 mb-0">
+                        <li class="d-flex"><span class="feature-dot"></span><span>Use any secure laundry bag for your first order.</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Keep whites and darks separate if you want separate loads.</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Check pockets and remove valuables.</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Add notes for delicate or special-care pieces.</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="fo-panel h-100 rounded-4 p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h2 class="h3 mb-3">Pickup Day Checklist</h2>
+                        <div class="fo-checklist d-grid gap-2">
+                            <div class="fo-checklist-item"><span>01</span><p class="mb-0">Place bag at your selected pickup spot.</p></div>
+                            <div class="fo-checklist-item"><span>02</span><p class="mb-0">Leave it out before your pickup window begins.</p></div>
+                            <div class="fo-checklist-item"><span>03</span><p class="mb-0">Look for pickup confirmation from Luma.</p></div>
+                            <div class="fo-checklist-item"><span>04</span><p class="mb-0">Track status until delivery in your dashboard.</p></div>
+                        </div>
+                    </div>
+                    <a class="btn home-glow-btn mt-4 align-self-start" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Schedule Pickup</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="fo-process-strip rounded-4 p-4 p-lg-5 text-center mb-4">
+            <h2 class="h3 mb-3">After Your First Pickup</h2>
+            <div class="fo-mini-flow d-flex flex-wrap justify-content-center align-items-center gap-2 gap-md-3 mb-3">
+                <span class="fo-pill">Picked Up</span>
+                <span class="fo-flow-arrow">→</span>
+                <span class="fo-pill">Cleaned & Dried</span>
+                <span class="fo-flow-arrow">→</span>
+                <span class="fo-pill">Folded</span>
+                <span class="fo-flow-arrow">→</span>
+                <span class="fo-pill">Delivered</span>
+            </div>
+            <p class="fo-muted mb-0">You’ll receive your fresh order back in a reusable Luma bag for future pickups.</p>
+        </div>
+
+        <div class="fo-panel rounded-4 p-4 p-lg-5">
+            <h2 class="h3 mb-4 text-center">First Order Questions</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="fo-faq-item rounded-3 p-3 h-100">
+                        <h3 class="h6 mb-2">Do I need a Luma bag for my first pickup?</h3>
+                        <p class="mb-0">No. Use any secure bag; we return your order in a reusable Luma bag.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="fo-faq-item rounded-3 p-3 h-100">
+                        <h3 class="h6 mb-2">Can I set instructions for special garments?</h3>
+                        <p class="mb-0">Yes. Add care notes when scheduling and we follow your saved preferences.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="fo-faq-item rounded-3 p-3 h-100">
+                        <h3 class="h6 mb-2">What if I miss my pickup window?</h3>
+                        <p class="mb-0">You can quickly reschedule from your account dashboard.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="fo-faq-item rounded-3 p-3 h-100">
+                        <h3 class="h6 mb-2">How do I place future orders?</h3>
+                        <p class="mb-0">After your first order, reuse your saved preferences for faster booking.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a class="btn btn-lg home-glow-btn" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Book Your First Pickup</a>
+            </div>
+        </div>
+    </div>
+</section>

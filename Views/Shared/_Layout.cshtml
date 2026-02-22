@@ -25,15 +25,25 @@
                             && string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase);
                         var isHowItWorksPage = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
                             && string.Equals(currentAction, "HowItWorks", StringComparison.OrdinalIgnoreCase);
+                            var isFirstOrderPage = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
+                                && string.Equals(currentAction, "FirstOrder", StringComparison.OrdinalIgnoreCase);
                         var isPricingPage = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
                             && string.Equals(currentAction, "Pricing", StringComparison.OrdinalIgnoreCase);
                     }
                     <ul class="navbar-nav mx-auto landing-links">
-                        <li class="nav-item"><a class="nav-link @(isHomePage ? "active" : "")" href="/">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/#features">Features</a></li>
-                        <li class="nav-item"><a class="nav-link @(isHowItWorksPage ? "active" : "")" asp-area="" asp-controller="Home" asp-action="HowItWorks">How It Works</a></li>
-                        <li class="nav-item"><a class="nav-link @(isPricingPage ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/#faq">FAQ</a></li>
+                            <li class="nav-item"><a class="nav-link @(isHomePage ? "active" : "")" href="/">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/#features">Features</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle @(isHowItWorksPage || isFirstOrderPage ? "active" : "")" href="#" id="howItWorksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    How It Works
+                                </a>
+                                <ul class="dropdown-menu landing-dropdown-menu" aria-labelledby="howItWorksDropdown">
+                                    <li><a class="dropdown-item @(isHowItWorksPage ? "active" : "")" asp-area="" asp-controller="Home" asp-action="HowItWorks">Overview</a></li>
+                                    <li><a class="dropdown-item @(isFirstOrderPage ? "active" : "")" asp-area="" asp-controller="Home" asp-action="FirstOrder">First Order Guide</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item"><a class="nav-link @(isPricingPage ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/#faq">FAQ</a></li>
                     </ul>
                     <div class="d-flex align-items-center gap-3">
                         @if (isHomePage)
