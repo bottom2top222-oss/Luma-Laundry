@@ -19,13 +19,20 @@
                 </button>
                 <div class="navbar-collapse collapse" id="mainNavbar">
                     @{
+                        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
                         var isHomePage = string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Home", StringComparison.OrdinalIgnoreCase)
                             && string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase);
+                        var isHowItWorksPage = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
+                            && string.Equals(currentAction, "HowItWorks", StringComparison.OrdinalIgnoreCase);
+                        var isPricingPage = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
+                            && string.Equals(currentAction, "Pricing", StringComparison.OrdinalIgnoreCase);
                     }
                     <ul class="navbar-nav mx-auto landing-links">
-                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link @(isHomePage ? "active" : "")" href="/">Home</a></li>
                         <li class="nav-item"><a class="nav-link" href="/#features">Features</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a></li>
+                        <li class="nav-item"><a class="nav-link @(isHowItWorksPage ? "active" : "")" asp-area="" asp-controller="Home" asp-action="HowItWorks">How It Works</a></li>
+                        <li class="nav-item"><a class="nav-link @(isPricingPage ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Pricing">Pricing</a></li>
                         <li class="nav-item"><a class="nav-link" href="/#faq">FAQ</a></li>
                     </ul>
                     <div class="d-flex align-items-center gap-3">

@@ -45,6 +45,13 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult HowItWorks()
+    {
+        ViewData["Title"] = "How It Works";
+        return View();
+    }
+
     private bool IsLoggedIn()
         => User?.Identity?.IsAuthenticated ?? false;
 }

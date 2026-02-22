@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "How It Works";
+    var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+}
+
+<section class="how-page py-4 py-md-5">
+    <div class="container">
+        <div class="how-hero rounded-4 p-4 p-lg-5 mb-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-6 fw-bold mb-3">How Luma Works</h1>
+                    <p class="lead mb-3 how-muted">Laundry day should be effortless. We pick up your clothes, clean and fold everything with care, and return your order right to your door.</p>
+                    <p class="mb-4 how-muted">Set your own schedule, choose standard or same-day turnaround, and track your order from pickup to delivery.</p>
+                    <a class="btn btn-lg home-glow-btn" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Book Your First Pickup</a>
+                </div>
+                <div class="col-lg-5">
+                    <div class="how-hero-panel rounded-4 p-4">
+                        <h2 class="h4 mb-3">Fast Snapshot</h2>
+                        <ul class="list-unstyled mb-0 d-grid gap-2">
+                            <li>✓ Pickup windows that fit your routine</li>
+                            <li>✓ Washed, dried, and neatly folded</li>
+                            <li>✓ Delivery notifications and status updates</li>
+                            <li>✓ Easy rebooking from your account dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="how-panel rounded-4 p-4 p-lg-5 mb-4">
+            <h2 class="h2 mb-4 text-center">Three Simple Steps</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <article class="how-step h-100 rounded-4 p-4">
+                        <div class="how-step-number mb-3">1</div>
+                        <h3 class="h4 mb-2">Schedule Pickup</h3>
+                        <p class="mb-0">Choose your date, preferred pickup window, and service type in under a minute.</p>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="how-step h-100 rounded-4 p-4">
+                        <div class="how-step-number mb-3">2</div>
+                        <h3 class="h4 mb-2">We Clean & Fold</h3>
+                        <p class="mb-0">Our team professionally processes your laundry and quality-checks every order.</p>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="how-step h-100 rounded-4 p-4">
+                        <div class="how-step-number mb-3">3</div>
+                        <h3 class="h4 mb-2">Doorstep Delivery</h3>
+                        <p class="mb-0">Your items return fresh, folded, and ready to put away at your selected delivery time.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-6">
+                <div class="how-panel h-100 rounded-4 p-4">
+                    <h2 class="h3 mb-3">What You Can Expect</h2>
+                    <ul class="list-unstyled d-grid gap-3 mb-0">
+                        <li class="d-flex"><span class="feature-dot"></span><span>Transparent pricing with no hidden service fees.</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Flexible recurring or one-time scheduling.</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Careful handling for everyday clothes and essentials.</span></li>
+                        <li class="d-flex"><span class="feature-dot"></span><span>Friendly support whenever you need changes.</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="how-panel h-100 rounded-4 p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h2 class="h3 mb-3">Turnaround Options</h2>
+                        <p class="mb-2"><strong>Standard:</strong> Next-day return for most orders.</p>
+                        <p class="mb-2"><strong>Same-day:</strong> Expedited option based on route availability.</p>
+                        <p class="mb-0 how-muted">Need help choosing? Start with standard service and upgrade any eligible order at checkout.</p>
+                    </div>
+                    <a class="btn home-glow-btn mt-4 align-self-start" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Login")">Schedule Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

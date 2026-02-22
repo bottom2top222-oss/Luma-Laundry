@@ -306,6 +306,60 @@ footer a:hover {
   color: #5ee3ff;
 }
 
+.how-page {
+  background:
+    radial-gradient(900px 500px at 50% 24%, rgba(70, 20, 130, 0.28), transparent 70%),
+    radial-gradient(420px 280px at 95% 95%, rgba(173, 21, 165, 0.2), transparent 65%),
+    #02081f;
+  color: #e6efff;
+}
+
+.how-hero,
+.how-panel {
+  background: rgba(8, 16, 45, 0.85);
+  border: 1px solid rgba(90, 130, 255, 0.35);
+  box-shadow: 0 0.8rem 1.4rem rgba(2, 8, 32, 0.45);
+}
+
+.how-hero h1,
+.how-panel h2,
+.how-panel h3,
+.how-step h3,
+.how-hero-panel h2 {
+  color: #bfe5ff;
+}
+
+.how-hero-panel {
+  background: rgba(10, 20, 58, 0.78);
+  border: 1px solid rgba(86, 140, 255, 0.38);
+  color: #eaf0ff;
+}
+
+.how-step {
+  background: rgba(10, 20, 58, 0.75);
+  border: 1px solid rgba(90, 130, 255, 0.35);
+  box-shadow: 0 0.65rem 1.2rem rgba(2, 8, 32, 0.4);
+}
+
+.how-step-number {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2b7bff 0%, #29b6ff 100%);
+  border: 1px solid rgba(114, 198, 255, 0.9);
+  box-shadow: 0 0 14px rgba(45, 170, 255, 0.5);
+}
+
+.how-muted {
+  color: rgba(215, 229, 255, 0.82) !important;
+}
+
 .home-hero {
   background: transparent;
 }
@@ -396,6 +450,12 @@ footer a:hover {
 
 .landing-links .nav-link:hover {
   color: #ffffff !important;
+}
+
+.landing-links .nav-link.active {
+  color: #ffffff !important;
+  text-shadow: 0 0 14px rgba(56, 217, 255, 0.45);
+  border-bottom: 2px solid #38d9ff;
 }
 
 .landing-signin {
