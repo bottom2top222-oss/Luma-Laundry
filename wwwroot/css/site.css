@@ -88,6 +88,13 @@ body.app-shell {
   padding-right: 24px;
 }
 
+@media (max-width: 576px) {
+  .container-fluid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
 /* Admin dashboard tweaks */
 .admin-dashboard .dashboard-banner h1 {
   color: #ffffff;
@@ -718,6 +725,36 @@ footer a:hover {
   background: transparent;
   box-shadow: none;
   padding: 0.75rem 2rem;
+}
+
+@media (max-width: 768px) {
+  .landing-nav-shell {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .landing-links .nav-link {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .landing-contact-box {
+    width: 100%;
+  }
+
+  .landing-cta-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .app-footer {
+    text-align: left;
+  }
+
+  .app-footer-heading {
+    margin-bottom: 0.6rem;
+  }
 }
 
 .landing-brand {

@@ -1,0 +1,31 @@
+{
+  "name": "LUMA Laundry",
+  "short_name": "LUMA",
+  "description": "Laundry pickup and delivery scheduling with LUMA.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#02081f",
+  "theme_color": "#02081f",
+  "icons": [
+    {
+      "src": "/lumalogo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/lumalogo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/lumalogo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
