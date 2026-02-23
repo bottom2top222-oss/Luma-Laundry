@@ -806,6 +806,60 @@ footer a:hover {
   border-color: rgba(114, 150, 239, 0.28);
 }
 
+.app-footer {
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(114, 150, 239, 0.25);
+}
+
+.app-footer-main {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-footer-logo {
+  height: 32px;
+  width: auto;
+}
+
+.app-footer-contact {
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.app-footer-link-strong {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-footer-link-strong:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.app-footer-heading {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+}
+
+.app-footer-list li + li {
+  margin-top: 0.35rem;
+}
+
+.app-footer-list a {
+  color: rgba(219, 232, 255, 0.8);
+  text-decoration: none;
+}
+
+.app-footer-list a:hover {
+  color: #ffffff;
+}
+
+.app-footer-copy {
+  color: rgba(219, 232, 255, 0.72);
+  font-size: 0.9rem;
+}
+
 .landing-ghost-btn {
   border-radius: 999px;
   border: 1px solid rgba(180, 197, 255, 0.3);

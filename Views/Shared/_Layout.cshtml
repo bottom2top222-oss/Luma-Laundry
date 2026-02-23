@@ -121,10 +121,52 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container-fluid">
-            &copy; 2026 - Luma - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> -
-            <a asp-area="" asp-controller="Account" asp-action="Terms">Terms</a>
+    <footer class="app-footer pt-4 text-light">
+        <div class="container-fluid px-4 px-lg-5">
+            <div class="app-footer-main py-4 py-lg-5">
+                <div class="row g-4 align-items-start">
+                    <div class="col-12 col-lg-6">
+                        <img src="~/luma-logo.svg" alt="LUMA" class="app-footer-logo" />
+                        <p class="mb-2 mt-4 app-footer-contact">
+                            Email <a href="mailto:support@luma-laundry.app" class="app-footer-link-strong">support@luma-laundry.app</a>
+                        </p>
+                        <p class="mb-0 app-footer-contact">
+                            Call <a href="tel:+19107534859" class="app-footer-link-strong">(910) 753-4859</a>
+                        </p>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="row g-4">
+                            <div class="col-6 col-md-4">
+                                <h3 class="app-footer-heading">Company</h3>
+                                <ul class="list-unstyled app-footer-list mb-0">
+                                    <li><a href="/#home">Home</a></li>
+                                    <li><a href="/#features">Services</a></li>
+                                    <li><a asp-area="" asp-controller="Home" asp-action="HowItWorks">Work</a></li>
+                                    <li><a href="mailto:support@luma-laundry.app">Contact</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <h3 class="app-footer-heading">Legal</h3>
+                                <ul class="list-unstyled app-footer-list mb-0">
+                                    <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                                    <li><a asp-area="" asp-controller="Account" asp-action="Terms">Terms of Service</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <h3 class="app-footer-heading">Connect</h3>
+                                <ul class="list-unstyled app-footer-list mb-0">
+                                    <li><a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a></li>
+                                    <li><a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                                    <li><a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="app-footer-copy mb-0 py-3 text-center">
+                &copy; @DateTime.UtcNow.Year LUMA. All rights reserved.
+            </p>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
