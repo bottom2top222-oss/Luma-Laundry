@@ -87,25 +87,26 @@ export const footerLinks = [
     {
         title: "Company",
         links: [
-            { name: "Home", url: "#" },
-            { name: "Services", url: "#" },
-            { name: "Work", url: "#" },
-            { name: "Contact", url: "#" }
+            { name: "Home", url: "/#home" },
+            { name: "Services", url: "/#features" },
+            { name: "Work", url: "/Home/HowItWorks" },
+            { name: "Contact", url: "mailto:support@luma-laundry.app" },
+            { name: "support@luma-laundry.app", url: "mailto:support@luma-laundry.app" }
         ]
     },
     {
         title: "Legal",
         links: [
-            { name: "Privacy Policy", url: "#" },
-            { name: "Terms of Service", url: "#" }
+            { name: "Privacy Policy", url: "/Home/Privacy" },
+            { name: "Terms of Service", url: "/Account/Terms" }
         ]
     },
     {
         title: "Connect",
         links: [
-            { name: "Twitter", url: "#" },
-            { name: "LinkedIn", url: "#" },
-            { name: "GitHub", url: "#" }
+            { name: "Twitter", url: "https://twitter.com" },
+            { name: "LinkedIn", url: "https://linkedin.com" },
+            { name: "GitHub", url: "https://github.com" }
         ]
     }
 ];
