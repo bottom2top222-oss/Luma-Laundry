@@ -13,9 +13,12 @@ export default function Footer() {
             <div className="max-w-6xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-white/10">
                     <div>
-                        <img src='/logo.svg' alt="logo" className="h-8" />
-                        <p className="max-w-[410px] mt-6 text-sm leading-relaxed">
-                            We are a digital agency focused on strategy, design and development—helping brands build meaningful digital experiences and grow sustainably.
+                        <img src='/luma-logo.svg' alt="LUMA" className="h-8" />
+                        <p className="max-w-[410px] mt-6 text-sm leading-relaxed text-white">
+                            Email <a href="mailto:support@luma-laundry.app" className="font-semibold hover:text-white/90 transition">support@luma-laundry.app</a>
+                        </p>
+                        <p className="max-w-[410px] mt-2 text-sm leading-relaxed text-white">
+                            Call <a href="tel:+19107534859" className="font-semibold hover:text-white/90 transition">(910) 753-4859</a>
                         </p>
                     </div>
 
@@ -31,6 +34,8 @@ export default function Footer() {
                                             <li key={i}>
                                                 <a
                                                     href={link.url}
+                                                    target={link.url.startsWith('http://') || link.url.startsWith('https://') ? '_blank' : undefined}
+                                                    rel={link.url.startsWith('http://') || link.url.startsWith('https://') ? 'noopener noreferrer' : undefined}
                                                     className="hover:text-white transition"
                                                 >
                                                     {link.name}
@@ -45,14 +50,7 @@ export default function Footer() {
                 </div>
 
                 <p className="py-4 text-center text-sm text-gray-400">
-                    © {new Date().getFullYear()} {' '}
-                    <a href="https://prebuiltui.com/tailwind-templates?ref=pixel-forge" target='_blank'>
-                        PrebuiltUI
-                    </a> • Distributed by {' '}
-                    <a href="https://themewagon.com" target='_blank'>
-                        ThemeWagon
-                    </a>
-                    . All rights reserved.
+                    © {new Date().getFullYear()} LUMA. All rights reserved.
                 </p>
             </div>
         </motion.footer>
