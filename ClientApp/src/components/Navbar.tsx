@@ -1,4 +1,4 @@
-import { MenuIcon, XIcon } from 'lucide-react';
+import { ChevronDownIcon, MenuIcon, XIcon } from 'lucide-react';
 import { PrimaryButton } from './Buttons';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -12,12 +12,17 @@ export default function Navbar() {
         { name: 'Features', href: '#features' },
         { name: 'How It Works', href: '/Home/HowItWorks' },
         { name: 'Pricing', href: '/Home/Pricing' },
-        { name: 'Locations', href: '#locations' },
         { name: 'FAQ', href: '#faq' },
     ];
 
+    const locationLinks = [
+        { name: 'Florida Service Area', href: '/locations/florida' },
+        { name: 'Brandon, FL', href: '/locations/florida?city=Brandon#service' },
+        { name: 'Riverview, FL', href: '/locations/florida?city=Riverview#service' },
+    ];
+
     useEffect(() => {
-        const sectionIds = ['home', 'features', 'faq', 'locations'];
+        const sectionIds = ['home', 'features', 'faq'];
         const visibleRatios = new Map<string, number>();
 
         const syncActiveFromLocation = () => {
@@ -35,12 +40,12 @@ export default function Navbar() {
             }
 
             if (currentPath === '/home/locations' || currentPath === '/locations/florida') {
-                setActiveHref('#locations');
+                setActiveHref('/Home/Locations');
                 return;
             }
 
             if (currentPath === '/' || currentPath === '') {
-                if (currentHash === '#features' || currentHash === '#faq' || currentHash === '#home' || currentHash === '#locations') {
+                if (currentHash === '#features' || currentHash === '#faq' || currentHash === '#home') {
                     setActiveHref(currentHash);
                 } else {
                     setActiveHref('#home');
@@ -137,6 +142,29 @@ export default function Navbar() {
                             {link.name}
                         </a>
                     ))}
+                    <div className='relative group'>
+                        <a
+                            href='/Home/Locations'
+                            onClick={() => setActiveHref('/Home/Locations')}
+                            className={`${activeHref === '/Home/Locations'
+                                ? 'text-white [text-shadow:0_0_14px_rgba(56,217,255,0.45)] border-b-2 border-cyan-400 pb-0.5'
+                                : 'text-gray-300 hover:text-white'} inline-flex items-center gap-1 transition`}
+                        >
+                            Locations
+                            <ChevronDownIcon className='size-4 opacity-80' />
+                        </a>
+                        <div className='invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 absolute left-0 mt-2 min-w-56 rounded-xl border border-white/10 bg-black/85 backdrop-blur-md p-2 transition'>
+                            {locationLinks.map((locationLink) => (
+                                <a
+                                    key={locationLink.name}
+                                    href={locationLink.href}
+                                    className='block rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-white/10 hover:text-white transition'
+                                >
+                                    {locationLink.name}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 <div className='hidden md:flex items-center gap-3'>
@@ -164,6 +192,27 @@ export default function Navbar() {
                         className={activeHref === link.href ? 'text-white [text-shadow:0_0_14px_rgba(56,217,255,0.45)]' : 'text-gray-300 hover:text-white'}
                     >
                         {link.name}
+                    </a>
+                ))}
+
+                <a
+                    href='/Home/Locations'
+                    onClick={() => {
+                        setActiveHref('/Home/Locations');
+                        setIsOpen(false);
+                    }}
+                    className={activeHref === '/Home/Locations' ? 'text-white [text-shadow:0_0_14px_rgba(56,217,255,0.45)]' : 'text-gray-300 hover:text-white'}
+                >
+                    Locations
+                </a>
+                {locationLinks.map((locationLink) => (
+                    <a
+                        key={locationLink.name}
+                        href={locationLink.href}
+                        onClick={() => setIsOpen(false)}
+                        className='text-sm text-gray-400 hover:text-white transition'
+                    >
+                        {locationLink.name}
                     </a>
                 ))}
 
