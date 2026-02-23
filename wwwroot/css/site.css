@@ -812,6 +812,12 @@ footer a:hover {
     width: 100%;
     text-align: left;
   }
+
+  #mainNavbar > .d-flex .landing-signin {
+    display: block;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
 }
 
 .landing-brand {
