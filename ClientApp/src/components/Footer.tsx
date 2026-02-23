@@ -15,10 +15,10 @@ export default function Footer() {
                     <div>
                         <img src='/luma-logo.svg' alt="LUMA" className="h-8" />
                         <p className="max-w-[410px] mt-6 text-sm leading-relaxed text-white">
-                            Email <a href="mailto:support@luma-laundry.app" className="font-semibold hover:text-white/90 transition">support@luma-laundry.app</a>
+                            ✉ <a href="mailto:support@luma-laundry.app" className="font-semibold hover:text-white/90 transition">support@luma-laundry.app</a>
                         </p>
                         <p className="max-w-[410px] mt-2 text-sm leading-relaxed text-white">
-                            Call <a href="tel:+19107534859" className="font-semibold hover:text-white/90 transition">(910) 753-4859</a>
+                            ☎ <a href="tel:+19107534859" className="font-semibold hover:text-white/90 transition">(910) 753-4859</a>
                         </p>
                     </div>
 
