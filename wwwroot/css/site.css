@@ -308,6 +308,7 @@ footer a:hover {
 
 .locations-page {
   position: relative;
+  margin-top: -1rem;
   background:
     radial-gradient(900px 500px at 50% 24%, rgba(70, 20, 130, 0.28), transparent 70%),
     radial-gradient(420px 280px at 95% 95%, rgba(173, 21, 165, 0.2), transparent 65%),
@@ -328,17 +329,17 @@ footer a:hover {
   border-bottom: 1px solid rgba(90, 130, 255, 0.35);
   box-shadow: 0 0.8rem 1.4rem rgba(2, 8, 32, 0.45);
   background-image:
-    linear-gradient(180deg, rgba(3, 9, 32, 0.42) 0%, rgba(3, 9, 32, 0.78) 100%),
+    linear-gradient(180deg, rgba(3, 9, 32, 0.18) 0%, rgba(3, 9, 32, 0.45) 100%),
     url('/Luma_Palm.png');
   background-size: cover;
-  background-position: center;
+  background-position: center top;
 }
 
 .locations-hero-overlay {
   min-height: 500px;
   max-width: 1200px;
   margin: 0 auto;
-  background: linear-gradient(90deg, rgba(2, 9, 31, 0.45) 0%, rgba(2, 9, 31, 0.2) 50%, rgba(2, 9, 31, 0.45) 100%);
+  background: linear-gradient(90deg, rgba(2, 9, 31, 0.22) 0%, rgba(2, 9, 31, 0.08) 50%, rgba(2, 9, 31, 0.22) 100%);
 }
 
 @media (max-width: 768px) {
