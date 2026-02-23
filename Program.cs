@@ -213,6 +213,11 @@ app.Use(async (context, next) =>
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "locations-florida",
+    pattern: "locations/florida",
+    defaults: new { controller = "Home", action = "Locations" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 

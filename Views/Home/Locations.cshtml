@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Locations";
+    var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+    var serviceLocations = ViewData["ServiceLocations"] as List<string> ?? new List<string>();
+    var serviceState = ViewData["ServiceState"] as string ?? "FL";
+    var selectedLocation = ViewData["SelectedLocation"] as string;
+}
+
+<section class="locations-page py-4 py-md-5">
+    <div class="container">
+        <div class="locations-hero rounded-4 p-4 p-lg-5 mb-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-6 fw-bold mb-3">Luma Service Locations in Florida</h1>
+                    <p class="lead mb-3 locations-muted">Fast pickup and delivery laundry service where your routine needs it most.</p>
+                    <p class="mb-4 locations-muted">We’re currently serving select neighborhoods and expanding coverage across the region.</p>
+                    <a class="btn btn-lg home-glow-btn" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Schedule Pickup</a>
+                </div>
+                <div class="col-lg-5 text-center">
+                    <img src="~/Luma_Palm.png" alt="Luma Palm" class="img-fluid locations-palm" />
+                </div>
+            </div>
+        </div>
+
+        <div class="locations-panel rounded-4 p-4 p-lg-5" id="service">
+            <h2 class="h3 mb-3">Current Service Area</h2>
+            <p class="locations-muted mb-4">Serving the following locations in @serviceState.</p>
+            <div class="row g-3">
+                @if (serviceLocations.Count == 0)
+                {
+                    <div class="col-12">
+                        <div class="locations-card rounded-3 p-3">
+                            <strong>Service area details are being updated.</strong>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var location in serviceLocations)
+                    {
+                        var isSelected = !string.IsNullOrWhiteSpace(selectedLocation)
+                            && string.Equals(location, selectedLocation, StringComparison.OrdinalIgnoreCase);
+
+                        <div class="col-md-6 col-lg-4">
+                            <article class="locations-card rounded-3 p-3 @(isSelected ? "locations-card-selected" : string.Empty)">
+                                <h3 class="h5 mb-1">@location</h3>
+                                <p class="mb-0 locations-muted">@serviceState</p>
+                            </article>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="locations-panel rounded-4 p-4 p-lg-5 mt-4">
+            <div class="row g-4 align-items-stretch">
+                <div class="col-lg-8">
+                    <h2 class="h3 mb-3">Florida Service Map</h2>
+                    <div class="locations-map-wrap rounded-3 overflow-hidden">
+                        <iframe
+                            class="locations-map-frame"
+                            title="Florida service map"
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=-82.45%2C27.74%2C-82.20%2C28.02&amp;layer=mapnik"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <h3 class="h5 mb-3">Currently Serving</h3>
+                    <ul class="list-unstyled d-grid gap-2 mb-0">
+                        @foreach (var location in serviceLocations)
+                        {
+                            <li class="locations-list-item rounded-3 px-3 py-2">@location, @serviceState</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
