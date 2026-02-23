@@ -12,11 +12,12 @@ export default function Navbar() {
         { name: 'Features', href: '#features' },
         { name: 'How It Works', href: '/Home/HowItWorks' },
         { name: 'Pricing', href: '/Home/Pricing' },
+        { name: 'Locations', href: '#locations' },
         { name: 'FAQ', href: '#faq' },
     ];
 
     useEffect(() => {
-        const sectionIds = ['home', 'features', 'faq'];
+        const sectionIds = ['home', 'features', 'faq', 'locations'];
         const visibleRatios = new Map<string, number>();
 
         const syncActiveFromLocation = () => {
@@ -33,8 +34,13 @@ export default function Navbar() {
                 return;
             }
 
+            if (currentPath === '/home/locations' || currentPath === '/locations/florida') {
+                setActiveHref('#locations');
+                return;
+            }
+
             if (currentPath === '/' || currentPath === '') {
-                if (currentHash === '#features' || currentHash === '#faq' || currentHash === '#home') {
+                if (currentHash === '#features' || currentHash === '#faq' || currentHash === '#home' || currentHash === '#locations') {
                     setActiveHref(currentHash);
                 } else {
                     setActiveHref('#home');
