@@ -19,6 +19,8 @@ export default function Navbar() {
         { name: 'Florida Service Area', href: '/locations/florida' },
         { name: 'Brandon, FL', href: '/locations/florida?city=Brandon#service' },
         { name: 'Riverview, FL', href: '/locations/florida?city=Riverview#service' },
+        { name: 'Valrico, FL', href: '/locations/florida?city=Valrico#service' },
+        { name: 'Lithia, FL', href: '/locations/florida?city=Lithia#service' },
     ];
 
     useEffect(() => {
