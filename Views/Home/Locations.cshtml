@@ -7,20 +7,16 @@
 }
 
 <section class="locations-page py-4 py-md-5">
-    <div class="container">
-        <div class="locations-hero rounded-4 p-4 p-lg-5 mb-4">
-            <div class="row g-4 align-items-center">
-                <div class="col-lg-7">
-                    <h1 class="display-6 fw-bold mb-3">Luma Service Locations in Florida</h1>
-                    <p class="lead mb-3 locations-muted">Fast pickup and delivery laundry service where your routine needs it most.</p>
-                    <p class="mb-4 locations-muted">We’re currently serving select neighborhoods and expanding coverage across the region.</p>
-                    <a class="btn btn-lg home-glow-btn" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Schedule Pickup</a>
-                </div>
-                <div class="col-lg-5 text-center">
-                    <img src="~/Luma_Palm.png" alt="Luma Palm" class="img-fluid locations-palm" />
-                </div>
-            </div>
+    <div class="locations-hero mb-4">
+        <div class="locations-hero-overlay p-4 p-lg-5 text-center d-flex flex-column justify-content-center align-items-center">
+            <h1 class="display-6 fw-bold mb-3">Luma Service Locations in Florida</h1>
+            <p class="lead mb-3 locations-muted">Fast pickup and delivery laundry service where your routine needs it most.</p>
+            <p class="mb-4 locations-muted">We’re currently serving select neighborhoods and expanding coverage across the region.</p>
+            <a class="btn btn-lg home-glow-btn" href="@(isLoggedIn ? "/Orders/Schedule" : "/Account/Register")">Schedule Pickup</a>
         </div>
+    </div>
+
+    <div class="container">
 
         <div class="locations-panel rounded-4 p-4 p-lg-5" id="service">
             <h2 class="h3 mb-3">Current Service Area</h2>
