@@ -716,6 +716,23 @@ footer a:hover {
 
 .landing-nav {
   background: #000000;
+  --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  --bs-navbar-toggler-border-color: rgba(255, 255, 255, 0.35);
+}
+
+.landing-nav .navbar-toggler {
+  border-color: transparent;
+}
+
+.landing-nav .navbar-toggler:hover,
+.landing-nav .navbar-toggler:active {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.landing-nav .navbar-toggler:focus {
+  box-shadow: none;
+  border-color: rgba(56, 217, 255, 0.6);
 }
 
 .landing-nav-shell {
